@@ -1,0 +1,37 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  users: defineTable({
+    authProvider: v.literal("clerk"),
+    externalUserId: v.string(),
+    tokenIdentifier: v.string(),
+    displayName: v.optional(v.string()),
+    email: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["tokenIdentifier"])
+    .index("by_external_id", ["externalUserId"]),
+
+  cards: defineTable({
+    ownerId: v.id("users"),
+    name: v.string(),
+    category: v.union(v.literal("Services"), v.literal("Food"), v.literal("Home"), v.literal("Classes"), v.literal("Pets"), v.literal("Repairs"), v.literal("Shops")),
+    line: v.string(),
+    area: v.string(),
+    price: v.optional(v.string()),
+    theme: v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream")),
+    imageIds: v.array(v.id("_storage")),
+    x: v.number(),
+    y: v.number(),
+    rotation: v.number(),
+    width: v.number(),
+    zIndex: v.number(),
+    status: v.union(v.literal("published"), v.literal("hidden"), v.literal("expired")),
+    positionLockedAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_status_created", ["status", "createdAt"])
+    .index("by_owner", ["ownerId"]),
+});
