@@ -21,7 +21,7 @@ import { PlacementMode } from "./placement-mode";
 import { OwnerDashboard } from "./owner-dashboard";
 import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
-import { categories, getCardFormat, type CardDraft, type CreateCard, type OwnerCard, type Placement, type WallCard as WallCardModel } from "./types";
+import { categories, getCardFormat, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 
 interface WallAppProps {
   mode: "demo" | "connected";
@@ -36,6 +36,11 @@ interface WallAppProps {
   ownerCards?: OwnerCard[];
   ownerCardsLoading?: boolean;
   onSetCardStatus?: (card: OwnerCard, status: "published" | "hidden") => Promise<void>;
+  onUpdateCard?: (card: OwnerCard, update: CardUpdate) => Promise<void>;
+  onDeleteCard?: (card: OwnerCard) => Promise<void>;
+  onRenewCard?: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
+  onMoveCard?: (card: WallCardModel, placement: Placement) => Promise<void>;
+  ownedCardIds?: ReadonlySet<string>;
 }
 
 function makeDemoCard(draft: CardDraft, placement: Placement, zIndex: number): WallCardModel {
@@ -80,7 +85,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds }: WallAppProps) {
   const [demoCards, setDemoCards] = useState<WallCardModel[]>(seedCards);
   const cards = mode === "connected" ? (remoteCards ?? []) : demoCards;
   const [selected, setSelected] = useState<WallCardModel | null>(null);
@@ -91,6 +96,8 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
   const deferredQuery = useDeferredValue(query);
   const [fresh, setFresh] = useState(false);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+  const [positionOverrides, setPositionOverrides] = useState<Record<string, Placement>>({});
+  const [movingCardId, setMovingCardId] = useState<string | null>(null);
   const [stackPickerCards, setStackPickerCards] = useState<WallCardModel[] | null>(null);
   const [layers, setLayers] = useState<string[]>(seedCards.map((card) => card.id));
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -123,6 +130,24 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
   const [selectedState, setSelectedState] = useState(defaultSeedLocation.state);
   const [selectedCity, setSelectedCity] = useState(defaultSeedLocation.city);
   const wallRef = useRef<HTMLElement>(null);
+  const moveOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const movePositionRef = useRef<Placement | null>(null);
+
+  useEffect(() => {
+    setViewCounts((current) => {
+      let changed = false;
+      const next = { ...current };
+      for (const card of cards) {
+        const id = String(card.id);
+        const clicks = card.clicks ?? 0;
+        if (next[id] !== clicks) {
+          next[id] = clicks;
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
+  }, [cards]);
 
   // Feature flag: hide map picker UI without deleting its code
   const MAP_ENABLED = false;
@@ -495,11 +520,12 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
       return;
     }
     const openedId = String(cardToOpen.id);
-    const nextViews = (viewCounts[openedId] ?? cardToOpen.clicks ?? 0) + 1;
+    const isOwnerView = ownedCardIds?.has(openedId) ?? false;
+    const nextViews = (viewCounts[openedId] ?? cardToOpen.clicks ?? 0) + (isOwnerView ? 0 : 1);
     setViewCounts((current) => ({ ...current, [openedId]: nextViews }));
     const openedWithViews = { ...cardToOpen, clicks: nextViews };
     setSelected(openedWithViews);
-    onCardOpen?.(openedWithViews);
+    if (!isOwnerView) onCardOpen?.(openedWithViews);
   };
 
   const handleCardClick = (cardToOpen: WallCardModel) => {
@@ -509,6 +535,49 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
       return;
     }
     openCard(cardToOpen);
+  };
+
+  const startCardMove = (event: PointerEvent<HTMLElement>, card: WallCardModel) => {
+    if (!ownedCardIds?.has(String(card.id)) || !wallRef.current) return;
+    const wallRect = wallRef.current.getBoundingClientRect();
+    const cardLeft = wallRect.left + (card.x / 100) * wallRect.width;
+    const cardTop = wallRect.top + card.y;
+    moveOffsetRef.current = { x: event.clientX - cardLeft, y: event.clientY - cardTop };
+    movePositionRef.current = null;
+    setMovingCardId(String(card.id));
+    setError(null);
+  };
+
+  const moveOwnedCard = (event: PointerEvent<HTMLElement>, card: WallCardModel) => {
+    const offset = moveOffsetRef.current;
+    const wall = wallRef.current;
+    if (!ownedCardIds?.has(String(card.id)) || !offset || !wall) return;
+    const wallRect = wall.getBoundingClientRect();
+    const format = getCardFormat(card.theme);
+    const left = Math.min(Math.max(0, event.clientX - wallRect.left - offset.x), Math.max(0, wallRect.width - format.width));
+    const top = Math.min(Math.max(0, event.clientY - wallRect.top - offset.y), Math.max(0, wallRect.height - format.minHeight));
+    const next = { x: (left / wallRect.width) * 100, y: top };
+    movePositionRef.current = next;
+    setPositionOverrides((current) => ({ ...current, [String(card.id)]: next }));
+  };
+
+  const finishCardMove = async (_event: PointerEvent<HTMLElement>, card: WallCardModel) => {
+    const id = String(card.id);
+    const next = movePositionRef.current;
+    moveOffsetRef.current = null;
+    movePositionRef.current = null;
+    setMovingCardId(null);
+    if (!next || !onMoveCard) return;
+    try {
+      await onMoveCard(card, next);
+    } catch (cause) {
+      setPositionOverrides((current) => {
+        const copy = { ...current };
+        delete copy[id];
+        return copy;
+      });
+      setError(cause instanceof Error ? cause.message : "The card position could not be saved.");
+    }
   };
 
   const openComposer = () => {
@@ -529,7 +598,16 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
     setComposer(false);
     setSelected(null);
     setPendingCard(draft);
-    setPlacement({ x: window.innerWidth < 780 ? 23 : 40, y: Math.max(90, window.scrollY + 120) });
+    const wallRect = wallRef.current?.getBoundingClientRect();
+    const wallWidth = wallRect?.width ?? window.innerWidth;
+    const wallHeight = wallRect?.height ?? Math.max(500, window.innerHeight - 66);
+    const format = getCardFormat(draft.theme);
+    const margin = 18;
+    const maxLeft = Math.max(margin, wallWidth - format.width - margin);
+    const maxTop = Math.max(36, wallHeight - format.minHeight - 36);
+    const left = margin + Math.random() * Math.max(0, maxLeft - margin);
+    const top = 36 + Math.random() * Math.max(0, maxTop - 36);
+    setPlacement({ x: (left / wallWidth) * 100, y: top });
   };
 
   const movePlacement = (event: PointerEvent<HTMLDivElement>) => {
@@ -599,10 +677,10 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
           <label className="filter-select">Browse<select value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number])}>{categories.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown /></label>
           <button className={fresh ? "nav-active" : ""} onClick={() => setFresh((value) => !value)}>Fresh <span className="fresh-dot" /></button>
           {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenu(false); }}><LayoutDashboard /> My cards</button> : null}
-          <button className="mobile-nav-post" onClick={openComposer}><Plus /> Post your card</button>
+          <button className="mobile-nav-post" onClick={openComposer}><Plus />Post your card</button>
         </nav>
         {authControl ? <div className="auth-control">{authControl}</div> : null}
-        <button className="primary post-button" onClick={openComposer}><Plus /> Post your card</button>
+        <button className="primary post-button" onClick={openComposer}><Plus />Post your card</button>
         <button className="icon-btn mobile-menu" onClick={() => setMobileMenu((value) => !value)} aria-label="Open menu"><Menu /></button>
       </header>
       {locationDropdown ? (
@@ -822,7 +900,10 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
         {isLoading || !locationReady ? <div className="empty-note"><strong>Finding the fresh paste…</strong></div> : null}
         {!isLoading && locationReady ? (
           visible.length ? (
-            visible.map((card) => {
+            visible.map((sourceCard) => {
+              const override = positionOverrides[String(sourceCard.id)];
+              const card = override ? { ...sourceCard, ...override } : sourceCard;
+              const ownerDraggable = Boolean(onMoveCard && ownedCardIds?.has(String(card.id)));
               return (
                 <WallCard
                   key={card.id}
@@ -830,6 +911,11 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
                   active={selected?.id === card.id}
                   onOpen={handleCardClick}
                   onFront={front}
+                  ownerDraggable={ownerDraggable}
+                  dragging={movingCardId === String(card.id)}
+                  onDragStart={startCardMove}
+                  onDragMove={moveOwnedCard}
+                  onDragEnd={finishCardMove}
                   zIndex={Math.max(card.zIndex, layers.indexOf(card.id) + 1)}
                 />
               );
@@ -892,7 +978,7 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
         </div>
       ) : null}
       {selected ? <DetailPanel card={selected} onClose={() => setSelected(null)} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} /> : null}
-      {dashboard && ownerCards && onSetCardStatus ? (
+      {dashboard && ownerCards && onSetCardStatus && onUpdateCard && onDeleteCard && onRenewCard ? (
         <OwnerDashboard
           cards={ownerCards}
           loading={ownerCardsLoading}
@@ -900,6 +986,15 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
           onCreate={createFromDashboard}
           onView={(card) => { setDashboard(false); setSelected(card); }}
           onSetVisibility={onSetCardStatus}
+          onUpdate={async (card, update) => {
+            await onUpdateCard(card, update);
+            setSelected((current) => current && String(current.id) === String(card.id) ? { ...current, ...update } : current);
+          }}
+          onDelete={async (card) => {
+            await onDeleteCard(card);
+            setSelected((current) => current && String(current.id) === String(card.id) ? null : current);
+          }}
+          onRenew={onRenewCard}
         />
       ) : null}
       {composer ? <Composer onClose={() => setComposer(false)} onReady={beginPlacement} initialLocation={{ country: selectedCountry, state: selectedState, city: selectedCity }} /> : null}

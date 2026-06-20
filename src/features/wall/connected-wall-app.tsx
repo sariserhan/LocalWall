@@ -1,29 +1,107 @@
 "use client";
 
-import { UserButton, useClerk } from "@clerk/nextjs";
+import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { WallApp } from "./wall-app";
-import { getCardFormat, type CardDraft, type OwnerCard, type Placement, type WallCard, type CardCategory, type CardTheme } from "./types";
+import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type WallCard, type CardCategory, type CardTheme } from "./types";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const WALL_SNAPSHOT_KEY = "wall-card-snapshot-v1";
+
+function sameCardSnapshot(left: WallCard, right: WallCard) {
+  const { clicks: _leftClicks, ...leftSnapshot } = left;
+  const { clicks: _rightClicks, ...rightSnapshot } = right;
+  return JSON.stringify(leftSnapshot) === JSON.stringify(rightSnapshot);
+}
+
+function reconcileRefreshedCards(current: WallCard[], latest: WallCard[]) {
+  const currentById = new Map(current.map((card) => [String(card.id), card]));
+  return latest.map((card) => {
+    const cached = currentById.get(String(card.id));
+    return cached && sameCardSnapshot(cached, card) ? cached : card;
+  });
+}
 
 export function ConnectedWallApp() {
-  const cards = useQuery(api.cards.listPublished) as WallCard[] | undefined;
-  const ownerCards = useQuery(api.cards.listMine) as OwnerCard[] | undefined;
+  const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
+  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
+  const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
+  const hasReconciledRefreshRef = useRef(false);
+  const publishedCards = useQuery(api.cards.listPublished) as WallCard[] | undefined;
+  const liveCardIds = useMemo(() => (layoutCards ?? []).map((card) => card.id as Id<"cards">), [layoutCards]);
+  const liveViewCounts = useQuery(api.cards.getLiveViewCounts, layoutCards === null ? "skip" : { cardIds: liveCardIds }) as Array<{ id: Id<"cards">; clicks: number }> | undefined;
+  const cards = useMemo(() => {
+    if (layoutCards === null) return undefined;
+    const counts = new Map((liveViewCounts ?? []).map((item) => [String(item.id), item.clicks]));
+    return layoutCards.map((card) => ({ ...card, clicks: counts.get(String(card.id)) ?? card.clicks ?? 0 }));
+  }, [layoutCards, liveViewCounts]);
+  const ownerCards = useQuery(api.cards.listMine, isAuthenticated ? {} : "skip") as OwnerCard[] | undefined;
   const generateUploadUrl = useMutation(api.cards.generateUploadUrl);
   const createCard = useMutation(api.cards.create);
   const incrementCardClicks = useMutation(api.cards.incrementClicks);
   const setCardVisibility = useMutation(api.cards.setVisibility);
-  const { isAuthenticated } = useConvexAuth();
+  const updateCard = useMutation(api.cards.update);
+  const deleteCard = useMutation(api.cards.remove);
+  const renewCard = useMutation(api.cards.renew);
+  const updateCardPosition = useMutation(api.cards.updatePosition);
   const { openSignIn } = useClerk();
   const searchParams = useSearchParams();
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+  const ownedCardIds = useMemo(() => new Set((ownerCards ?? []).map((card) => String(card.id))), [ownerCards]);
+
+  useLayoutEffect(() => {
+    try {
+      const cached = window.localStorage.getItem(WALL_SNAPSHOT_KEY);
+      if (!cached) return;
+      const parsed = JSON.parse(cached) as unknown;
+      if (Array.isArray(parsed)) setLayoutCards(parsed as WallCard[]);
+    } catch {
+      window.localStorage.removeItem(WALL_SNAPSHOT_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (publishedCards === undefined) return;
+    setLayoutCards((current) => {
+      if (!hasReconciledRefreshRef.current) {
+        hasReconciledRefreshRef.current = true;
+        return reconcileRefreshedCards(current ?? [], publishedCards);
+      }
+
+      if (current === null) return publishedCards;
+      const publishedIds = new Set(publishedCards.map((card) => String(card.id)));
+      const remaining = current.filter((card) => publishedIds.has(String(card.id)));
+      return remaining.length === current.length ? current : remaining;
+    });
+  }, [publishedCards]);
+
+  useEffect(() => {
+    if (layoutCards === null) return;
+    try {
+      window.localStorage.setItem(WALL_SNAPSHOT_KEY, JSON.stringify(layoutCards));
+    } catch {
+      // The wall still works normally when browser storage is unavailable.
+    }
+  }, [layoutCards]);
+
+  const addCardToLocalWall = useCallback((card: WallCard) => {
+    setLayoutCards((current) => {
+      const cardsOnWall = current ?? [];
+      return cardsOnWall.some((existing) => String(existing.id) === String(card.id))
+        ? cardsOnWall.map((existing) => String(existing.id) === String(card.id) ? card : existing)
+        : [...cardsOnWall, card];
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) setCheckoutMessage((message) => message?.startsWith("Finishing sign-in") ? null : message);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
@@ -32,7 +110,7 @@ export function ConnectedWallApp() {
 
     const processCheckout = async () => {
       if (checkoutStatus === "canceled") {
-        setCheckoutMessage("Payment canceled. Your draft was not posted.");
+        setCheckoutMessage("Payment canceled. No changes were made.");
         window.history.replaceState({}, document.title, window.location.pathname);
         return;
       }
@@ -43,9 +121,17 @@ export function ConnectedWallApp() {
       setIsProcessingCheckout(true);
       try {
         const verify = await fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`);
-        if (!verify.ok) throw new Error("Unable to verify Stripe session.");
-        const verified = await verify.json();
-        if (!verified.success) throw new Error(verified.error || "Payment verification failed.");
+        const verified = await verify.json() as { success: boolean; error?: string; session?: { metadata?: Record<string, string> } };
+        if (!verify.ok || !verified.success) throw new Error(verified.error || "Payment verification failed.");
+
+        const metadata = verified.session?.metadata;
+        if (metadata?.kind === "renewal") {
+          const paidAmount = Number(metadata.paidAmount);
+          if (![1, 3, 10, 20].includes(paidAmount) || !metadata.cardId) throw new Error("The renewal details are invalid.");
+          await renewCard({ cardId: metadata.cardId as Id<"cards">, paidAmount: paidAmount as 1 | 3 | 10 | 20 });
+          setCheckoutMessage("Payment succeeded and your card has been renewed.");
+          return;
+        }
 
         const stored = window.localStorage.getItem(`stripe-checkout-draft-${sessionId}`);
         if (!stored) throw new Error("Could not find the card draft for this payment.");
@@ -77,8 +163,10 @@ export function ConnectedWallApp() {
           rotation: number;
           width: number;
         };
+        const paidAmount = Number(metadata?.paidAmount);
+        if (metadata?.kind !== "posting" || ![1, 3, 10, 20].includes(paidAmount)) throw new Error("The paid card details are invalid.");
 
-        await createCard({
+        const createdCard = await createCard({
           name: cardPayload.name,
           category: cardPayload.category,
           line: cardPayload.line,
@@ -97,14 +185,15 @@ export function ConnectedWallApp() {
           facebook: cardPayload.facebook,
           tiktok: cardPayload.tiktok,
           linkedin: cardPayload.linkedin,
-          paidAmount: cardPayload.paidAmount,
+          paidAmount,
           theme: cardPayload.theme,
           imageIds: cardPayload.imageIds,
           x: cardPayload.x,
           y: cardPayload.y,
           rotation: cardPayload.rotation,
           width: cardPayload.width,
-        });
+        }) as WallCard;
+        addCardToLocalWall(createdCard);
         window.localStorage.removeItem(`stripe-checkout-draft-${sessionId}`);
         setCheckoutMessage("Payment succeeded and your card is now on the wall.");
       } catch (cause) {
@@ -116,7 +205,7 @@ export function ConnectedWallApp() {
     };
 
     processCheckout();
-  }, [searchParams, isProcessingCheckout, createCard]);
+  }, [searchParams, isProcessingCheckout, createCard, renewCard, addCardToLocalWall]);
 
   const uploadImage = async (file: File): Promise<Id<"_storage">> => {
     if (!allowedImageTypes.has(file.type)) throw new Error("Images must be JPG, PNG, or WEBP.");
@@ -133,10 +222,11 @@ export function ConnectedWallApp() {
     return result.storageId;
   };
 
-  const handleCreate = async (draft: CardDraft, placement: Placement): Promise<WallCard> => {
+  const handleCreate = async (draft: CardDraft, placement: Placement): Promise<WallCard | void> => {
+    if (!isAuthenticated) throw new Error("Please finish signing in before posting a card.");
     const imageIds = await Promise.all(draft.files.slice(0, 2).map(uploadImage));
     const paidAmount = draft.paymentOption === "free" ? 0 : Number(draft.paymentOption);
-    const card = await createCard({
+    const cardPayload = {
       name: draft.name,
       category: draft.category,
       line: draft.line,
@@ -162,8 +252,40 @@ export function ConnectedWallApp() {
       y: placement.y,
       rotation: -3 + Math.random() * 6,
       width: getCardFormat(draft.theme).width,
-    }) as WallCard;
+    };
+    if (paidAmount > 0) {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardPayload }),
+      });
+      const result = await response.json() as { url?: string; sessionId?: string; error?: string };
+      if (!response.ok || !result.url || !result.sessionId) throw new Error(result.error || "Could not start card checkout.");
+      window.localStorage.setItem(`stripe-checkout-draft-${result.sessionId}`, JSON.stringify(cardPayload));
+      window.location.assign(result.url);
+      return;
+    }
+
+    const card = await createCard(cardPayload) as WallCard;
+    addCardToLocalWall(card);
     return card;
+  };
+
+  const handleRenew = async (card: OwnerCard, paidAmount: RenewalAmount) => {
+    if (paidAmount === 0) {
+      await renewCard({ cardId: card.id as Id<"cards">, paidAmount });
+      setCheckoutMessage(`${card.name} was renewed for 1 day.`);
+      return;
+    }
+
+    const response = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount } }),
+    });
+    const result = await response.json() as { url?: string; error?: string };
+    if (!response.ok || !result.url) throw new Error(result.error || "Could not start renewal checkout.");
+    window.location.assign(result.url);
   };
 
   return (
@@ -172,19 +294,49 @@ export function ConnectedWallApp() {
       cards={cards}
       isLoading={cards === undefined}
       isSignedIn={isAuthenticated}
-      onRequestSignIn={() => openSignIn()}
+      onRequestSignIn={() => {
+        if (!isClerkLoaded || isConvexAuthLoading) {
+          setCheckoutMessage("Loading sign-in. Please try again in a moment.");
+          return;
+        }
+        if (isClerkSignedIn && !isAuthenticated) {
+          setCheckoutMessage("Finishing sign-in with Convex…");
+          return;
+        }
+        if (isClerkSignedIn) return;
+        void openSignIn();
+      }}
       onCreateCard={handleCreate}
       onCardOpen={(card) => {
         if (!card.id.toString().startsWith("demo-")) {
           incrementCardClicks({ cardId: card.id as any });
         }
       }}
-      authControl={isAuthenticated ? <UserButton /> : null}
+      authControl={isClerkSignedIn ? <UserButton /> : <button className="auth-sign-in" onClick={() => openSignIn()}>Sign in</button>}
       notice={checkoutMessage}
       ownerCards={isAuthenticated ? (ownerCards ?? []) : undefined}
+      ownedCardIds={ownedCardIds}
       ownerCardsLoading={isAuthenticated && ownerCards === undefined}
       onSetCardStatus={async (card, status) => {
         await setCardVisibility({ cardId: card.id as Id<"cards">, status });
+        if (status === "hidden") {
+          setLayoutCards((current) => current?.filter((item) => String(item.id) !== String(card.id)) ?? current);
+        } else {
+          addCardToLocalWall(card);
+        }
+      }}
+      onUpdateCard={async (card, update: CardUpdate) => {
+        await updateCard({ cardId: card.id as Id<"cards">, ...update });
+        setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...update } : item) ?? current);
+      }}
+      onDeleteCard={async (card) => {
+        await deleteCard({ cardId: card.id as Id<"cards"> });
+        setLayoutCards((current) => current?.filter((item) => String(item.id) !== String(card.id)) ?? current);
+      }}
+      onRenewCard={handleRenew}
+      onMoveCard={async (card, placement) => {
+        await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y });
+        setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
       }}
     />
   );

@@ -9,6 +9,7 @@
  */
 
 import type * as cards from "../cards.js";
+import type * as crons from "../crons.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   cards: typeof cards;
+  crons: typeof crons;
 }>;
 
 /**

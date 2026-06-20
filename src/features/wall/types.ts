@@ -66,6 +66,10 @@ export interface OwnerCard extends WallCard {
   clicks: number;
 }
 
+export type RenewalAmount = 0 | 1 | 3 | 10 | 20;
+
+export type CardUpdate = Pick<OwnerCard, "name" | "category" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "theme">;
+
 export interface CardDraft {
   name: string;
   category: CardCategory;

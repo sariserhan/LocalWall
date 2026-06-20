@@ -15,7 +15,17 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl }: AppPr
   if (!clerkPublishableKey || !convexUrl) return children;
 
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider
+      publishableKey={clerkPublishableKey}
+      localization={{
+        signIn: {
+          start: {
+            title: "Sign in to WALL",
+            subtitle: "Sign in to post and manage your local card",
+          },
+        },
+      }}
+    >
       <ConnectedProviders convexUrl={convexUrl}>{children}</ConnectedProviders>
     </ClerkProvider>
   );

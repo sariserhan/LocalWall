@@ -1,7 +1,7 @@
-import { mutationGeneric as mutation, queryGeneric as query } from "convex/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 
 const category = v.union(v.literal("Services"), v.literal("Food"), v.literal("Home"), v.literal("Classes"), v.literal("Pets"), v.literal("Repairs"), v.literal("Shops"));
 const theme = v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream"), v.literal("biz"), v.literal("kraft"), v.literal("blueprint"), v.literal("photo"), v.literal("ticket"));
@@ -30,6 +30,8 @@ const packageDurations: Record<number, number> = {
 function getExpiryDuration(paidAmount: number): number {
   return packageDurations[paidAmount] ?? packageDurations[0];
 }
+
+const paymentAmount = v.union(v.literal(0), v.literal(1), v.literal(3), v.literal(10), v.literal(20));
 
 const blockedTextContent = /\b(nude|nudity|porn|pornography|xxx|onlyfans|explicit\s+sex|sexual\s+services|escort\s+services|white\s+power|racial\s+purity|race\s+war|kill\s+(?:all\s+)?(?:black|white|asian|jewish|muslim|gay)\s+people|f+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:ing|ed|er|s)?|sh[i1*]+t+(?:ty|s)?|bullsh[i1*]t|b[i1*]tch(?:es)?|a+s+s+h+o+l+e+s?|bastards?|cunts?|motherf+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:er|ing|ed|s)?|sluts?|whores?|damn|crap)\b/i;
 const socialProfilePattern = /^@?[A-Za-z0-9._-]{2,100}$|^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/;
@@ -60,7 +62,6 @@ export const listPublished = query({
       const urls = await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId)));
       return {
         id: card._id,
-        ownerId: card.ownerId,
         name: card.name,
         category: card.category,
         line: card.line,
@@ -93,6 +94,15 @@ export const listPublished = query({
         clicks: card.clicks,
       };
     }));
+  },
+});
+
+export const getLiveViewCounts = query({
+  args: { cardIds: v.array(v.id("cards")) },
+  handler: async (ctx, args) => {
+    if (args.cardIds.length > 200) throw new Error("Too many cards requested.");
+    const cards = await Promise.all(args.cardIds.map((cardId) => ctx.db.get(cardId)));
+    return cards.flatMap((card) => card ? [{ id: card._id, clicks: card.clicks ?? 0 }] : []);
   },
 });
 
@@ -165,12 +175,151 @@ export const setVisibility = mutation({
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only manage your own cards.");
     if (args.status === "published" && card.expiresAt <= Date.now()) throw new Error("Expired cards must be renewed before publishing.");
-    if (args.status === "published") {
-      const ownerCards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).take(100);
-      const otherLiveCard = ownerCards.find((candidate) => candidate._id !== card._id && candidate.status === "published" && candidate.expiresAt > Date.now());
-      if (otherLiveCard) throw new Error("Hide your current live card before publishing another one.");
-    }
     await ctx.db.patch(card._id, { status: args.status });
+    return { success: true };
+  },
+});
+
+export const renew = mutation({
+  args: {
+    cardId: v.id("cards"),
+    paidAmount: paymentAmount,
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.ownerId !== user._id) throw new Error("You can only renew your own cards.");
+
+    const now = Date.now();
+    const status = card.status === "hidden" ? "hidden" : "published";
+    const expiresAt = Math.max(now, card.expiresAt) + getExpiryDuration(args.paidAmount);
+
+    await ctx.db.patch(card._id, {
+      status,
+      paidAmount: args.paidAmount,
+      expiresAt,
+    });
+    return { success: true, status, expiresAt };
+  },
+});
+
+const EXPIRATION_BATCH_SIZE = 100;
+
+export const markExpired = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const published = await ctx.db
+      .query("cards")
+      .withIndex("by_status_and_expiresAt", (q) => q.eq("status", "published").lte("expiresAt", now))
+      .take(EXPIRATION_BATCH_SIZE);
+    const hidden = await ctx.db
+      .query("cards")
+      .withIndex("by_status_and_expiresAt", (q) => q.eq("status", "hidden").lte("expiresAt", now))
+      .take(EXPIRATION_BATCH_SIZE);
+    const expired = [...published, ...hidden].slice(0, EXPIRATION_BATCH_SIZE);
+
+    await Promise.all(expired.map((card) => ctx.db.patch(card._id, { status: "expired" as const })));
+    if (expired.length === EXPIRATION_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(0, internal.cards.markExpired, {});
+    }
+    return { updated: expired.length };
+  },
+});
+
+export const update = mutation({
+  args: {
+    cardId: v.id("cards"),
+    name: v.string(),
+    category,
+    line: v.string(),
+    message: v.optional(v.string()),
+    area: v.string(),
+    zipcode: v.optional(v.string()),
+    price: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    website: v.optional(v.string()),
+    location: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    facebook: v.optional(v.string()),
+    tiktok: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
+    theme,
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.ownerId !== user._id) throw new Error("You can only edit your own cards.");
+
+    const name = args.name.trim();
+    const line = args.line.trim();
+    const phone = args.phone?.trim() ?? "";
+    const email = args.email?.trim() ?? "";
+    if (name.length < 2 || name.length > 60) throw new Error("Business name must be between 2 and 60 characters.");
+    if (line.length < 5 || line.length > 90) throw new Error("Service description must be between 5 and 90 characters.");
+    if (args.message && args.message.length > 300) throw new Error("Message must be 300 characters or fewer.");
+    if (blockedTextContent.test([name, line, args.message ?? ""].join(" "))) throw new Error("Profanity, adult, hateful, or sexual content is not allowed on WALL.");
+    if (!args.area.trim() || args.area.length > 50) throw new Error("Neighborhood must be between 1 and 50 characters.");
+    if (args.zipcode && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,19}$/.test(args.zipcode.trim())) throw new Error("Enter a valid zip code.");
+    if (!phone && !email) throw new Error("Add at least one contact method: phone or email.");
+    if (phone && !/^[+()0-9.\s-]{7,30}$/.test(phone)) throw new Error("Enter a valid phone number.");
+    if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new Error("Enter a valid email address.");
+    if (args.website && (args.website.length > 240 || !isValidWebUrl(args.website.trim()))) throw new Error("Enter a valid website, such as example.com.");
+    if (args.location && args.location.length > 300) throw new Error("Location must be 300 characters or fewer.");
+    if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && (profile.length > 240 || !socialProfilePattern.test(profile.trim())))) throw new Error("Enter valid social usernames or profile URLs.");
+    if (args.price && args.price.length > 50) throw new Error("Price must be 50 characters or fewer.");
+
+    await ctx.db.patch(card._id, {
+      name,
+      category: args.category,
+      line,
+      message: args.message?.trim() || undefined,
+      area: args.area.trim(),
+      zipcode: args.zipcode?.trim() || undefined,
+      price: args.price?.trim() || undefined,
+      phone: phone || undefined,
+      email: email || undefined,
+      website: args.website?.trim() || undefined,
+      location: args.location?.trim() || undefined,
+      instagram: args.instagram?.trim() || undefined,
+      facebook: args.facebook?.trim() || undefined,
+      tiktok: args.tiktok?.trim() || undefined,
+      linkedin: args.linkedin?.trim() || undefined,
+      theme: args.theme,
+    });
+    return { success: true };
+  },
+});
+
+export const updatePosition = mutation({
+  args: {
+    cardId: v.id("cards"),
+    x: v.number(),
+    y: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.ownerId !== user._id) throw new Error("You can only move your own cards.");
+    if (!Number.isFinite(args.x) || args.x < 0 || args.x > 100 || !Number.isFinite(args.y) || args.y < 0 || args.y > 1500) {
+      throw new Error("That position is outside the wall.");
+    }
+
+    const positionLockedAt = Date.now();
+    await ctx.db.patch(card._id, { x: args.x, y: args.y, positionLockedAt });
+    return { success: true, x: args.x, y: args.y, positionLockedAt };
+  },
+});
+
+export const remove = mutation({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.ownerId !== user._id) throw new Error("You can only delete your own cards.");
+    await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.delete(imageId)));
+    await ctx.db.delete(card._id);
     return { success: true };
   },
 });
@@ -244,14 +393,7 @@ export const create = mutation({
     }
     if (!user) throw new Error("Your profile could not be created.");
 
-    const now = Date.now();
-    const existingUserCards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect();
-    const activeCard = existingUserCards.find((card) => card.status === "published" && card.expiresAt > now);
-    if (activeCard) {
-      throw new Error("You already have an active card on the wall. One active card per user is allowed.");
-    }
-
-    const createdAt = now;
+    const createdAt = Date.now();
     const expiresAt = createdAt + getExpiryDuration(args.paidAmount);
     const existingCards = await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).collect();
     const zIndex = existingCards.reduce((highest, card) => Math.max(highest, card.zIndex), 0) + 1;
@@ -334,9 +476,15 @@ export const incrementClicks = mutation({
   handler: async (ctx, args) => {
     const card = await ctx.db.get(args.cardId);
     if (!card) throw new Error("Card not found.");
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity) {
+      const viewer = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+      if (viewer?._id === card.ownerId) return { success: true, incremented: false, clicks: card.clicks ?? 0 };
+    }
+    const clicks = (card.clicks ?? 0) + 1;
     await ctx.db.patch(args.cardId, {
-      clicks: (card.clicks ?? 0) + 1,
+      clicks,
     });
-    return { success: true };
+    return { success: true, incremented: true, clicks };
   },
 });

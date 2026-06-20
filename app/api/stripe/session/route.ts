@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", { apiVersion: "20
 
 export async function GET(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
-    return new Response(JSON.stringify({ success: false, error: "Stripe secret key is not configured." }), { status: 500 });
+    return Response.json({ success: false, error: "Stripe is not configured. Add STRIPE_SECRET_KEY to .env.local and restart the server." }, { status: 503 });
   }
 
   const sessionId = request.nextUrl.searchParams.get("session_id");
@@ -19,10 +19,12 @@ export async function GET(request: NextRequest) {
       return new Response(JSON.stringify({ success: false, error: "Payment not complete." }), { status: 400 });
     }
 
-    return new Response(JSON.stringify({ success: true, session: { id: session.id, paymentStatus: session.payment_status } }), {
+    return new Response(JSON.stringify({ success: true, session: { id: session.id, paymentStatus: session.payment_status, metadata: session.metadata } }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ success: false, error: "Unable to retrieve Stripe session." }), { status: 500 });
+    const message = error instanceof Error ? error.message : "Unable to retrieve Stripe session.";
+    console.error("Stripe session verification error", error);
+    return Response.json({ success: false, error: message }, { status: 500 });
   }
 }

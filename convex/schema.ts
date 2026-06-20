@@ -49,5 +49,6 @@ export default defineSchema({
     clicks: v.number(),
   })
     .index("by_status_created", ["status", "createdAt"])
+    .index("by_status_and_expiresAt", ["status", "expiresAt"])
     .index("by_owner", ["ownerId"]),
 });

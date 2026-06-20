@@ -3,42 +3,84 @@ import type { NextRequest } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", { apiVersion: "2022-11-15" });
 
+const paidAmounts = new Set([1, 3, 10, 20]);
+
+function json(body: unknown, status = 200) {
+  return Response.json(body, { status });
+}
+
 export async function POST(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
-    return new Response(JSON.stringify({ error: "Stripe secret key is not configured." }), { status: 500 });
+    return json({ error: "Stripe is not configured. Add STRIPE_SECRET_KEY to .env.local and restart the server." }, 503);
   }
 
-  const body = await request.json().catch(() => null);
-  const cardPayload = body?.cardPayload;
-  if (!cardPayload) {
-    return new Response(JSON.stringify({ error: "Missing card payload." }), { status: 400 });
-  }
+  try {
+    const body = await request.json().catch(() => null);
+    const renewalPayload = body?.renewalPayload;
+    if (renewalPayload) {
+      const paidAmount = Number(renewalPayload.paidAmount);
+      if (!paidAmounts.has(paidAmount) || typeof renewalPayload.cardId !== "string") {
+        return json({ error: "Invalid renewal request." }, 400);
+      }
 
-  const origin = new URL(request.url).origin;
-  const successUrl = `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`;
+      const origin = new URL(request.url).origin;
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Renew ${String(renewalPayload.cardName || "wall card").slice(0, 80)}`,
+              description: "Extend this card's time on the wall",
+            },
+            unit_amount: paidAmount * 100,
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          kind: "renewal",
+          cardId: renewalPayload.cardId,
+          paidAmount: String(paidAmount),
+        },
+        success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+      });
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    line_items: [
-      {
+      return json({ url: session.url, sessionId: session.id });
+    }
+
+    const cardPayload = body?.cardPayload;
+    const paidAmount = Number(cardPayload?.paidAmount);
+    if (!cardPayload || !paidAmounts.has(paidAmount)) {
+      return json({ error: "Invalid paid card request." }, 400);
+    }
+
+    const origin = new URL(request.url).origin;
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{
         price_data: {
           currency: "usd",
           product_data: {
-            name: "Wall card posting",
-            description: "Secure your wall card placement",
+            name: `Post ${String(cardPayload.name || "wall card").slice(0, 80)}`,
+            description: "Publish this card on the local wall",
           },
-          unit_amount: Math.max(100, Math.round(Number(cardPayload.paidAmount) * 100)),
+          unit_amount: paidAmount * 100,
         },
         quantity: 1,
+      }],
+      metadata: {
+        kind: "posting",
+        paidAmount: String(paidAmount),
       },
-    ],
-    success_url: successUrl,
-    cancel_url: cancelUrl,
-  });
+      success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+    });
 
-  return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
-    headers: { "Content-Type": "application/json" },
-  });
+    return json({ url: session.url, sessionId: session.id });
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : "Stripe checkout could not be started.";
+    console.error("Stripe checkout error", cause);
+    return json({ error: message }, 500);
+  }
 }

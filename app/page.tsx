@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
       <Suspense fallback={<div className="app-loading"><strong>WALL</strong><span>Finding your local wall…</span></div>}>
-        {isConnected ? <ConnectedWallApp /> : <WallApp mode="demo" />}
+        {isConnected ? <ConnectedWallApp /> : <WallApp mode="demo" isSignedIn={false} notice="Posting is unavailable until Clerk sign-in is configured." />}
       </Suspense>
     </AppProviders>
   );

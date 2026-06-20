@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, KeyboardEvent } from "react";
+import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { getCardFormat, type WallCard as WallCardModel } from "./types";
 
 interface WallCardProps {
@@ -8,6 +8,11 @@ interface WallCardProps {
   active: boolean;
   onOpen: (card: WallCardModel) => void;
   onFront: (id: string) => void;
+  ownerDraggable?: boolean;
+  dragging?: boolean;
+  onDragStart?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
+  onDragMove?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
+  onDragEnd?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
   zIndex: number;
 }
 
@@ -22,7 +27,9 @@ function hashString(value: string): number {
   return Math.abs(hash);
 }
 
-export function WallCard({ card, active, onOpen, onFront, zIndex }: WallCardProps) {
+export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false, dragging = false, onDragStart, onDragMove, onDragEnd, zIndex }: WallCardProps) {
+  const pointerRef = useRef<{ id: number; x: number; y: number } | null>(null);
+  const didDragRef = useRef(false);
   const seed = hashString(String(card.id));
   const tapeWidth = 42 + (seed % 45); // 42px to 86px
   const tapeRotate = -14 + ((seed >> 3) % 23); // -14deg to +8deg
@@ -48,16 +55,51 @@ export function WallCard({ card, active, onOpen, onFront, zIndex }: WallCardProp
     }
   };
 
+  const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
+    onFront(card.id);
+    if (!ownerDraggable || event.button !== 0) return;
+    pointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    didDragRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    onDragStart?.(event, card);
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    const start = pointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4) didDragRef.current = true;
+    if (didDragRef.current) onDragMove?.(event, card);
+  };
+
+  const finishDrag = (event: PointerEvent<HTMLElement>) => {
+    const start = pointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    pointerRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    onDragEnd?.(event, card);
+  };
+
   return (
     <article
-      className={`wall-card theme-${card.theme} ${active ? "is-active" : ""}`}
+      className={`wall-card theme-${card.theme} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""}`}
       style={style}
-      onPointerDown={() => onFront(card.id)}
-      onClick={() => onOpen(card)}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={finishDrag}
+      onPointerCancel={finishDrag}
+      onClick={(event) => {
+        if (didDragRef.current) {
+          event.preventDefault();
+          didDragRef.current = false;
+          return;
+        }
+        onOpen(card);
+      }}
       tabIndex={0}
       role="button"
       onKeyDown={handleKeyDown}
-      aria-label={`Open advertisement for ${card.name}`}
+      title={ownerDraggable ? "Drag to reposition your card" : undefined}
+      aria-label={ownerDraggable ? `Your advertisement for ${card.name}. Drag to reposition or activate to open.` : `Open advertisement for ${card.name}`}
     >
       <span className="card-tape" aria-hidden="true" />
       <div className="card-copy">

@@ -1,8 +1,9 @@
 "use client";
 
-import { BarChart3, Clock3, Eye, EyeOff, MousePointerClick, Plus, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Check, Clock3, Eye, EyeOff, MousePointerClick, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { OwnerCard } from "./types";
+import { EditCardModal } from "./edit-card-modal";
+import type { CardUpdate, OwnerCard, RenewalAmount } from "./types";
 
 interface OwnerDashboardProps {
   cards: OwnerCard[];
@@ -11,7 +12,18 @@ interface OwnerDashboardProps {
   onCreate: () => void;
   onView: (card: OwnerCard) => void;
   onSetVisibility: (card: OwnerCard, status: "published" | "hidden") => Promise<void>;
+  onUpdate: (card: OwnerCard, update: CardUpdate) => Promise<void>;
+  onDelete: (card: OwnerCard) => Promise<void>;
+  onRenew: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
 }
+
+const renewalOptions: ReadonlyArray<{ amount: RenewalAmount; price: string; duration: string }> = [
+  { amount: 0, price: "Free", duration: "1 day" },
+  { amount: 1, price: "$1", duration: "1 week" },
+  { amount: 3, price: "$3", duration: "1 month" },
+  { amount: 10, price: "$10", duration: "5 months" },
+  { amount: 20, price: "$20", duration: "1 year" },
+];
 
 function expiryLabel(expiresAt: number) {
   const remaining = expiresAt - Date.now();
@@ -21,9 +33,13 @@ function expiryLabel(expiresAt: number) {
   return `${days} days left`;
 }
 
-export function OwnerDashboard({ cards, loading, onClose, onCreate, onView, onSetVisibility }: OwnerDashboardProps) {
+export function OwnerDashboard({ cards, loading, onClose, onCreate, onView, onSetVisibility, onUpdate, onDelete, onRenew }: OwnerDashboardProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<OwnerCard | null>(null);
+  const [renewTarget, setRenewTarget] = useState<OwnerCard | null>(null);
+  const [renewalAmount, setRenewalAmount] = useState<RenewalAmount>(3);
   const stats = useMemo(() => ({
     totalViews: cards.reduce((sum, card) => sum + card.clicks, 0),
     live: cards.filter((card) => card.status === "published").length,
@@ -37,6 +53,34 @@ export function OwnerDashboard({ cards, loading, onClose, onCreate, onView, onSe
       await onSetVisibility(card, status);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The card could not be updated.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const deleteCard = async () => {
+    if (!deleteTarget) return;
+    setBusyId(String(deleteTarget.id));
+    setError(null);
+    try {
+      await onDelete(deleteTarget);
+      setDeleteTarget(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The card could not be deleted.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const renewCard = async () => {
+    if (!renewTarget) return;
+    setBusyId(String(renewTarget.id));
+    setError(null);
+    try {
+      await onRenew(renewTarget, renewalAmount);
+      setRenewTarget(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The card could not be renewed.");
     } finally {
       setBusyId(null);
     }
@@ -82,14 +126,20 @@ export function OwnerDashboard({ cards, loading, onClose, onCreate, onView, onSe
                 </div>
                 <div className="dashboard-card-actions">
                   <button className="secondary" onClick={() => onView(card)}>View</button>
+                  <button className="secondary" disabled={busy} onClick={() => setEditingCard(card)}><Pencil /> Edit</button>
+                  <button className="secondary" disabled={busy} onClick={() => { setRenewTarget(card); setRenewalAmount(3); }}><RefreshCw /> Renew</button>
                   <button className="secondary" disabled={expired || busy} onClick={() => changeVisibility(card)}>
                     {card.status === "published" ? <><EyeOff /> Hide</> : <><Eye /> {expired ? "Expired" : "Publish"}</>}
                   </button>
+                  <button className="secondary danger-action" disabled={busy} onClick={() => setDeleteTarget(card)}><Trash2 /> Delete</button>
                 </div>
               </article>
             );
           })}
         </div>
+        {deleteTarget ? <div className="dashboard-confirm-backdrop"><div className="dashboard-confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-card-title"><AlertTriangle /><h3 id="delete-card-title">Delete {deleteTarget.name}?</h3><p>This permanently removes the card and its uploaded images. This cannot be undone.</p><div><button className="secondary" onClick={() => setDeleteTarget(null)} disabled={busyId !== null}>Cancel</button><button className="primary danger-confirm" onClick={deleteCard} disabled={busyId !== null}>{busyId ? "Deleting…" : "Delete permanently"}</button></div></div></div> : null}
+        {renewTarget ? <div className="dashboard-confirm-backdrop"><div className="dashboard-confirm renewal-dialog" role="dialog" aria-modal="true" aria-labelledby="renew-card-title"><RefreshCw /><h3 id="renew-card-title">Renew {renewTarget.name}</h3><p>Choose how much time to add. Time is added after the current expiration date when the card is still active.</p><div className="renewal-options" role="radiogroup" aria-label="Renewal duration">{renewalOptions.map((option) => <button key={option.amount} type="button" role="radio" aria-checked={renewalAmount === option.amount} className={`renewal-option ${renewalAmount === option.amount ? "selected" : ""}`} onClick={() => setRenewalAmount(option.amount)}><strong>{option.price}</strong><span>{option.duration}</span>{renewalAmount === option.amount ? <Check /> : null}</button>)}</div><div className="renewal-actions"><button className="secondary" onClick={() => setRenewTarget(null)} disabled={busyId !== null}>Cancel</button><button className="primary" onClick={renewCard} disabled={busyId !== null}>{busyId ? "Starting…" : renewalAmount === 0 ? "Renew free" : `Continue for $${renewalAmount}`}</button></div></div></div> : null}
+        {editingCard ? <EditCardModal card={editingCard} onClose={() => setEditingCard(null)} onSave={onUpdate} /> : null}
       </section>
     </div>
   );
