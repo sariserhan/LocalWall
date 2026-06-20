@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentType, MouseEvent, PointerEvent, SVGProps } from "react";
+import { MapPin } from "lucide-react";
 import type { WallCard } from "./types";
 
 type SocialKey = "instagram" | "facebook" | "tiktok" | "linkedin";
@@ -24,17 +25,23 @@ function socialHref(value: string, baseUrl: string) {
   return `${baseUrl}${trimmed.replace(/^@/, "").replace(/^\/+|\/+$/g, "")}`;
 }
 
-type SocialCard = Pick<WallCard, "name" | "instagram" | "facebook" | "tiktok" | "linkedin">;
+type SocialCard = Pick<WallCard, "name" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin">;
 
-export function SocialLinks({ card, compact = false }: { card: SocialCard; compact?: boolean }) {
+function mapsHref(location: string) {
+  const trimmed = location.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+}
+
+export function SocialLinks({ card }: { card: SocialCard }) {
   const profiles = socialConfig.flatMap(({ key, ...config }) => card[key] ? [{ ...config, key, value: card[key] }] : []);
-  if (profiles.length === 0) return null;
+  if (profiles.length === 0 && !card.location) return null;
 
   const stopPointer = (event: PointerEvent<HTMLAnchorElement>) => event.stopPropagation();
   const stopClick = (event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation();
 
   return (
-    <div className={compact ? "card-socials" : "detail-socials"} aria-label={`${card.name} social media`}>
+    <div className="detail-socials" aria-label={`${card.name} social media`}>
       {profiles.map(({ key, label, baseUrl, Icon, value }) => (
         <a
           key={key}
@@ -47,9 +54,13 @@ export function SocialLinks({ card, compact = false }: { card: SocialCard; compa
           onClick={stopClick}
         >
           <Icon aria-hidden="true" />
-          {compact ? null : <span>{label}</span>}
         </a>
       ))}
+      {card.location ? (
+        <a href={mapsHref(card.location)} target="_blank" rel="noreferrer" aria-label={`View ${card.name} location in Google Maps`} title="Google Maps" onPointerDown={stopPointer} onClick={stopClick}>
+          <MapPin aria-hidden="true" />
+        </a>
+      ) : null}
     </div>
   );
 }

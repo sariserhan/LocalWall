@@ -31,7 +31,18 @@ function getExpiryDuration(paidAmount: number): number {
   return packageDurations[paidAmount] ?? packageDurations[0];
 }
 
-const obviousAdultContent = /\b(nude|nudity|porn|pornography|xxx|onlyfans|explicit\s+sex|sexual\s+services|escort\s+services)\b/i;
+const blockedTextContent = /\b(nude|nudity|porn|pornography|xxx|onlyfans|explicit\s+sex|sexual\s+services|escort\s+services|white\s+power|racial\s+purity|race\s+war|kill\s+(?:all\s+)?(?:black|white|asian|jewish|muslim|gay)\s+people|f+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:ing|ed|er|s)?|sh[i1*]+t+(?:ty|s)?|bullsh[i1*]t|b[i1*]tch(?:es)?|a+s+s+h+o+l+e+s?|bastards?|cunts?|motherf+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:er|ing|ed|s)?|sluts?|whores?|damn|crap)\b/i;
+const socialProfilePattern = /^@?[A-Za-z0-9._-]{2,100}$|^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/;
+
+function isValidWebUrl(value: string) {
+  try {
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    const url = new URL(normalized);
+    return (url.protocol === "http:" || url.protocol === "https:") && url.hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
 
 export const listPublished = query({
   args: {},
@@ -63,6 +74,7 @@ export const listPublished = query({
         phone: card.phone,
         email: card.email,
         website: card.website,
+        location: card.location,
         instagram: card.instagram,
         facebook: card.facebook,
         tiktok: card.tiktok,
@@ -120,6 +132,7 @@ export const listMine = query({
         phone: card.phone,
         email: card.email,
         website: card.website,
+        location: card.location,
         instagram: card.instagram,
         facebook: card.facebook,
         tiktok: card.tiktok,
@@ -177,6 +190,7 @@ export const create = mutation({
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     website: v.optional(v.string()),
+    location: v.optional(v.string()),
     instagram: v.optional(v.string()),
     facebook: v.optional(v.string()),
     tiktok: v.optional(v.string()),
@@ -194,21 +208,24 @@ export const create = mutation({
     const phone = args.phone?.trim() ?? "";
     const email = args.email?.trim() ?? "";
     if (args.imageIds.length > 2) throw new Error("A card can have at most two images.");
-    if (!args.name.trim() || args.name.length > 60) throw new Error("Business name must be between 1 and 60 characters.");
-    if (!args.line.trim() || args.line.length > 90) throw new Error("Service description must be between 1 and 90 characters.");
+    if (args.name.trim().length < 2 || args.name.length > 60) throw new Error("Business name must be between 2 and 60 characters.");
+    if (args.line.trim().length < 5 || args.line.length > 90) throw new Error("Service description must be between 5 and 90 characters.");
     if (args.message && args.message.length > 300) throw new Error("Message must be 300 characters or fewer.");
-    if (obviousAdultContent.test([args.name, args.line, args.message ?? ""].join(" "))) throw new Error("Adult or sexual content is not allowed on WALL.");
+    if (blockedTextContent.test([args.name, args.line, args.message ?? ""].join(" "))) throw new Error("Profanity, adult, or sexual content is not allowed on WALL.");
     if (!args.area.trim() || args.area.length > 50) throw new Error("Neighborhood must be between 1 and 50 characters.");
     if (!args.city.trim() || args.city.length > 100) throw new Error("City must be specified.");
     if (!args.state.trim() || args.state.length > 100) throw new Error("State must be specified.");
     if (!args.country.trim() || args.country.length > 100) throw new Error("Country must be specified.");
     if (args.zipcode && args.zipcode.length > 20) throw new Error("Zip code must be shorter than 20 characters.");
+    if (args.zipcode && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,19}$/.test(args.zipcode.trim())) throw new Error("Enter a valid zip code.");
     if (!phone && !email) throw new Error("Add at least one contact method: phone or email.");
     if (phone && phone.length > 30) throw new Error("Phone number must be 30 characters or fewer.");
     if (phone && !/^[+()0-9.\s-]{7,30}$/.test(phone)) throw new Error("Enter a valid phone number.");
-    if (email && (email.length > 120 || !email.includes("@"))) throw new Error("Enter a valid email address.");
-    if (args.website && args.website.length > 240) throw new Error("Website must be 240 characters or fewer.");
-    if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && profile.length > 240)) throw new Error("Social profile links must be 240 characters or fewer.");
+    if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new Error("Enter a valid email address.");
+    if (args.website && (args.website.length > 240 || !isValidWebUrl(args.website.trim()))) throw new Error("Enter a valid website, such as example.com.");
+    if (args.location && args.location.length > 300) throw new Error("Location must be 300 characters or fewer.");
+    if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && (profile.length > 240 || !socialProfilePattern.test(profile.trim())))) throw new Error("Enter valid social usernames or profile URLs.");
+    if (args.price && args.price.length > 50) throw new Error("Price must be 50 characters or fewer.");
     if (args.x < 0 || args.x > 88 || args.y < 0 || args.y > 1500) throw new Error("That position is outside the wall.");
     if (![0, 1, 3, 10, 20].includes(args.paidAmount)) throw new Error("Invalid payment option.");
 
@@ -253,6 +270,7 @@ export const create = mutation({
       phone: phone || undefined,
       email: email || undefined,
       website: args.website?.trim() || undefined,
+      location: args.location?.trim() || undefined,
       instagram: args.instagram?.trim() || undefined,
       facebook: args.facebook?.trim() || undefined,
       tiktok: args.tiktok?.trim() || undefined,
@@ -288,6 +306,7 @@ export const create = mutation({
       phone: phone || undefined,
       email: email || undefined,
       website: args.website?.trim() || undefined,
+      location: args.location?.trim() || undefined,
       instagram: args.instagram?.trim() || undefined,
       facebook: args.facebook?.trim() || undefined,
       tiktok: args.tiktok?.trim() || undefined,

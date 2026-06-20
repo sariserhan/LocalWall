@@ -25,6 +25,7 @@ export default defineSchema({
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     website: v.optional(v.string()),
+    location: v.optional(v.string()),
     instagram: v.optional(v.string()),
     facebook: v.optional(v.string()),
     tiktok: v.optional(v.string()),

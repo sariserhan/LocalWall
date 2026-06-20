@@ -3,7 +3,6 @@
 import { Check, Sparkles, X } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
 import { getCardFormat, type CardDraft, type Placement } from "./types";
-import { SocialLinks } from "./social-links";
 
 interface PlacementModeProps {
   card: CardDraft;
@@ -37,7 +36,6 @@ export function PlacementMode({ card, position, dragging, onDragStart, onMove, o
         <span className="card-tape" aria-hidden="true" />
         <div className="card-copy"><p className="card-category">{card.category}</p><h2>{card.name}</h2><p className="card-line">{card.line}</p></div>
         {card.previews[0] ? <img src={card.previews[0]} alt="" draggable="false" /> : null}
-        <SocialLinks card={card} compact />
         <footer><span>{card.area}</span>{card.price ? <strong>{card.price}</strong> : null}</footer>
         <div className="drag-label">DRAG ME</div>
       </article>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Contact, ExternalLink, Mail, Phone, X } from "lucide-react";
+import { Bookmark, ExternalLink, Mail, Phone, X } from "lucide-react";
 import { useState } from "react";
 import type { WallCard } from "./types";
 import { SocialLinks } from "./social-links";
@@ -9,7 +9,7 @@ function websiteHref(website: string) {
   return /^https?:\/\//i.test(website) ? website : `https://${website}`;
 }
 
-export function DetailPanel({ card, onClose, viewCount, onSendBehind }: { card: WallCard; onClose: () => void; viewCount: number; onSendBehind?: () => void }) {
+export function DetailPanel({ card, onClose, viewCount }: { card: WallCard; onClose: () => void; viewCount: number }) {
   const [saved, setSaved] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -19,6 +19,8 @@ export function DetailPanel({ card, onClose, viewCount, onSendBehind }: { card: 
       return false;
     }
   });
+  const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
+  const phoneRevealed = revealedPhoneFor === String(card.id);
 
   const toggleSaved = () => {
     const cardId = String(card.id);
@@ -51,13 +53,13 @@ export function DetailPanel({ card, onClose, viewCount, onSendBehind }: { card: 
       {card.price ? <div className="sheet-price">Starting at <strong>{card.price}</strong></div> : null}
       {hasContact ? (
         <div className="contact-actions" aria-label={`Contact ${card.name}`}>
-          {card.phone ? <a className="primary contact-action" href={`tel:${card.phone}`}><Phone /> Call</a> : null}
+          {card.phone ? <button type="button" className={`primary contact-action call-desktop${phoneRevealed ? " is-revealed" : ""}`} onClick={() => setRevealedPhoneFor(String(card.id))}><Phone /> {phoneRevealed ? card.phone : "Show phone"}</button> : null}
+          {card.phone ? <a className="primary contact-action call-mobile" href={`tel:${card.phone}`}><Phone /> Call</a> : null}
           {card.email ? <a className="secondary contact-action" href={`mailto:${card.email}?subject=${encodeURIComponent(`Saw your card on WALL`)}`}><Mail /> Email</a> : null}
           {card.website ? <a className="secondary contact-action" href={websiteHref(card.website)} target="_blank" rel="noreferrer"><ExternalLink /> Website</a> : null}
         </div>
       ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
       <SocialLinks card={card} />
-      {onSendBehind ? <button className="secondary wide" onClick={onSendBehind}><Contact></Contact>Contact {card.name}</button> : null}
       <button className={`secondary wide ${saved ? "is-saved" : ""}`} onClick={toggleSaved} aria-pressed={saved}><Bookmark fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save card"}</button>
       <div className="sheet-meta"><span>{viewCount > 0 ? `${viewCount} views` : "No views yet"}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
     </aside>

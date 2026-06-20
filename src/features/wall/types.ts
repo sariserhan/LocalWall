@@ -39,6 +39,7 @@ export interface WallCard {
   phone?: string;
   email?: string;
   website?: string;
+  location?: string;
   instagram?: string;
   facebook?: string;
   tiktok?: string;
@@ -79,6 +80,7 @@ export interface CardDraft {
   phone?: string;
   email?: string;
   website?: string;
+  location?: string;
   instagram?: string;
   facebook?: string;
   tiktok?: string;

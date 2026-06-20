@@ -64,6 +64,7 @@ export function ConnectedWallApp() {
           phone?: string;
           email?: string;
           website?: string;
+          location?: string;
           instagram?: string;
           facebook?: string;
           tiktok?: string;
@@ -91,6 +92,7 @@ export function ConnectedWallApp() {
           phone: cardPayload.phone,
           email: cardPayload.email,
           website: cardPayload.website,
+          location: cardPayload.location,
           instagram: cardPayload.instagram,
           facebook: cardPayload.facebook,
           tiktok: cardPayload.tiktok,
@@ -148,6 +150,7 @@ export function ConnectedWallApp() {
       phone: draft.phone,
       email: draft.email,
       website: draft.website,
+      location: draft.location,
       instagram: draft.instagram,
       facebook: draft.facebook,
       tiktok: draft.tiktok,

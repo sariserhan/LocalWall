@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, Sparkles, X } from "lucide-react";
-import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from "react";
+import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import { Country, State, City } from "country-state-city";
-import { categories, type CardCategory, type CardDraft, type CardTheme } from "./types";
+import { categories, getCardFormat, type CardCategory, type CardDraft, type CardTheme } from "./types";
 
 interface ComposerProps {
   onClose: () => void;
@@ -25,6 +25,7 @@ interface ComposerForm {
   phone: string;
   email: string;
   website: string;
+  location: string;
   instagram: string;
   facebook: string;
   tiktok: string;
@@ -54,6 +55,7 @@ const initialForm: ComposerForm = {
   phone: "",
   email: "",
   website: "",
+  location: "",
   instagram: "",
   facebook: "",
   tiktok: "",
@@ -83,8 +85,41 @@ const paymentOptions: ReadonlyArray<{ value: ComposerForm["paymentOption"]; pric
   { value: "20", price: "$20", duration: "1 year", description: "A full year on your local wall." },
 ];
 
-const stepLabels = ["Details", "Design", "Duration"] as const;
+const stepLabels = ["Design", "Details", "Duration"] as const;
 type ModerationMatch = { field: "name" | "line" | "message"; term: string; start: number; end: number };
+type DetailField = "name" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin";
+
+const detailFieldLabels: Record<DetailField, string> = {
+  name: "Business or service", line: "Subtitle", message: "Message", area: "Neighborhood", zipcode: "Zip code", price: "Price", phone: "Phone", email: "Email", website: "Website", location: "Location", instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn",
+};
+
+function validWebUrl(value: string) {
+  try {
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    const url = new URL(normalized);
+    return (url.protocol === "http:" || url.protocol === "https:") && url.hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
+
+function validSocialProfile(value: string) {
+  return /^@?[A-Za-z0-9._-]{2,100}$/.test(value) || /^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/.test(value);
+}
+
+function LiveCardPreview({ form, image }: { form: ComposerForm; image?: string }) {
+  const format = getCardFormat(form.theme);
+  const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
+  const style = { "--w": `${format.width}px`, "--h": `${format.minHeight}px`, "--r": "-1deg", "--x": "0", "--y": "0" } as CSSProperties;
+  return (
+    <article className={`wall-card composer-live-card theme-${form.theme}`} style={style} aria-label="Live card preview">
+      <span className="card-tape" aria-hidden="true" />
+      <div className="card-copy"><p className="card-category">{form.category}</p><h2>{form.name || "Your business"}</h2><p className="card-line">{form.line || "Your offer goes here."}</p>{form.message.trim() ? <p className="composer-preview-message">{form.message}</p> : null}</div>
+      {image ? <img src={image} alt="" draggable={false} /> : null}
+      <footer><span>{location}</span>{form.price ? <strong>{form.price}</strong> : null}</footer>
+    </article>
+  );
+}
 
 export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
   const [form, setForm] = useState<ComposerForm>(() => {
@@ -101,27 +136,59 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [step, setStep] = useState(1);
   const [contactError, setContactError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<DetailField, string>>>({});
   const [moderationStatus, setModerationStatus] = useState<"idle" | "checking" | "passed" | "blocked">("idle");
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [moderationMatches, setModerationMatches] = useState<ModerationMatch[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const moderationRequestRef = useRef<AbortController | null>(null);
 
-  const validateContact = () => {
-    const phoneInput = formRef.current?.elements.namedItem("phone") as HTMLInputElement | null;
-    const emailInput = formRef.current?.elements.namedItem("email") as HTMLInputElement | null;
-    phoneInput?.setCustomValidity("");
-    emailInput?.setCustomValidity("");
-    if (form.phone.trim() || form.email.trim()) {
-      setContactError(null);
-      return true;
+  const validateDetails = () => {
+    const errors: Partial<Record<DetailField, string>> = {};
+    const name = form.name.trim();
+    const line = form.line.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim();
+
+    if (name.length < 2) errors.name = "Enter at least 2 characters.";
+    if (name.length > 60) errors.name = "Use 60 characters or fewer.";
+    if (line.length < 5) errors.line = "Enter at least 5 characters.";
+    if (line.length > 90) errors.line = "Use 90 characters or fewer.";
+    if (form.message.length > 300) errors.message = "Use 300 characters or fewer.";
+    if (form.area && form.area.trim().length < 2) errors.area = "Enter at least 2 characters or leave it empty.";
+    if (form.zipcode && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,19}$/.test(form.zipcode.trim())) errors.zipcode = "Use letters, numbers, spaces, or hyphens.";
+    if (!phone && !email) {
+      errors.phone = "Add a phone number or email address.";
+      errors.email = "Add a phone number or email address.";
     }
-    const error = "Add at least one contact method: phone or email.";
-    phoneInput?.setCustomValidity(error);
-    setContactError(error);
-    phoneInput?.reportValidity();
-    return false;
+    if (phone && !/^[+()0-9.\s-]{7,30}$/.test(phone)) errors.phone = "Use a valid phone number with at least 7 digits/characters.";
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a complete email address, such as name@example.com.";
+    if (form.website && !validWebUrl(form.website.trim())) errors.website = "Enter a valid website, such as example.com.";
+    if (form.location.length > 300) errors.location = "Use 300 characters or fewer.";
+    for (const field of ["instagram", "facebook", "tiktok", "linkedin"] as const) {
+      if (form[field] && !validSocialProfile(form[field].trim())) errors[field] = "Enter a username, @handle, or complete profile URL.";
+    }
+
+    const fields = Object.keys(detailFieldLabels) as DetailField[];
+    fields.forEach((field) => {
+      const control = formRef.current?.elements.namedItem(field) as HTMLInputElement | HTMLTextAreaElement | null;
+      control?.setCustomValidity(errors[field] ?? "");
+    });
+    setFieldErrors(errors);
+    const contactMessage = errors.phone && errors.email ? "Add at least one contact method: phone or email." : null;
+    setContactError(contactMessage);
+
+    const firstField = fields.find((field) => errors[field]);
+    if (firstField) {
+      const control = formRef.current?.elements.namedItem(firstField) as HTMLInputElement | HTMLTextAreaElement | null;
+      control?.focus();
+      control?.reportValidity();
+      return false;
+    }
+    return formRef.current?.reportValidity() ?? false;
   };
+
+  const fieldError = (field: DetailField) => fieldErrors[field] ? <small className="field-error" role="alert">{fieldErrors[field]}</small> : null;
 
   const moderateDraft = async (includeImages: boolean) => {
     moderationRequestRef.current?.abort();
@@ -172,10 +239,13 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
       return;
     }
     if (step === 1) {
-      if (!formRef.current?.reportValidity() || !validateContact()) return;
-      if (!await moderateDraft(false)) return;
+      setStep(targetStep === 3 ? 2 : targetStep);
+      return;
     }
-    if (step === 2 && targetStep === 3 && !await moderateDraft(true)) return;
+    if (step === 2 && targetStep === 3) {
+      if (!validateDetails()) return;
+      if (!await moderateDraft(true)) return;
+    }
     setStep(targetStep);
   };
 
@@ -206,6 +276,13 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
     phoneInput?.setCustomValidity("");
     emailInput?.setCustomValidity("");
     setContactError(null);
+    setFieldErrors((current) => {
+      if (!current.phone && !current.email) return current;
+      const next = { ...current };
+      delete next.phone;
+      delete next.email;
+      return next;
+    });
   }, [form.phone, form.email]);
 
   const onImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -223,11 +300,13 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
     }
     onReady({
       ...form,
+      area: form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall",
       message: form.message.trim() || undefined,
       price: form.price.trim() || undefined,
       phone: form.phone.trim() || undefined,
       email: form.email.trim() || undefined,
       website: form.website.trim() || undefined,
+      location: form.location.trim() || undefined,
       instagram: form.instagram.trim() || undefined,
       facebook: form.facebook.trim() || undefined,
       tiktok: form.tiktok.trim() || undefined,
@@ -239,7 +318,18 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
 
   return (
     <div className="composer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <form ref={formRef} className="composer" onSubmit={submit}>
+      <form ref={formRef} className={`composer composer-step-${step}`} onSubmit={submit} onInput={(event) => {
+        const control = event.target as HTMLInputElement | HTMLTextAreaElement;
+        const field = control.name as DetailField;
+        if (!field || !(field in detailFieldLabels)) return;
+        control.setCustomValidity("");
+        setFieldErrors((current) => {
+          if (!current[field]) return current;
+          const next = { ...current };
+          delete next[field];
+          return next;
+        });
+      }}>
         <header>
           <button type="button" className="icon-btn" onClick={step > 1 ? () => setStep((current) => current - 1) : onClose} aria-label={step > 1 ? "Back" : "Close"}>{step > 1 ? <ArrowLeft /> : <X />}</button>
           <div><span>{stepLabels[step - 1]}</span><small>POST A CARD · STEP {step} OF 3</small></div>
@@ -264,40 +354,45 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
             );
           })}
         </div>
-        {step === 1 ? (
-          <div className="composer-body">
-            <label>Business or service<input name="name" required maxLength={60} autoFocus value={form.name} onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))} placeholder="What should the wall call you?" /></label>
+        {step === 2 ? (
+          <div className="composer-body details-step">
+            <div className="details-fields">
+            {Object.keys(fieldErrors).length ? <div className="validation-summary" role="alert"><strong>Fix these details to continue</strong>{(Object.keys(fieldErrors) as DetailField[]).map((field) => <button type="button" key={field} onClick={() => (formRef.current?.elements.namedItem(field) as HTMLElement | null)?.focus()}><span>{detailFieldLabels[field]}</span>{fieldErrors[field]}</button>)}</div> : null}
+            <label>Business or service<input name="name" required maxLength={60} autoFocus value={form.name} onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))} placeholder="What should the wall call you?" />{fieldError("name")}</label>
             <div className="form-grid">
               <label>Category<select value={form.category} onChange={(event) => setForm((value) => ({ ...value, category: event.target.value as CardCategory }))}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>
               <label>Posting on selected wall<input value={`${form.city}${form.state ? `, ${form.state}` : ""}${form.country ? `, ${form.country}` : ""}`} readOnly aria-readonly /></label>
             </div>
             <div className="form-grid">
-              <label>Neighborhood<input maxLength={50} value={form.area} onChange={(event) => setForm((value) => ({ ...value, area: event.target.value }))} placeholder="Optional" /></label>
-              <label>Zip code<input maxLength={20} value={form.zipcode} onChange={(event) => setForm((value) => ({ ...value, zipcode: event.target.value }))} placeholder="Optional" /></label>
+              <label>Neighborhood<input name="area" maxLength={50} value={form.area} onChange={(event) => setForm((value) => ({ ...value, area: event.target.value }))} placeholder="Optional" />{fieldError("area")}</label>
+              <label>Zip code<input name="zipcode" maxLength={20} value={form.zipcode} onChange={(event) => setForm((value) => ({ ...value, zipcode: event.target.value }))} placeholder="Optional" />{fieldError("zipcode")}</label>
             </div>
-            <label>Subtitle<textarea name="line" required maxLength={90} value={form.line} onChange={(event) => setForm((value) => ({ ...value, line: event.target.value }))} placeholder="Short line shown on the card." /></label>
-            <label>Message <span>(optional)</span><textarea name="message" maxLength={300} aria-describedby="message-safety" value={form.message} onChange={(event) => setForm((value) => ({ ...value, message: event.target.value }))} placeholder="Longer details shown when someone opens the card." /><small id="message-safety" className="safety-hint">Messages are checked for adult and unsafe content before publishing.</small>{step === 1 && moderationError ? <small className="field-error" role="alert">{moderationError}</small> : null}{moderationMatches.length ? <span className="flagged-terms">Flagged: {moderationMatches.map((match) => <mark key={`${match.field}-${match.start}`}>{match.field}: {match.term}</mark>)}</span> : null}</label>
-            <label>Price <span>(optional)</span><input maxLength={50} value={form.price} onChange={(event) => setForm((value) => ({ ...value, price: event.target.value }))} placeholder="$25 / visit" /></label>
+            <label>Subtitle<textarea name="line" required maxLength={90} value={form.line} onChange={(event) => setForm((value) => ({ ...value, line: event.target.value }))} placeholder="Short line shown on the card." />{fieldError("line")}</label>
+            <label>Message <span>(optional)</span><textarea name="message" maxLength={300} aria-describedby="message-safety" value={form.message} onChange={(event) => setForm((value) => ({ ...value, message: event.target.value }))} placeholder="Longer details shown when someone opens the card." />{fieldError("message")}<small id="message-safety" className="safety-hint">Messages are checked for adult and unsafe content before publishing.</small>{step === 2 && moderationError ? <small className="field-error" role="alert">{moderationError}</small> : null}{moderationMatches.length ? <span className="flagged-terms">Flagged: {moderationMatches.map((match) => <mark key={`${match.field}-${match.start}`}>{match.field}: {match.term}</mark>)}</span> : null}</label>
+            <label>Price <span>(optional)</span><input name="price" maxLength={50} value={form.price} onChange={(event) => setForm((value) => ({ ...value, price: event.target.value }))} placeholder="$25 / visit" />{fieldError("price")}</label>
             <fieldset>
               <legend>How should people contact you?</legend>
               <div className="form-grid contact-fields">
-                <label>Phone<input name="phone" type="tel" maxLength={30} pattern="[+()0-9.\s-]{7,30}" value={form.phone} onChange={(event) => setForm((value) => ({ ...value, phone: event.target.value }))} placeholder="(555) 123-4567" /></label>
-                <label>Email<input name="email" type="email" maxLength={120} value={form.email} onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))} placeholder="hello@example.com" /></label>
+                <label>Phone<input name="phone" type="tel" maxLength={30} inputMode="tel" value={form.phone} onChange={(event) => setForm((value) => ({ ...value, phone: event.target.value }))} placeholder="(555) 123-4567" />{fieldError("phone")}</label>
+                <label>Email<input name="email" type="email" maxLength={120} value={form.email} onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))} placeholder="hello@example.com" />{fieldError("email")}</label>
               </div>
               <small className={contactError ? "field-error" : "field-help"} role={contactError ? "alert" : undefined}>{contactError ?? "At least one phone number or email address is required."}</small>
-              <label>Website<input type="url" maxLength={240} value={form.website} onChange={(event) => setForm((value) => ({ ...value, website: event.target.value }))} placeholder="https://example.com" /></label>
+              <label>Website<input name="website" type="text" inputMode="url" maxLength={240} value={form.website} onChange={(event) => setForm((value) => ({ ...value, website: event.target.value }))} placeholder="example.com" />{fieldError("website")}</label>
+              <label>Google Maps location <span>(optional)</span><input name="location" type="text" maxLength={300} value={form.location} onChange={(event) => setForm((value) => ({ ...value, location: event.target.value }))} placeholder="Address or Google Maps link" />{fieldError("location")}<small className="field-help">Share only a public business or meeting location.</small></label>
             </fieldset>
             <fieldset>
               <legend>Social media <span>(optional)</span></legend>
               <div className="form-grid social-fields">
-                <label>Instagram<input maxLength={240} value={form.instagram} onChange={(event) => setForm((value) => ({ ...value, instagram: event.target.value }))} placeholder="@yourbusiness" /></label>
-                <label>Facebook<input maxLength={240} value={form.facebook} onChange={(event) => setForm((value) => ({ ...value, facebook: event.target.value }))} placeholder="facebook.com/yourbusiness" /></label>
-                <label>TikTok<input maxLength={240} value={form.tiktok} onChange={(event) => setForm((value) => ({ ...value, tiktok: event.target.value }))} placeholder="@yourbusiness" /></label>
-                <label>LinkedIn<input maxLength={240} value={form.linkedin} onChange={(event) => setForm((value) => ({ ...value, linkedin: event.target.value }))} placeholder="linkedin.com/company/yourbusiness" /></label>
+                <label>Instagram<input name="instagram" maxLength={240} value={form.instagram} onChange={(event) => setForm((value) => ({ ...value, instagram: event.target.value }))} placeholder="@yourbusiness" />{fieldError("instagram")}</label>
+                <label>Facebook<input name="facebook" maxLength={240} value={form.facebook} onChange={(event) => setForm((value) => ({ ...value, facebook: event.target.value }))} placeholder="facebook.com/yourbusiness" />{fieldError("facebook")}</label>
+                <label>TikTok<input name="tiktok" maxLength={240} value={form.tiktok} onChange={(event) => setForm((value) => ({ ...value, tiktok: event.target.value }))} placeholder="@yourbusiness" />{fieldError("tiktok")}</label>
+                <label>LinkedIn<input name="linkedin" maxLength={240} value={form.linkedin} onChange={(event) => setForm((value) => ({ ...value, linkedin: event.target.value }))} placeholder="linkedin.com/company/yourbusiness" />{fieldError("linkedin")}</label>
               </div>
             </fieldset>
+            </div>
+            <aside className="details-live-preview"><span>Live card</span><div className="details-preview-canvas"><LiveCardPreview form={form} image={previews[0]} /></div><small>Updates as you type</small></aside>
           </div>
-        ) : step === 2 ? (
+        ) : step === 1 ? (
           <div className="composer-body design-step">
             <label className="upload-zone">
               <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onImages} />
@@ -326,13 +421,7 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
             <div className="preview-stage">
               <span>Live preview</span>
               <div className="preview-canvas">
-                <div className={`mini-preview theme-${form.theme}`}>
-                  <i className="mini-preview-tape" aria-hidden="true" />
-                  <span>{form.category}</span>
-                  <strong>{form.name || "Your business"}</strong>
-                  <p>{form.line || "Your offer goes here."}</p>
-                  <small>{form.area || "Your neighborhood"}</small>
-                </div>
+                <LiveCardPreview form={form} image={previews[0]} />
               </div>
             </div>
           </div>
@@ -371,9 +460,9 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
           </div>
         )}
         <footer>
-          <span>{step === 1 ? "Next, make it look like yours." : step === 2 ? "Next, choose how long it stays." : "You’ll choose its spot next."}</span>
+          <span>{step === 1 ? "Next, add the words and contact details." : step === 2 ? "Next, choose how long it stays." : "You’ll choose its spot next."}</span>
           <button className="primary" type="submit" disabled={moderationStatus === "checking"}>
-            {moderationStatus === "checking" ? "Checking safety…" : step === 1 ? <>Design card <ArrowRight /></> : step === 2 ? <>Choose duration <ArrowRight /></> : <>Choose a spot <Sparkles /></>}
+            {moderationStatus === "checking" ? "Checking safety…" : step === 1 ? <>Add details <ArrowRight /></> : step === 2 ? <>Choose duration <ArrowRight /></> : <>Choose a spot <Sparkles /></>}
           </button>
         </footer>
       </form>

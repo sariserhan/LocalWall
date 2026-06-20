@@ -54,6 +54,7 @@ function makeDemoCard(draft: CardDraft, placement: Placement, zIndex: number): W
     phone: draft.phone,
     email: draft.email,
     website: draft.website,
+    location: draft.location,
     instagram: draft.instagram,
     facebook: draft.facebook,
     tiktok: draft.tiktok,
@@ -452,10 +453,6 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
   }, [cards, category, deferredQuery, fresh, selectedCountry, selectedState, selectedCity, locationReady]);
 
   const front = (id: string) => setLayers((current) => [...current.filter((item) => item !== id), id]);
-
-  const sendBehind = (id: string) => {
-    setLayers((current) => [id, ...current.filter((item) => item !== id)]);
-  };
 
   const estimateCardHeight = (card: WallCardModel) => {
     if (card.images.length > 0) return 300;
@@ -894,7 +891,7 @@ export function WallApp({ mode, cards: remoteCards, onCreateCard, onCardOpen, on
           </div>
         </div>
       ) : null}
-      {selected ? <DetailPanel card={selected} onClose={() => setSelected(null)} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onSendBehind={() => sendBehind(String(selected.id))} /> : null}
+      {selected ? <DetailPanel card={selected} onClose={() => setSelected(null)} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} /> : null}
       {dashboard && ownerCards && onSetCardStatus ? (
         <OwnerDashboard
           cards={ownerCards}
