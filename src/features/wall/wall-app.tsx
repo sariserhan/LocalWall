@@ -138,6 +138,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     stateName: string;
     city: string;
   } | null>(null);
+  const [savedCardIds, setSavedCardIds] = useState<ReadonlySet<string>>(new Set());
   const [selectedCountry, setSelectedCountry] = useState(defaultSeedLocation.country);
   const [selectedState, setSelectedState] = useState(defaultSeedLocation.state);
   const [selectedCity, setSelectedCity] = useState(defaultSeedLocation.city);
@@ -503,6 +504,25 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     return () => window.removeEventListener("keydown", handleEscape);
   }, [stackPickerCards]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const readSavedCards = () => {
+      try {
+        const savedIds = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
+        setSavedCardIds(new Set(savedIds));
+      } catch {
+        setSavedCardIds(new Set());
+      }
+    };
+    readSavedCards();
+    window.addEventListener("storage", readSavedCards);
+    window.addEventListener("saved-cards-updated", readSavedCards as EventListener);
+    return () => {
+      window.removeEventListener("storage", readSavedCards);
+      window.removeEventListener("saved-cards-updated", readSavedCards as EventListener);
+    };
+  }, []);
+
   const visible = useMemo(() => {
     if (!locationReady) return cards;
     const needle = deferredQuery.toLowerCase();
@@ -526,6 +546,25 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       return true;
     }).length;
   }, [locationReady, pendingCreatedCards, selectedCity, selectedCountry, selectedState]);
+
+  const savedCardsForDashboard = useMemo(
+    () => cards.filter((card) => savedCardIds.has(String(card.id))),
+    [cards, savedCardIds],
+  );
+
+  const removeSavedCard = (card: WallCardModel) => {
+    if (typeof window === "undefined") return;
+    const cardId = String(card.id);
+    try {
+      const savedIds = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
+      const next = savedIds.filter((id) => id !== cardId);
+      window.localStorage.setItem("savedWallCards", JSON.stringify(next));
+      setSavedCardIds(new Set(next));
+      window.dispatchEvent(new CustomEvent("saved-cards-updated"));
+    } catch {
+      setError("Could not remove the card from saved list.");
+    }
+  };
 
   const front = (id: string) => setLayers((current) => [...current.filter((item) => item !== id), id]);
 
@@ -1043,14 +1082,16 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           </div>
         </div>
       ) : null}
-      {selected ? <DetailPanel card={selected} onClose={() => { setSelected(null); syncCardParam(null); }} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} /> : null}
+      {selected ? <DetailPanel key={String(selected.id)} card={selected} onClose={() => { setSelected(null); syncCardParam(null); }} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} canSaveCard={isSignedIn} /> : null}
       {dashboard && ownerCards && onSetCardStatus && onUpdateCard && onDeleteCard && onRenewCard ? (
         <OwnerDashboard
           cards={ownerCards}
+          savedCards={savedCardsForDashboard}
           loading={ownerCardsLoading}
           onClose={() => setDashboard(false)}
           onCreate={createFromDashboard}
           onView={(card) => { setDashboard(false); setSelected(card); }}
+          onRemoveSaved={removeSavedCard}
           onSetVisibility={onSetCardStatus}
           onUpdate={async (card, update) => {
             await onUpdateCard(card, update);

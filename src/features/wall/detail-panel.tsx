@@ -12,12 +12,13 @@ function websiteHref(website: string) {
 
 type CardEvent = "website" | "phone" | "email" | "social" | "save" | "share";
 
-export function DetailPanel({ card, onClose, viewCount, onEvent, onReport }: {
+export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true }: {
   card: WallCard;
   onClose: () => void;
   viewCount: number;
   onEvent?: (event: CardEvent) => void;
   onReport?: (reason: "spam" | "scam" | "inappropriate" | "expired" | "other", details?: string) => Promise<void>;
+  canSaveCard?: boolean;
 }) {
   const [saved, setSaved] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -31,6 +32,16 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport }: {
   const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const phoneRevealed = revealedPhoneFor === String(card.id);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const savedCards = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
+      setSaved(savedCards.includes(String(card.id)));
+    } catch {
+      setSaved(false);
+    }
+  }, [card.id]);
 
   useEffect(() => {
     if (!expandedImage) return;
@@ -48,6 +59,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport }: {
       const next = savedCards.includes(cardId) ? savedCards.filter((id) => id !== cardId) : [...savedCards, cardId];
       window.localStorage.setItem("savedWallCards", JSON.stringify(next));
       setSaved(next.includes(cardId));
+      window.dispatchEvent(new CustomEvent("saved-cards-updated"));
       if (next.includes(cardId)) onEvent?.("save");
     } catch {
       setSaved((value) => !value);
@@ -101,7 +113,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport }: {
         </div>
       ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
       <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
-      <button className={`secondary wide ${saved ? "is-saved" : ""}`} onClick={toggleSaved} aria-pressed={saved}><Bookmark fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save card"}</button>
+      {canSaveCard ? <button className={`secondary wide ${saved ? "is-saved" : ""}`} onClick={toggleSaved} aria-pressed={saved}><Bookmark fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save card"}</button> : null}
       <div className="detail-secondary-actions">
         <button type="button" className="secondary" onClick={() => void shareCard()}><Share2 /> Share</button>
         {onReport ? <button type="button" className="secondary" onClick={() => void report()}><Flag /> Report</button> : null}
