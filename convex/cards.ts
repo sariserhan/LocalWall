@@ -112,6 +112,56 @@ export const listPublished = query({
   },
 });
 
+export const getPublishedById = query({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, args) => {
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.status !== "published" || card.expiresAt <= Date.now()) return null;
+    const [urls, thumbnailUrls, stats] = await Promise.all([
+      Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
+      Promise.all((card.thumbnailImageIds ?? []).map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
+      ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", card._id)).unique(),
+    ]);
+    return {
+      id: card._id,
+      ownerId: card.ownerId,
+      name: card.name,
+      category: card.category,
+      line: card.line,
+      message: card.message,
+      area: card.area,
+      city: card.city,
+      state: card.state,
+      country: card.country,
+      zipcode: card.zipcode,
+      price: card.price,
+      phone: card.phone,
+      email: card.email,
+      website: card.website,
+      location: card.location,
+      instagram: card.instagram,
+      facebook: card.facebook,
+      tiktok: card.tiktok,
+      linkedin: card.linkedin,
+      theme: card.theme,
+      imageMode: card.imageMode,
+      images: urls.filter((url): url is string => url !== null),
+      thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
+      x: card.x,
+      y: card.y,
+      rotation: card.rotation,
+      width: card.width,
+      zIndex: card.zIndex,
+      positionLockedAt: card.positionLockedAt,
+      updatedAt: card.updatedAt,
+      createdAt: card.createdAt,
+      paidAmount: card.paidAmount,
+      expiresAt: card.expiresAt,
+      clicks: stats?.clicks ?? card.clicks,
+    };
+  },
+});
+
 export const getLiveViewCounts = query({
   args: { cardIds: v.array(v.id("cards")) },
   handler: async (ctx, args) => {

@@ -89,6 +89,15 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
+  savedCards: defineTable({
+    userId: v.id("users"),
+    cardId: v.id("cards"),
+    createdAt: v.number(),
+  })
+    .index("by_userId_and_createdAt", ["userId", "createdAt"])
+    .index("by_userId_and_cardId", ["userId", "cardId"])
+    .index("by_cardId", ["cardId"]),
+
   cardStats: defineTable({
     cardId: v.id("cards"),
     clicks: v.number(),

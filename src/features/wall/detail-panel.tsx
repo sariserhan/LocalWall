@@ -12,36 +12,23 @@ function websiteHref(website: string) {
 
 type CardEvent = "website" | "phone" | "email" | "social" | "save" | "share";
 
-export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true }: {
+export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved }: {
   card: WallCard;
   onClose: () => void;
   viewCount: number;
   onEvent?: (event: CardEvent) => void;
   onReport?: (reason: "spam" | "scam" | "inappropriate" | "expired" | "other", details?: string) => Promise<void>;
   canSaveCard?: boolean;
+  saved?: boolean;
+  onSetSaved?: (saved: boolean) => Promise<void>;
 }) {
-  const [saved, setSaved] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const savedCards = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
-      return savedCards.includes(String(card.id));
-    } catch {
-      return false;
-    }
-  });
+  const [optimisticSaved, setOptimisticSaved] = useState(saved);
+  const [saving, setSaving] = useState(false);
   const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const phoneRevealed = revealedPhoneFor === String(card.id);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const savedCards = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
-      setSaved(savedCards.includes(String(card.id)));
-    } catch {
-      setSaved(false);
-    }
-  }, [card.id]);
+  useEffect(() => setOptimisticSaved(saved), [saved]);
 
   useEffect(() => {
     if (!expandedImage) return;
@@ -52,23 +39,23 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [expandedImage]);
 
-  const toggleSaved = () => {
-    const cardId = String(card.id);
+  const toggleSaved = async () => {
+    if (!onSetSaved || saving) return;
+    const next = !optimisticSaved;
+    setOptimisticSaved(next);
+    setSaving(true);
     try {
-      const savedCards = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as string[];
-      const next = savedCards.includes(cardId) ? savedCards.filter((id) => id !== cardId) : [...savedCards, cardId];
-      window.localStorage.setItem("savedWallCards", JSON.stringify(next));
-      setSaved(next.includes(cardId));
-      window.dispatchEvent(new CustomEvent("saved-cards-updated"));
-      if (next.includes(cardId)) onEvent?.("save");
+      await onSetSaved(next);
+      if (next) onEvent?.("save");
     } catch {
-      setSaved((value) => !value);
+      setOptimisticSaved(!next);
+    } finally {
+      setSaving(false);
     }
   };
 
   const shareCard = async () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("card", String(card.id));
+    const url = new URL(`/card/${encodeURIComponent(String(card.id))}`, window.location.origin);
     const shareData = { title: card.name, text: card.line, url: url.toString() };
     if (navigator.share) await navigator.share(shareData);
     else await navigator.clipboard.writeText(url.toString());
@@ -113,7 +100,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         </div>
       ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
       <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
-      {canSaveCard ? <button className={`secondary wide ${saved ? "is-saved" : ""}`} onClick={toggleSaved} aria-pressed={saved}><Bookmark fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save card"}</button> : null}
+      {canSaveCard ? <button className={`secondary wide ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save card"}</button> : null}
       <div className="detail-secondary-actions">
         <button type="button" className="secondary" onClick={() => void shareCard()}><Share2 /> Share</button>
         {onReport ? <button type="button" className="secondary" onClick={() => void report()}><Flag /> Report</button> : null}

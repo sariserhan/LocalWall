@@ -49,7 +49,7 @@ async function createImageVariants(file: File): Promise<ImageVariants> {
   }
 }
 
-export function ConnectedWallApp() {
+export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) {
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
@@ -60,7 +60,12 @@ export function ConnectedWallApp() {
     state: searchParams.get("state") || undefined,
     city: searchParams.get("city") || undefined,
   }) as WallCard[] | undefined;
-  const renderCards = useMemo(() => layoutCards ?? publishedCards ?? [], [layoutCards, publishedCards]);
+  const directCard = useQuery(api.cards.getPublishedById, initialCardId ? { cardId: initialCardId as Id<"cards"> } : "skip") as WallCard | null | undefined;
+  const renderCards = useMemo(() => {
+    const baseCards = layoutCards ?? publishedCards ?? [];
+    if (!directCard || baseCards.some((card) => String(card.id) === String(directCard.id))) return baseCards;
+    return [...baseCards, directCard];
+  }, [directCard, layoutCards, publishedCards]);
   const pendingCreatedCards = useMemo(() => {
     if (publishedCards === undefined || !hasAppliedInitialServerSnapshotRef.current) return [];
     const layoutIds = new Set((layoutCards ?? []).map((card) => String(card.id)));
@@ -74,6 +79,7 @@ export function ConnectedWallApp() {
     return renderCards.map((card) => ({ ...card, clicks: counts.get(String(card.id)) ?? card.clicks ?? 0 }));
   }, [layoutCards, liveViewCounts, publishedCards, renderCards]);
   const ownerCards = useQuery(api.cards.listMine, isAuthenticated ? {} : "skip") as OwnerCard[] | undefined;
+  const savedCards = useQuery(api.savedCards.list, isAuthenticated ? {} : "skip") as WallCard[] | undefined;
   const adminAccess = useQuery(api.admin.getAccess, isAuthenticated ? {} : "skip") as { isAdmin: boolean } | undefined;
   const [adminOpen, setAdminOpen] = useState(false);
   const adminDashboard = useQuery(api.admin.getDashboard, adminOpen && adminAccess?.isAdmin ? {} : "skip") as AdminDashboardData | undefined;
@@ -92,12 +98,36 @@ export function ConnectedWallApp() {
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const recordCardEvent = useMutation(api.cards.recordEvent);
   const reportCard = useMutation(api.cards.report);
+  const setSavedCard = useMutation(api.savedCards.setSaved);
+  const mergeLocalSavedCards = useMutation(api.savedCards.mergeLocal);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
   const { openSignUp } = useClerk();
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
   const ownedCardIds = useMemo(() => new Set((ownerCards ?? []).map((card) => String(card.id))), [ownerCards]);
+  const hasMergedLocalSavedCardsRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      hasMergedLocalSavedCardsRef.current = false;
+      return;
+    }
+    if (savedCards === undefined || hasMergedLocalSavedCardsRef.current) return;
+    hasMergedLocalSavedCardsRef.current = true;
+    const merge = async () => {
+      try {
+        const localIds = JSON.parse(window.localStorage.getItem("savedWallCards") ?? "[]") as unknown;
+        const cardIds = Array.isArray(localIds) ? localIds.filter((id): id is string => typeof id === "string") : [];
+        if (cardIds.length > 0) await mergeLocalSavedCards({ cardIds: cardIds.slice(0, 100) });
+        window.localStorage.removeItem("savedWallCards");
+      } catch (cause) {
+        hasMergedLocalSavedCardsRef.current = false;
+        setCheckoutMessage(cause instanceof Error ? cause.message : "Saved cards could not be synchronized.");
+      }
+    };
+    void merge();
+  }, [isAuthenticated, mergeLocalSavedCards, savedCards]);
 
   useEffect(() => {
     if (publishedCards === undefined) return;
@@ -288,6 +318,7 @@ export function ConnectedWallApp() {
         }
       }}
       onCardEvent={(card, event) => {
+        if (event === "save") return;
         if (!String(card.id).startsWith("demo-")) void recordCardEvent({ cardId: card.id as Id<"cards">, event });
       }}
       onReportCard={async (card, reason, details) => {
@@ -296,6 +327,11 @@ export function ConnectedWallApp() {
       authControl={isClerkSignedIn ? <UserButton /> : null}
       notice={checkoutMessage}
       ownerCards={isAuthenticated ? (ownerCards ?? []) : undefined}
+      savedCards={isAuthenticated ? (savedCards ?? []) : []}
+      initialCardId={initialCardId}
+      onSetSavedCard={async (card, saved) => {
+        await setSavedCard({ cardId: card.id as Id<"cards">, saved });
+      }}
       ownedCardIds={ownedCardIds}
       isAdmin={adminAccess?.isAdmin ?? false}
       onOpenAdmin={() => setAdminOpen(true)}
