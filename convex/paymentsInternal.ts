@@ -28,6 +28,7 @@ export const completePaidCard = internalMutation({
     if (!pending || pending.status !== "pending" || pending.expiresAt <= Date.now()) throw new Error("This pending card is no longer available.");
     const owner = await ctx.db.get(pending.ownerId);
     if (!owner || owner.tokenIdentifier !== args.tokenIdentifier) throw new Error("You can only complete your own card.");
+    if (owner.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
     if (pending.paidAmount !== args.paidAmount || !packageDurations[args.paidAmount]) throw new Error("The verified payment does not match this card.");
     const payload = pending.payload;
     const createdAt = Date.now();
@@ -95,6 +96,7 @@ export const completePaidRenewal = internalMutation({
     const owner = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier)).unique();
     const card = await ctx.db.get(args.cardId);
     if (!owner || !card || card.ownerId !== owner._id) throw new Error("You can only renew your own cards.");
+    if (owner.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
     const duration = packageDurations[args.paidAmount];
     if (!duration) throw new Error("The verified payment amount is invalid.");
 

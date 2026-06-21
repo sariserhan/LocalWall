@@ -74,6 +74,8 @@ export const getDashboard = query({
         id: user._id,
         displayName: user.displayName,
         email: user.email,
+        blockedAt: user.blockedAt,
+        blockedReason: user.blockedReason,
         createdAt: user.createdAt,
         cardCount: cardCountByUser.get(String(user._id)) ?? 0,
       })),
@@ -120,5 +122,66 @@ export const removeCard = mutation({
     await Promise.all(card.imageIds.map((imageId) => ctx.storage.delete(imageId)));
     await ctx.db.delete(card._id);
     return { success: true };
+  },
+});
+
+export const blockUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("That user no longer exists.");
+
+    const now = Date.now();
+    await ctx.db.patch(user._id, {
+      blockedAt: now,
+      blockedReason: "Blocked by admin moderation",
+    });
+
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", args.userId)).take(500);
+    await Promise.all(cards.map(async (card) => {
+      if (card.status === "expired") return;
+      await ctx.db.patch(card._id, {
+        status: "hidden",
+        updatedAt: now,
+      });
+    }));
+
+    return { success: true, hiddenCards: cards.filter((card) => card.status !== "expired").length };
+  },
+});
+
+export const unblockUser = mutation({
+  args: {
+    userId: v.id("users"),
+    restoreCards: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("That user no longer exists.");
+
+    await ctx.db.patch(user._id, {
+      blockedAt: undefined,
+      blockedReason: undefined,
+    });
+
+    if (!args.restoreCards) {
+      return { success: true, restoredCards: 0 };
+    }
+
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", args.userId)).take(500);
+    const now = Date.now();
+    let restoredCards = 0;
+    await Promise.all(cards.map(async (card) => {
+      if (card.status !== "hidden" || card.expiresAt <= now) return;
+      restoredCards += 1;
+      await ctx.db.patch(card._id, {
+        status: "published",
+        updatedAt: now,
+      });
+    }));
+
+    return { success: true, restoredCards };
   },
 });

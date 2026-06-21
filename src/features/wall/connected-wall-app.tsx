@@ -63,6 +63,8 @@ export function ConnectedWallApp() {
   const updateCardPosition = useMutation(api.cards.updatePosition);
   const adminSetCardStatus = useMutation(api.admin.setCardStatus);
   const adminRemoveCard = useMutation(api.admin.removeCard);
+  const adminBlockUser = useMutation(api.admin.blockUser);
+  const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const recordCardEvent = useMutation(api.cards.recordEvent);
   const reportCard = useMutation(api.cards.report);
@@ -297,6 +299,15 @@ export function ConnectedWallApp() {
           onDeleteCard={async (cardId) => {
             await adminRemoveCard({ cardId });
             setLayoutCards((current) => current?.filter((card) => String(card.id) !== String(cardId)) ?? current);
+          }}
+          onBlockUser={async (userId) => {
+            await adminBlockUser({ userId });
+            setLayoutCards((current) => current?.map((card) => String(card.ownerId) === String(userId) ? { ...card, status: "hidden" } : card) ?? current);
+          }}
+          onUnblockUser={async (userId, restoreCards) => {
+            await adminUnblockUser({ userId, restoreCards });
+            if (!restoreCards) return;
+            setLayoutCards(null);
           }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
         />

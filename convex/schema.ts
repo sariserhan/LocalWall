@@ -9,6 +9,8 @@ export default defineSchema({
     displayName: v.optional(v.string()),
     email: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    blockedAt: v.optional(v.number()),
+    blockedReason: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_token", ["tokenIdentifier"])

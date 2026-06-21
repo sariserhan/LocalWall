@@ -21,6 +21,14 @@ async function requireUser(ctx: QueryCtx | MutationCtx) {
   return user;
 }
 
+async function requireActiveUser(ctx: QueryCtx | MutationCtx) {
+  const user = await requireUser(ctx);
+  if (user.blockedAt) {
+    throw new Error("Your account is blocked by WALL admin. Contact support for help.");
+  }
+  return user;
+}
+
 const packageDurations: Record<number, number> = {
   0: 24 * 60 * 60 * 1000,
   1: 7 * 24 * 60 * 60 * 1000,
@@ -62,6 +70,7 @@ export const listPublished = query({
       const urls = await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId)));
       return {
         id: card._id,
+        ownerId: card.ownerId,
         name: card.name,
         category: card.category,
         line: card.line,
@@ -188,7 +197,7 @@ export const setVisibility = mutation({
     status: v.union(v.literal("published"), v.literal("hidden")),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only manage your own cards.");
     if (args.status === "published" && card.expiresAt <= Date.now()) throw new Error("Expired cards must be renewed before publishing.");
@@ -204,7 +213,7 @@ export const renew = mutation({
   },
   handler: async (ctx, args) => {
     if (args.paidAmount !== 0) throw new Error("Paid renewals must be completed through verified checkout.");
-    const user = await requireUser(ctx);
+    const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only renew your own cards.");
 
@@ -267,7 +276,7 @@ export const update = mutation({
     theme,
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only edit your own cards.");
 
@@ -319,7 +328,7 @@ export const updatePosition = mutation({
     y: v.number(),
   },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only move your own cards.");
     if (!Number.isFinite(args.x) || !Number.isFinite(args.y)) {
@@ -337,7 +346,7 @@ export const updatePosition = mutation({
 export const remove = mutation({
   args: { cardId: v.id("cards") },
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
+    const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only delete your own cards.");
     await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.delete(imageId)));
@@ -416,6 +425,7 @@ export const create = mutation({
       user = await ctx.db.get(userId);
     }
     if (!user) throw new Error("Your profile could not be created.");
+    if (user.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
 
     const createdAt = Date.now();
     const cardWidth = args.imageMode === "business-card" ? 300 : args.width;

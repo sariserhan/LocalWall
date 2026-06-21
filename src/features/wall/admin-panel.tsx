@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, Eye, EyeOff, Flag, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
+import { AlertTriangle, Check, Eye, EyeOff, Flag, Mail, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -25,6 +25,8 @@ export interface AdminDashboardData {
     id: Id<"users">;
     displayName?: string;
     email?: string;
+    blockedAt?: number;
+    blockedReason?: string;
     createdAt: number;
     cardCount: number;
   }>;
@@ -36,6 +38,8 @@ interface AdminPanelProps {
   onClose: () => void;
   onSetCardStatus: (cardId: Id<"cards">, status: "published" | "hidden") => Promise<void>;
   onDeleteCard: (cardId: Id<"cards">) => Promise<void>;
+  onBlockUser: (userId: Id<"users">) => Promise<void>;
+  onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onResolveReport: (reportId: Id<"reports">) => Promise<void>;
 }
 
@@ -43,7 +47,7 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onResolveReport }: AdminPanelProps) {
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onResolveReport }: AdminPanelProps) {
   const [tab, setTab] = useState<"cards" | "users" | "reports">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -54,6 +58,17 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onRes
   const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
   const users = useMemo(() => (data?.users ?? []).filter((user) => !deferredQuery || [user.displayName, user.email].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.users, deferredQuery]);
   const reports = useMemo(() => (data?.reports ?? []).filter((report) => !deferredQuery || [report.cardName, report.reason, report.details].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.reports, deferredQuery]);
+  const cardsById = useMemo(() => new Map((data?.cards ?? []).map((card) => [String(card.id), card])), [data?.cards]);
+
+  const sendMessage = (email: string | undefined, context: string) => {
+    if (!email) {
+      setError("This owner has no public email address.");
+      return;
+    }
+    const subject = encodeURIComponent(`WALL moderation notice: ${context}`);
+    const body = encodeURIComponent("Hello,\n\nThis is a moderation message from WALL admin regarding your card/account.\n\nPlease reply to this email for support.\n");
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_self");
+  };
 
   const setStatus = async (card: AdminDashboardData["cards"][number]) => {
     const status = card.status === "published" ? "hidden" : "published";
@@ -121,7 +136,8 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onRes
                     <p>{card.line}</p>
                     <small>{card.ownerName || card.ownerEmail || "Unknown owner"} · {card.city}, {card.state || card.country} · {card.clicks} opens</small>
                   </div>
-                  <div className="admin-row-actions">
+                  <div className="admin-row-actions admin-row-actions-wide">
+                    <button className="secondary" disabled={!card.ownerEmail} onClick={() => sendMessage(card.ownerEmail, card.name)}><Mail /> Send message</button>
                     <button className="secondary" disabled={busy || card.status === "expired"} onClick={() => setStatus(card)}>{card.status === "published" ? <><EyeOff /> Hide</> : <><Eye /> Restore</>}</button>
                     <button className="secondary danger-action" disabled={busy} onClick={() => setDeleteTarget(card)}><Trash2 /> Delete</button>
                   </div>
@@ -138,6 +154,25 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onRes
               <article className="admin-row admin-user-row" key={String(user.id)}>
                 <div className="admin-avatar">{(user.displayName || user.email || "U").slice(0, 1).toUpperCase()}</div>
                 <div className="admin-row-main"><h3>{user.displayName || "Unnamed user"}</h3><p>{user.email || "No public email"}</p><small>Joined {dateLabel(user.createdAt)} · {user.cardCount} recent cards</small></div>
+                <div className="admin-row-actions admin-row-actions-wide">
+                  <button className="secondary" disabled={!user.email} onClick={() => sendMessage(user.email, user.displayName || "WALL account")}><Mail /> Send message</button>
+                  <button className="secondary danger-action" disabled={busyId === String(user.id)} onClick={async () => {
+                    setBusyId(String(user.id));
+                    setError(null);
+                    try {
+                      if (user.blockedAt) {
+                        const restoreCards = window.confirm("Also restore this user's hidden non-expired cards?");
+                        await onUnblockUser(user.id, restoreCards);
+                      } else {
+                        await onBlockUser(user.id);
+                      }
+                    } catch (cause) {
+                      setError(cause instanceof Error ? cause.message : user.blockedAt ? "The user could not be unblocked." : "The user could not be blocked.");
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}>{user.blockedAt ? <><Check /> Unblock user</> : <><Flag /> Block user</>}</button>
+                </div>
               </article>
             ))}
             {!users.length ? <div className="dashboard-empty">No users match this search.</div> : null}
@@ -146,7 +181,45 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onRes
 
         {data && tab === "reports" ? (
           <div className="admin-list" role="tabpanel">
-            {reports.map((report) => <article className="admin-row" key={String(report.id)}><div className="admin-row-main"><div><span>{dateLabel(report.createdAt)}</span></div><h3>{report.cardName}</h3><p>{report.details || report.reason}</p><small>Reason: {report.reason}</small></div><div className="admin-row-actions"><button className="secondary" disabled={busyId === String(report.id)} onClick={async () => { setBusyId(String(report.id)); try { await onResolveReport(report.id); } finally { setBusyId(null); } }}><Check /> Resolve</button></div></article>)}
+            {reports.map((report) => {
+              const card = cardsById.get(String(report.cardId));
+              const busy = busyId === String(report.id);
+              return (
+                <article className="admin-row" key={String(report.id)}>
+                  <div className="admin-row-main"><div><span>{dateLabel(report.createdAt)}</span></div><h3>{report.cardName}</h3><p>{report.details || report.reason}</p><small>Reason: {report.reason}</small></div>
+                  <div className="admin-row-actions admin-row-actions-wide">
+                    <button className="secondary" disabled={!card?.ownerEmail || busy} onClick={() => sendMessage(card?.ownerEmail, card?.name || report.cardName)}><Mail /> Send message</button>
+                    <button className="secondary" disabled={!card || busy || card.status === "expired"} onClick={async () => {
+                      if (!card) return;
+                      setBusyId(String(report.id));
+                      setError(null);
+                      try {
+                        await onSetCardStatus(card.id, "hidden");
+                        await onResolveReport(report.id);
+                      } catch (cause) {
+                        setError(cause instanceof Error ? cause.message : "The card could not be hidden.");
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}><EyeOff /> Hide</button>
+                    <button className="secondary danger-action" disabled={!card || busy} onClick={async () => {
+                      if (!card) return;
+                      setBusyId(String(report.id));
+                      setError(null);
+                      try {
+                        await onDeleteCard(card.id);
+                        await onResolveReport(report.id);
+                      } catch (cause) {
+                        setError(cause instanceof Error ? cause.message : "The card could not be deleted.");
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}><Trash2 /> Delete</button>
+                    <button className="secondary" disabled={busy} onClick={async () => { setBusyId(String(report.id)); try { await onResolveReport(report.id); } finally { setBusyId(null); } }}><Check /> Resolve</button>
+                  </div>
+                </article>
+              );
+            })}
             {!reports.length ? <div className="dashboard-empty">No open reports.</div> : null}
           </div>
         ) : null}
