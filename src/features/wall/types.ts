@@ -48,6 +48,7 @@ export interface WallCard {
   theme: CardTheme;
   imageMode?: CardImageMode;
   images: string[];
+  thumbnailImages?: string[];
   x: number;
   y: number;
   rotation: number;

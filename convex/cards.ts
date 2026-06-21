@@ -67,7 +67,10 @@ export const listPublished = query({
     const visibleCards = cards.filter((card) => card.expiresAt > now);
 
     return Promise.all(visibleCards.map(async (card) => {
-      const urls = await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId)));
+      const [urls, thumbnailUrls] = await Promise.all([
+        Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
+        Promise.all((card.thumbnailImageIds ?? []).map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
+      ]);
       return {
         id: card._id,
         ownerId: card.ownerId,
@@ -92,6 +95,7 @@ export const listPublished = query({
         theme: card.theme,
         imageMode: card.imageMode,
         images: urls.filter((url): url is string => url !== null),
+        thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
         x: card.x,
         y: card.y,
         rotation: card.rotation,
@@ -139,8 +143,9 @@ export const listMine = query({
 
     const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).order("desc").take(100);
     return Promise.all(cards.map(async (card) => {
-      const [urls, stats] = await Promise.all([
+      const [urls, thumbnailUrls, stats] = await Promise.all([
         Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
+        Promise.all((card.thumbnailImageIds ?? []).map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
         ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", card._id)).unique(),
       ]);
       const effectiveStatus = card.status === "published" && card.expiresAt <= Date.now() ? "expired" : card.status;
@@ -168,6 +173,7 @@ export const listMine = query({
         theme: card.theme,
         imageMode: card.imageMode,
         images: urls.filter((url): url is string => url !== null),
+        thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
         x: card.x,
         y: card.y,
         rotation: card.rotation,
@@ -349,7 +355,8 @@ export const remove = mutation({
     const user = await requireActiveUser(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card || card.ownerId !== user._id) throw new Error("You can only delete your own cards.");
-    await Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.delete(imageId)));
+    const storedImages = new Set<Id<"_storage">>([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
+    await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
     await ctx.db.delete(card._id);
     return { success: true };
   },
@@ -379,6 +386,7 @@ export const create = mutation({
     theme,
     imageMode: v.optional(imageMode),
     imageIds: v.array(v.id("_storage")),
+    thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
     x: v.number(),
     y: v.number(),
     rotation: v.number(),
@@ -389,6 +397,7 @@ export const create = mutation({
     const phone = args.phone?.trim() ?? "";
     const email = args.email?.trim() ?? "";
     if (args.imageIds.length > 2) throw new Error("A card can have at most two images.");
+    if (args.thumbnailImageIds && args.thumbnailImageIds.length !== args.imageIds.length) throw new Error("Each full image needs a matching thumbnail.");
     if (args.imageMode === "business-card" && args.imageIds.length !== 1) throw new Error("A finished business card needs exactly one image.");
     if (args.name.trim().length < 2 || args.name.length > 60) throw new Error("Business name must be between 2 and 60 characters.");
     if (args.line.trim().length < 5 || args.line.length > 90) throw new Error("Service description must be between 5 and 90 characters.");
@@ -486,6 +495,7 @@ export const create = mutation({
       theme: args.theme,
       imageMode: args.imageMode,
       imageIds: args.imageIds,
+      thumbnailImageIds: args.thumbnailImageIds,
       x: args.x,
       y: args.y,
       rotation: args.rotation,
@@ -500,7 +510,10 @@ export const create = mutation({
       clicks: 0,
     });
     await ctx.db.insert("cardStats", { cardId, clicks: 0, websiteClicks: 0, phoneClicks: 0, emailClicks: 0, socialClicks: 0, saves: 0, shares: 0, updatedAt: createdAt });
-    const urls = await Promise.all(args.imageIds.map((imageId) => ctx.storage.getUrl(imageId)));
+    const [urls, thumbnailUrls] = await Promise.all([
+      Promise.all(args.imageIds.map((imageId) => ctx.storage.getUrl(imageId))),
+      Promise.all((args.thumbnailImageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+    ]);
     return {
       id: cardId,
       ownerId: user._id,
@@ -525,6 +538,7 @@ export const create = mutation({
       theme: args.theme,
       imageMode: args.imageMode,
       images: urls.filter((url): url is string => url !== null),
+      thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
       x: args.x,
       y: args.y,
       rotation: args.rotation,

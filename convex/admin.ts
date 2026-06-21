@@ -119,7 +119,8 @@ export const removeCard = mutation({
     await requireAdmin(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card) throw new Error("That card no longer exists.");
-    await Promise.all(card.imageIds.map((imageId) => ctx.storage.delete(imageId)));
+    const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
+    await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
     await ctx.db.delete(card._id);
     return { success: true };
   },

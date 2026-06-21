@@ -116,7 +116,7 @@ export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, 
             <div className="dashboard-card-list dashboard-saved-list">
               {savedCards.map((card) => (
                 <article className="dashboard-card-row" key={`saved-${String(card.id)}`}>
-                  <div className={`dashboard-card-thumb theme-${card.theme}`}>{card.images[0] ? <img src={card.images[0]} alt="" /> : <span>{card.name.slice(0, 1)}</span>}</div>
+                <div className={`dashboard-card-thumb theme-${card.theme}`}>{card.thumbnailImages?.[0] || card.images[0] ? <img src={card.thumbnailImages?.[0] ?? card.images[0]} alt="" loading="lazy" decoding="async" /> : <span>{card.name.slice(0, 1)}</span>}</div>
                   <div className="dashboard-card-copy">
                     <div><Bookmark /> saved</div>
                     <h3>{card.name}</h3>

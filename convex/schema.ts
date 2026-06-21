@@ -35,6 +35,7 @@ export default defineSchema({
     theme: v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream"), v.literal("biz"), v.literal("kraft"), v.literal("blueprint"), v.literal("photo"), v.literal("ticket")),
     imageMode: v.optional(v.union(v.literal("photo"), v.literal("business-card"))),
     imageIds: v.array(v.id("_storage")),
+    thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
     x: v.number(),
     y: v.number(),
     rotation: v.number(),
@@ -80,6 +81,13 @@ export default defineSchema({
     paidAmount: v.number(),
     usedAt: v.number(),
   }).index("by_session", ["sessionId"]),
+
+  rateLimits: defineTable({
+    key: v.string(),
+    count: v.number(),
+    resetAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 
   cardStats: defineTable({
     cardId: v.id("cards"),

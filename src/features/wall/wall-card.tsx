@@ -35,6 +35,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
   const tapeRotate = -14 + ((seed >> 3) % 23); // -14deg to +8deg
   const tapeLeft = 22 + ((seed >> 6) % 48); // 22% to 69%
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
+  const cardImage = card.thumbnailImages?.[0] ?? card.images[0];
   const format = getCardFormat(displayTheme);
 
   const style: CardStyle = {
@@ -82,7 +83,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
 
   return (
     <article
-      className={`wall-card theme-${displayTheme} ${card.imageMode === "business-card" && card.images[0] ? "image-business-card" : ""} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""}`}
+      className={`wall-card theme-${displayTheme} ${card.imageMode === "business-card" && cardImage ? "image-business-card" : ""} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""}`}
       style={style}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -108,7 +109,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
         <h2>{card.name}</h2>
         <p className="card-line">{card.line}</p>
       </div>
-      {card.images[0] ? <img src={card.images[0]} alt="" draggable="false" /> : null}
+      {cardImage ? <img src={cardImage} alt="" draggable="false" loading="lazy" decoding="async" /> : null}
       <footer>
         <span>{card.area}</span>
         {card.price ? <strong>{card.price}</strong> : null}

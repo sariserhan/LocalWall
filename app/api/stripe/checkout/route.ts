@@ -1,7 +1,8 @@
 import Stripe from "stripe";
 import type { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { rateLimit } from "../../_rate-limit";
+import { durableUserRateLimit } from "../../_distributed-rate-limit";
+import { isSameOriginRequest, rateLimit } from "../../_rate-limit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
@@ -12,13 +13,19 @@ function json(body: unknown, status = 200) {
 }
 
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, "checkout", 20, 60 * 60 * 1000);
-  if (limited) return limited;
+  if (!isSameOriginRequest(request)) return json({ error: "Cross-site checkout requests are not allowed." }, 403);
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 8 * 1024) return json({ error: "Checkout request is too large." }, 413);
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) return json({ error: "Checkout requests must use JSON." }, 415);
+  const ipLimit = rateLimit(request, "checkout:ip:hour", 40, 60 * 60 * 1000);
+  if (ipLimit) return ipLimit;
   if (!process.env.STRIPE_SECRET_KEY) {
     return json({ error: "Stripe is not configured. Add STRIPE_SECRET_KEY to .env.local and restart the server." }, 503);
   }
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
   if (!userId) return json({ error: "Sign in before starting checkout." }, 401);
+  const durableLimit = await durableUserRateLimit(await getToken({ template: "convex" }), ["checkout_hour", "checkout_day"]);
+  if (durableLimit) return durableLimit;
 
   try {
     const body = await request.json().catch(() => null);

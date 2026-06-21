@@ -13,16 +13,40 @@ import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Pl
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-async function optimizeImage(file: File) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+interface ImageVariants {
+  full: File;
+  thumbnail: File;
+}
+
+async function encodeWebpVariant(bitmap: ImageBitmap, sourceName: string, suffix: string, maxDimension: number, quality: number) {
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.84));
-  return blob ? new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" }) : file;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("This browser could not prepare the image.");
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+  if (!blob) throw new Error("This browser could not convert the image to WebP.");
+  const baseName = sourceName.replace(/\.[^.]+$/, "") || "wall-card";
+  return new File([blob], `${baseName}-${suffix}.webp`, { type: "image/webp", lastModified: Date.now() });
+}
+
+async function createImageVariants(file: File): Promise<ImageVariants> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const [full, thumbnail] = await Promise.all([
+      encodeWebpVariant(bitmap, file.name, "full", 1920, 0.86),
+      encodeWebpVariant(bitmap, file.name, "thumb", 640, 0.78),
+    ]);
+    return { full, thumbnail };
+  } finally {
+    bitmap.close();
+  }
 }
 
 export function ConnectedWallApp() {
@@ -143,25 +167,34 @@ export function ConnectedWallApp() {
     processCheckout();
   }, [searchParams, isProcessingCheckout, finalizePaidCard, finalizePaidRenewal, addCardToLocalWall]);
 
-  const uploadImage = async (file: File): Promise<Id<"_storage">> => {
-    if (!allowedImageTypes.has(file.type)) throw new Error("Images must be JPG, PNG, or WEBP.");
-    if (file.size > MAX_IMAGE_BYTES) throw new Error("Each image must be smaller than 8MB.");
-
-    const optimized = await optimizeImage(file).catch(() => file);
+  const uploadVariant = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateUploadUrl({});
     const response = await fetch(uploadUrl, {
       method: "POST",
-      headers: { "Content-Type": optimized.type },
-      body: optimized,
+      headers: { "Content-Type": file.type },
+      body: file,
     });
     if (!response.ok) throw new Error("An image upload failed. Please try again.");
     const result = await response.json() as { storageId: Id<"_storage"> };
     return result.storageId;
   };
 
+  const uploadImageVariants = async (file: File) => {
+    if (!allowedImageTypes.has(file.type)) throw new Error("Images must be JPG, PNG, or WEBP.");
+    if (file.size > MAX_IMAGE_BYTES) throw new Error("Each image must be smaller than 8MB.");
+    const variants = await createImageVariants(file);
+    const [imageId, thumbnailImageId] = await Promise.all([
+      uploadVariant(variants.full),
+      uploadVariant(variants.thumbnail),
+    ]);
+    return { imageId, thumbnailImageId };
+  };
+
   const handleCreate = async (draft: CardDraft, placement: Placement): Promise<WallCard | void> => {
     if (!isAuthenticated) throw new Error("Please finish signing in before posting a card.");
-    const imageIds = await Promise.all(draft.files.slice(0, 2).map(uploadImage));
+    const uploadedImages = await Promise.all(draft.files.slice(0, 2).map(uploadImageVariants));
+    const imageIds = uploadedImages.map((image) => image.imageId);
+    const thumbnailImageIds = uploadedImages.map((image) => image.thumbnailImageId);
     const paidAmount = draft.paymentOption === "free" ? 0 : Number(draft.paymentOption);
     const cardPayload = {
       name: draft.name,
@@ -186,6 +219,7 @@ export function ConnectedWallApp() {
       theme: draft.theme,
       imageMode: draft.imageMode,
       imageIds,
+      thumbnailImageIds,
       x: placement.x,
       y: placement.y,
       rotation: -3 + Math.random() * 6,

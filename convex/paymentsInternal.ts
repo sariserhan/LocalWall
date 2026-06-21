@@ -21,8 +21,11 @@ export const completePaidCard = internalMutation({
     if (existingReceipt) {
       const existingCard = await ctx.db.get(existingReceipt.cardId);
       if (!existingCard) throw new Error("The completed card could not be found.");
-      const existingUrls = await Promise.all(existingCard.imageIds.map((imageId) => ctx.storage.getUrl(imageId)));
-      return { id: existingCard._id, ...existingCard, images: existingUrls.filter((url): url is string => url !== null) };
+      const [existingUrls, existingThumbnailUrls] = await Promise.all([
+        Promise.all(existingCard.imageIds.map((imageId) => ctx.storage.getUrl(imageId))),
+        Promise.all((existingCard.thumbnailImageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+      ]);
+      return { id: existingCard._id, ...existingCard, images: existingUrls.filter((url): url is string => url !== null), thumbnailImages: existingThumbnailUrls.filter((url): url is string => url !== null) };
     }
     const pending = await ctx.db.get(args.pendingCardId);
     if (!pending || pending.status !== "pending" || pending.expiresAt <= Date.now()) throw new Error("This pending card is no longer available.");
@@ -55,6 +58,7 @@ export const completePaidCard = internalMutation({
       theme: payload.theme,
       imageMode: payload.imageMode,
       imageIds: payload.imageIds,
+      thumbnailImageIds: payload.thumbnailImageIds,
       x: payload.x,
       y: payload.y,
       rotation: payload.rotation,
@@ -72,8 +76,12 @@ export const completePaidCard = internalMutation({
     await ctx.db.insert("paymentReceipts", { sessionId: args.sessionId, pendingCardId: pending._id, cardId, paidAmount: args.paidAmount, usedAt: createdAt });
     await ctx.db.patch(pending._id, { status: "completed" });
     const imageIds = payload.imageIds as Id<"_storage">[];
-    const urls = await Promise.all(imageIds.map((imageId) => ctx.storage.getUrl(imageId)));
-    return { id: cardId, ...payload, ownerId: pending.ownerId, images: urls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, expiresAt: createdAt + packageDurations[args.paidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0 };
+    const thumbnailImageIds = (payload.thumbnailImageIds ?? []) as Id<"_storage">[];
+    const [urls, thumbnailUrls] = await Promise.all([
+      Promise.all(imageIds.map((imageId) => ctx.storage.getUrl(imageId))),
+      Promise.all(thumbnailImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
+    ]);
+    return { id: cardId, ...payload, ownerId: pending.ownerId, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, expiresAt: createdAt + packageDurations[args.paidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0 };
   },
 });
 

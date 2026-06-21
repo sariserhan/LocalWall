@@ -1070,7 +1070,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                       <h2>{card.name}</h2>
                       <p className="card-line">{card.line}</p>
                     </div>
-                    {card.images[0] ? <img src={card.images[0]} alt="" draggable={false} /> : null}
+                    {card.thumbnailImages?.[0] || card.images[0] ? <img src={card.thumbnailImages?.[0] ?? card.images[0]} alt="" draggable={false} loading="lazy" decoding="async" /> : null}
                     <footer>
                       <span>{card.area}</span>
                       {card.price ? <strong>{card.price}</strong> : null}

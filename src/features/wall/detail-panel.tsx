@@ -96,7 +96,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         <div className={card.images.length > 1 ? "sheet-images sheet-images-double" : "sheet-images"}>
           {card.images.map((image, index) => (
             <button className="sheet-image-button" type="button" onClick={() => setExpandedImage(image)} aria-label={`View ${card.name} image ${index + 1} full screen`} key={image}>
-              <img className="sheet-image" src={image} alt={`${card.name} service ${index + 1}`} />
+              <img className="sheet-image" src={card.thumbnailImages?.[index] ?? image} alt={`${card.name} service ${index + 1}`} loading="lazy" decoding="async" />
               <span>View full screen</span>
             </button>
           ))}

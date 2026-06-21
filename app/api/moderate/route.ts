@@ -3,16 +3,22 @@ import path from "node:path";
 import * as ort from "onnxruntime-node";
 import sharp from "sharp";
 import { createWorker, type Worker } from "tesseract.js";
-import { rateLimit } from "../_rate-limit";
+import { auth } from "@clerk/nextjs/server";
+import { durableUserRateLimit } from "../_distributed-rate-limit";
+import { isSameOriginRequest, rateLimit } from "../_rate-limit";
 
 export const runtime = "nodejs";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_REQUEST_BYTES = 17 * 1024 * 1024;
+const MAX_IMAGE_PIXELS = 40_000_000;
+const MAX_CONCURRENT_IMAGE_REQUESTS = 2;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 let safetyModelPromise: Promise<ort.InferenceSession> | null = null;
 let ocrWorkerPromise: Promise<Worker> | null = null;
 let ocrQueue = Promise.resolve("");
+let activeImageRequests = 0;
 
 const blockedTextPattern = /\b(nude|nudity|porn|pornography|xxx|onlyfans|explicit\s+sex|sexual\s+services|escort\s+services|white\s+power|racial\s+purity|race\s+war|kill\s+(?:all\s+)?(?:black|white|asian|jewish|muslim|gay)\s+people|f+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:ing|ed|er|s)?|sh[i1*]+t+(?:ty|s)?|bullsh[i1*]t|b[i1*]tch(?:es)?|a+s+s+h+o+l+e+s?|bastards?|cunts?|motherf+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:er|ing|ed|s)?|sluts?|whores?|damn|crap)\b/gi;
 
@@ -47,7 +53,7 @@ function readImageText(image: Buffer) {
 }
 
 async function classifyImage(image: Buffer) {
-  const pixels = await sharp(image)
+  const pixels = await sharp(image, { limitInputPixels: MAX_IMAGE_PIXELS })
     .rotate()
     .resize(224, 224, { fit: "fill" })
     .toColourspace("srgb")
@@ -70,7 +76,16 @@ async function classifyImage(image: Buffer) {
 
 async function moderateImage(image: File, imageIndex: number) {
   const buffer = Buffer.from(await image.arrayBuffer());
-  const [visual, extractedText] = await Promise.all([classifyImage(buffer), readImageText(buffer)]);
+  const metadata = await sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS }).metadata();
+  if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_IMAGE_PIXELS) {
+    throw new Error("Image dimensions are too large.");
+  }
+  const ocrImage = await sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS })
+    .rotate()
+    .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 82 })
+    .toBuffer();
+  const [visual, extractedText] = await Promise.all([classifyImage(buffer), readImageText(ocrImage)]);
   const flags: Array<{ image: number; label: string; score?: number }> = [];
   if (visual.adult >= 0.6) flags.push({ image: imageIndex + 1, label: "adult or sexual content", score: visual.adult });
   if (visual.gore >= 0.55) flags.push({ image: imageIndex + 1, label: "violent or gory content", score: visual.gore });
@@ -79,8 +94,16 @@ async function moderateImage(image: File, imageIndex: number) {
 }
 
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, "moderate", 12, 5 * 60 * 1000);
-  if (limited) return limited;
+  if (!isSameOriginRequest(request)) return Response.json({ safe: false, error: "Cross-site moderation requests are not allowed." }, { status: 403 });
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_REQUEST_BYTES) return Response.json({ safe: false, error: "The moderation request is too large." }, { status: 413 });
+  const ipLimit = rateLimit(request, "moderate:ip:5m", 20, 5 * 60 * 1000);
+  if (ipLimit) return ipLimit;
+  const { userId, getToken } = await auth();
+  if (!userId) return Response.json({ safe: false, error: "Sign in before checking a card." }, { status: 401, headers: { "Cache-Control": "no-store" } });
+  const durableLimit = await durableUserRateLimit(await getToken({ template: "convex" }), ["moderation_5m", "moderation_day"]);
+  if (durableLimit) return durableLimit;
+
   const formData = await request.formData().catch(() => null);
   if (!formData) return Response.json({ safe: false, error: "Invalid moderation request." }, { status: 400 });
 
@@ -88,7 +111,9 @@ export async function POST(request: NextRequest) {
   const line = String(formData.get("line") ?? "");
   const message = String(formData.get("message") ?? "");
   const text = [name, line, message].filter(Boolean).join("\n").trim();
-  const images = formData.getAll("images").filter((value): value is File => value instanceof File).slice(0, 2);
+  if (name.length > 60 || line.length > 90 || message.length > 300) return Response.json({ safe: false, error: "Card text is too long." }, { status: 400 });
+  const images = formData.getAll("images").filter((value): value is File => value instanceof File);
+  if (images.length > 2) return Response.json({ safe: false, error: "A card can include at most two images." }, { status: 400 });
   const matches = [...findBlockedText("name", name), ...findBlockedText("line", line), ...findBlockedText("message", message)];
   if (matches.length > 0) {
     return Response.json({ safe: false, error: "Remove the highlighted profanity or adult content before continuing.", matches }, { status: 422 });
@@ -100,7 +125,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (!text && images.length === 0) return Response.json({ safe: true, mode: "local" });
+  if (images.length > 0 && activeImageRequests >= MAX_CONCURRENT_IMAGE_REQUESTS) {
+    return Response.json({ safe: false, error: "Image moderation is busy. Please try again shortly." }, { status: 503, headers: { "Retry-After": "5" } });
+  }
 
+  if (images.length > 0) activeImageRequests += 1;
   try {
     const results = await Promise.all(images.map(moderateImage));
     const blocked = results.flat();
@@ -112,5 +141,7 @@ export async function POST(request: NextRequest) {
   } catch (cause) {
     console.error("Local image moderation failed", cause);
     return Response.json({ safe: false, error: "The local image safety check could not run. Please try another image." }, { status: 503 });
+  } finally {
+    if (images.length > 0) activeImageRequests -= 1;
   }
 }
