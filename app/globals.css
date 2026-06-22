@@ -18,6 +18,12 @@ button { color: inherit; }
 .location svg:last-child { width: 13px; margin-left: 5px; }
 .location-inner { display: inline-flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
 .location-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.locate-btn { display: flex; gap: 6px; align-items: center; padding: 0 14px; border: 0; border-right: 1px solid #b7b4ae; background: transparent; font: 700 13px var(--font-barlow-condensed); text-transform: uppercase; cursor: pointer; color: #444; transition: color .15s, background .15s; }
+.locate-btn:hover:not(:disabled) { background: #e4e2dc; color: #111; }
+.locate-btn:disabled { opacity: .5; cursor: default; }
+.locate-btn svg { width: 15px; }
+.locate-spin { animation: locate-spin .9s linear infinite; }
+@keyframes locate-spin { to { transform: rotate(360deg); } }
 .topbar nav { margin-left: auto; display: flex; align-items: stretch; }
 .topbar nav > button, .filter-select { display: flex; align-items: center; justify-content: center; position: relative; min-width: 102px; border: 0; border-left: 1px solid #c4c1bb; background: transparent; text-transform: uppercase; font: 800 14px var(--font-barlow-condensed); cursor: pointer; }
 .topbar nav > button svg { width: 16px; margin-right: 7px; }

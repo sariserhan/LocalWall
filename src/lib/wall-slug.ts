@@ -74,13 +74,13 @@ export function parseSmartQuery(
 
   if (getCityNames) {
     const cityNames = getCityNames(state);
-    for (let len = Math.min(4, rest.length - 1); len >= 1; len--) {
+    for (let len = Math.min(4, rest.length); len >= 1; len--) {
       const cityTokens = rest.slice(-len);
       const candidate = cityTokens.join(" ");
       if (cityNames.some((c) => c.toLowerCase() === candidate)) {
         const city = cityTokens.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
         const keyword = rest.slice(0, -len).join(" ");
-        return { keyword: keyword || city, city, state };
+        return { keyword, city, state };
       }
     }
   }
