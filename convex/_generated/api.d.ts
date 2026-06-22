@@ -14,6 +14,7 @@ import type * as crons from "../crons.js";
 import type * as payments from "../payments.js";
 import type * as paymentsInternal from "../paymentsInternal.js";
 import type * as rateLimits from "../rateLimits.js";
+import type * as reminders from "../reminders.js";
 import type * as savedCards from "../savedCards.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   payments: typeof payments;
   paymentsInternal: typeof paymentsInternal;
   rateLimits: typeof rateLimits;
+  reminders: typeof reminders;
   savedCards: typeof savedCards;
 }>;
 

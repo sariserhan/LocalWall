@@ -52,6 +52,8 @@ export default defineSchema({
     city: v.string(),
     zipcode: v.optional(v.string()),
     clicks: v.number(),
+    reminder3dSentAt: v.optional(v.number()),
+    reminder1dSentAt: v.optional(v.number()),
   })
     .index("by_status_created", ["status", "createdAt"])
     .index("by_status_and_country_and_state_and_city_and_createdAt", ["status", "country", "state", "city", "createdAt"])

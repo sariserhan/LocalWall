@@ -96,6 +96,7 @@ export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) 
   const adminBlockUser = useMutation(api.admin.blockUser);
   const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminResolveReport = useMutation(api.admin.resolveReport);
+  const adminSendTestEmail = useAction(api.admin.sendTestReminderEmail);
   const recordCardEvent = useMutation(api.cards.recordEvent);
   const reportCard = useMutation(api.cards.report);
   const setSavedCard = useMutation(api.savedCards.setSaved);
@@ -380,6 +381,7 @@ export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) 
             setLayoutCards(null);
           }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
+          onSendTestEmail={async (to) => { await adminSendTestEmail({ to }); }}
         />
       ) : null}
     </>

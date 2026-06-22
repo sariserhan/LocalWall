@@ -76,7 +76,7 @@ export interface OwnerCard extends WallCard {
   shares?: number;
 }
 
-export type RenewalAmount = 0 | 1 | 3 | 10 | 20;
+export type RenewalAmount = 0 | 2.99 | 7.99 | 24.99;
 
 export type CardUpdate = Pick<OwnerCard, "name" | "category" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "theme">;
 
@@ -101,7 +101,7 @@ export interface CardDraft {
   linkedin?: string;
   theme: CardTheme;
   imageMode: CardImageMode;
-  paymentOption: "free" | "1" | "3" | "10" | "20";
+  paymentOption: "free" | "2.99" | "7.99" | "24.99";
   files: File[];
   previews: string[];
 }

@@ -30,18 +30,17 @@ async function requireActiveUser(ctx: QueryCtx | MutationCtx) {
 }
 
 const packageDurations: Record<number, number> = {
-  0: 24 * 60 * 60 * 1000,
-  1: 7 * 24 * 60 * 60 * 1000,
-  3: 30 * 24 * 60 * 60 * 1000,
-  10: 150 * 24 * 60 * 60 * 1000,
-  20: 365 * 24 * 60 * 60 * 1000,
+  0: 1 * 24 * 60 * 60 * 1000,
+  2.99: 30 * 24 * 60 * 60 * 1000,
+  7.99: 90 * 24 * 60 * 60 * 1000,
+  24.99: 365 * 24 * 60 * 60 * 1000,
 };
 
 function getExpiryDuration(paidAmount: number): number {
   return packageDurations[paidAmount] ?? packageDurations[0];
 }
 
-const paymentAmount = v.union(v.literal(0), v.literal(1), v.literal(3), v.literal(10), v.literal(20));
+const paymentAmount = v.union(v.literal(0), v.literal(2.99), v.literal(7.99), v.literal(24.99));
 
 const blockedTextContent = /\b(nude|nudity|porn|pornography|xxx|onlyfans|explicit\s+sex|sexual\s+services|escort\s+services|white\s+power|racial\s+purity|race\s+war|kill\s+(?:all\s+)?(?:black|white|asian|jewish|muslim|gay)\s+people|f+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:ing|ed|er|s)?|sh[i1*]+t+(?:ty|s)?|bullsh[i1*]t|b[i1*]tch(?:es)?|a+s+s+h+o+l+e+s?|bastards?|cunts?|motherf+[\W_]*[u*]+[\W_]*c+[\W_]*k+(?:er|ing|ed|s)?|sluts?|whores?|damn|crap)\b/i;
 const socialProfilePattern = /^@?[A-Za-z0-9._-]{2,100}$|^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/;
@@ -468,7 +467,7 @@ export const create = mutation({
     if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && (profile.length > 240 || !socialProfilePattern.test(profile.trim())))) throw new Error("Enter valid social usernames or profile URLs.");
     if (args.price && args.price.length > 50) throw new Error("Price must be 50 characters or fewer.");
     if (args.x < 0 || args.x > 88 || args.y < 0 || args.y > 1500) throw new Error("That position is outside the wall.");
-    if (![0, 1, 3, 10, 20].includes(args.paidAmount)) throw new Error("Invalid payment option.");
+    if (![0, 2.99, 7.99, 24.99].includes(args.paidAmount)) throw new Error("Invalid payment option.");
 
     let user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) {
@@ -600,6 +599,25 @@ export const create = mutation({
       paidAmount: args.paidAmount,
       expiresAt,
       clicks: 0,
+    };
+  },
+});
+
+export const getMyCardForRenewal = query({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) return null;
+    const card = await ctx.db.get(args.cardId);
+    if (!card || card.ownerId !== user._id) return null;
+    return {
+      id: card._id,
+      name: card.name,
+      status: card.status,
+      expiresAt: card.expiresAt,
+      paidAmount: card.paidAmount,
     };
   },
 });

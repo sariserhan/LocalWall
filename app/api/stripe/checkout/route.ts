@@ -6,7 +6,7 @@ import { isSameOriginRequest, rateLimit } from "../../_rate-limit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
-const paidAmounts = new Set([1, 3, 10, 20]);
+const paidAmounts = new Set([2.99, 7.99, 24.99]);
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status });
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
               name: `Renew ${String(renewalPayload.cardName || "wall card").slice(0, 80)}`,
               description: "Extend this card's time on the wall",
             },
-            unit_amount: paidAmount * 100,
+            unit_amount: Math.round(paidAmount * 100),
           },
           quantity: 1,
         }],
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
           name: `Post ${String(body?.cardName || "wall card").slice(0, 80)}`,
             description: "Publish this card on the local wall",
           },
-          unit_amount: paidAmount * 100,
+          unit_amount: Math.round(paidAmount * 100),
         },
         quantity: 1,
       }],

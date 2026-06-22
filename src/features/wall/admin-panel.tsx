@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, Eye, EyeOff, Flag, Mail, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
+import { AlertTriangle, Check, Eye, EyeOff, Flag, Mail, Search, Send, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -41,18 +41,21 @@ interface AdminPanelProps {
   onBlockUser: (userId: Id<"users">) => Promise<void>;
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onResolveReport: (reportId: Id<"reports">) => Promise<void>;
+  onSendTestEmail: (to: string) => Promise<void>;
 }
 
 function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onResolveReport }: AdminPanelProps) {
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onResolveReport, onSendTestEmail }: AdminPanelProps) {
   const [tab, setTab] = useState<"cards" | "users" | "reports">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [testEmailTo, setTestEmailTo] = useState("");
+  const [testEmailStatus, setTestEmailStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
@@ -110,6 +113,35 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
           <div><Eye /><span>Recent cards</span><strong>{data?.stats.cards ?? "—"}</strong></div>
           <div><UserRound /><span>Recent users</span><strong>{data?.stats.users ?? "—"}</strong></div>
           <div><Flag /><span>Open reports</span><strong>{data?.stats.reports ?? "—"}</strong></div>
+        </div>
+
+        <div className="admin-tools">
+          <label htmlFor="admin-test-email-input"><Mail size={13} />Test reminder email</label>
+          <input
+            id="admin-test-email-input"
+            type="email"
+            placeholder="recipient@example.com"
+            value={testEmailTo}
+            onChange={(e) => { setTestEmailTo(e.target.value); setTestEmailStatus("idle"); }}
+          />
+          <button
+            className="secondary"
+            disabled={testEmailStatus === "sending" || !testEmailTo.includes("@")}
+            onClick={async () => {
+              setTestEmailStatus("sending");
+              setError(null);
+              try {
+                await onSendTestEmail(testEmailTo);
+                setTestEmailStatus("sent");
+              } catch (cause) {
+                setError(cause instanceof Error ? cause.message : "Test email failed.");
+                setTestEmailStatus("error");
+              }
+            }}
+          >
+            {testEmailStatus === "sending" ? "Sending…" : testEmailStatus === "sent" ? <><Check size={13} /> Sent</> : <><Send size={13} /> Send test</>}
+          </button>
+          {testEmailStatus === "sent" ? <span className="admin-tools-ok">Email sent</span> : null}
         </div>
 
         <div className="admin-controls">

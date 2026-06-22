@@ -32,7 +32,7 @@ interface ComposerForm {
   linkedin: string;
   theme: CardTheme;
   imageMode: CardImageMode;
-  paymentOption: "free" | "1" | "3" | "10" | "20";
+  paymentOption: "free" | "2.99" | "7.99" | "24.99";
 }
 
 const countries = Country.getAllCountries();
@@ -81,10 +81,9 @@ const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description
 
 const paymentOptions: ReadonlyArray<{ value: ComposerForm["paymentOption"]; price: string; duration: string; description: string; featured?: boolean }> = [
   { value: "free", price: "Free", duration: "1 day", description: "Try the wall with no commitment." },
-  { value: "1", price: "$1", duration: "1 week", description: "Great for a quick local offer." },
-  { value: "3", price: "$3", duration: "1 month", description: "Best for regular neighborhood services.", featured: true },
-  { value: "10", price: "$10", duration: "5 months", description: "Stay visible through the season." },
-  { value: "20", price: "$20", duration: "1 year", description: "A full year on your local wall." },
+  { value: "2.99", price: "$2.99", duration: "30 days", description: "Great for a quick local offer." },
+  { value: "7.99", price: "$7.99", duration: "90 days", description: "Best for regular neighborhood services.", featured: true },
+  { value: "24.99", price: "$24.99", duration: "365 days", description: "A full year on your local wall." },
 ];
 
 const stepLabels = ["Design", "Details", "Duration"] as const;

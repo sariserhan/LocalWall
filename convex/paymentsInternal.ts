@@ -3,10 +3,9 @@ import type { Id } from "./_generated/dataModel";
 import { internalMutation } from "./_generated/server";
 
 const packageDurations: Record<number, number> = {
-  1: 7 * 24 * 60 * 60 * 1000,
-  3: 30 * 24 * 60 * 60 * 1000,
-  10: 150 * 24 * 60 * 60 * 1000,
-  20: 365 * 24 * 60 * 60 * 1000,
+  2.99: 30 * 24 * 60 * 60 * 1000,
+  7.99: 90 * 24 * 60 * 60 * 1000,
+  24.99: 365 * 24 * 60 * 60 * 1000,
 };
 
 export const completePaidCard = internalMutation({

@@ -19,12 +19,11 @@ interface OwnerDashboardProps {
   onRenew: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
 }
 
-const renewalOptions: ReadonlyArray<{ amount: RenewalAmount; price: string; duration: string }> = [
-  { amount: 0, price: "Free", duration: "1 day" },
-  { amount: 1, price: "$1", duration: "1 week" },
-  { amount: 3, price: "$3", duration: "1 month" },
-  { amount: 10, price: "$10", duration: "5 months" },
-  { amount: 20, price: "$20", duration: "1 year" },
+const renewalOptions: ReadonlyArray<{ amount: RenewalAmount; name: string; price: string; duration: string }> = [
+  { amount: 0,     name: "Free",     price: "Free",   duration: "1 day"    },
+  { amount: 2.99,  name: "Basic",    price: "$2.99",  duration: "30 days"  },
+  { amount: 7.99,  name: "Featured", price: "$7.99",  duration: "90 days"  },
+  { amount: 24.99, name: "Business", price: "$24.99", duration: "365 days" },
 ];
 
 function expiryLabel(expiresAt: number) {
@@ -41,7 +40,7 @@ export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, 
   const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OwnerCard | null>(null);
   const [renewTarget, setRenewTarget] = useState<OwnerCard | null>(null);
-  const [renewalAmount, setRenewalAmount] = useState<RenewalAmount>(3);
+  const [renewalAmount, setRenewalAmount] = useState<RenewalAmount>(7.99);
   const stats = useMemo(() => ({
     totalViews: cards.reduce((sum, card) => sum + card.clicks, 0),
     live: cards.filter((card) => card.status === "published").length,
@@ -157,7 +156,7 @@ export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, 
                   <div className="dashboard-card-actions">
                     <button className="secondary" onClick={() => onView(card)}>View</button>
                     <button className="secondary" disabled={busy} onClick={() => setEditingCard(card)}><Pencil /> Edit</button>
-                    <button className="secondary" disabled={busy} onClick={() => { setRenewTarget(card); setRenewalAmount(3); }}><RefreshCw /> Renew</button>
+                    <button className="secondary" disabled={busy} onClick={() => { setRenewTarget(card); setRenewalAmount(7.99); }}><RefreshCw /> Renew</button>
                     <button className="secondary" disabled={expired || busy} onClick={() => changeVisibility(card)}>
                       {card.status === "published" ? <><EyeOff /> Hide</> : <><Eye /> {expired ? "Expired" : "Publish"}</>}
                     </button>
