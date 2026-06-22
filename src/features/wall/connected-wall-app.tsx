@@ -49,16 +49,29 @@ async function createImageVariants(file: File): Promise<ImageVariants> {
   }
 }
 
-export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) {
+export function ConnectedWallApp({
+  initialCardId,
+  initialLocation,
+  initialKeyword,
+  initialCategory,
+}: {
+  initialCardId?: string;
+  initialLocation?: { country: string; state: string; city: string };
+  initialKeyword?: string;
+  initialCategory?: string;
+}) {
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
   const hasAppliedInitialServerSnapshotRef = useRef(false);
+  const queryCountry = initialLocation?.country || searchParams.get("country") || undefined;
+  const queryState = initialLocation?.state || searchParams.get("state") || undefined;
+  const queryCity = initialLocation?.city || searchParams.get("city") || undefined;
   const publishedCards = useQuery(api.cards.listPublished, {
-    country: searchParams.get("country") || undefined,
-    state: searchParams.get("state") || undefined,
-    city: searchParams.get("city") || undefined,
+    country: queryCountry,
+    state: queryState,
+    city: queryCity,
   }) as WallCard[] | undefined;
   const directCard = useQuery(api.cards.getPublishedById, initialCardId ? { cardId: initialCardId as Id<"cards"> } : "skip") as WallCard | null | undefined;
   const renderCards = useMemo(() => {
@@ -232,6 +245,7 @@ export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) 
     const cardPayload = {
       name: draft.name,
       category: draft.category,
+      subcategory: draft.subcategory,
       line: draft.line,
       message: draft.message,
       area: draft.area,
@@ -333,6 +347,9 @@ export function ConnectedWallApp({ initialCardId }: { initialCardId?: string }) 
       ownerCards={isAuthenticated ? (ownerCards ?? []) : undefined}
       savedCards={isAuthenticated ? (savedCards ?? []) : []}
       initialCardId={initialCardId}
+      initialLocation={initialLocation}
+      initialKeyword={initialKeyword}
+      initialCategory={initialCategory}
       onSetSavedCard={async (card, saved) => {
         await setSavedCard({ cardId: card.id as Id<"cards">, saved });
       }}

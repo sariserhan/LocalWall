@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, Sparkles, X } from "lucide-react";
 import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import { Country, State, City } from "country-state-city";
-import { categories, getCardFormat, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
+import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 
 interface ComposerProps {
   onClose: () => void;
@@ -14,6 +14,7 @@ interface ComposerProps {
 interface ComposerForm {
   name: string;
   category: CardCategory;
+  subcategory: string;
   line: string;
   message: string;
   area: string;
@@ -46,6 +47,7 @@ const defaultCity = defaultCities[0]?.name ?? "";
 const initialForm: ComposerForm = {
   name: "",
   category: "Services",
+  subcategory: "",
   line: "",
   message: "",
   area: "",
@@ -119,7 +121,7 @@ function LiveCardPreview({ form, image }: { form: ComposerForm; image?: string }
   return (
     <article className={`wall-card composer-live-card theme-${displayTheme} ${form.imageMode === "business-card" && image ? "image-business-card" : ""}`} style={style} aria-label="Live card preview">
       <span className="card-tape" aria-hidden="true" />
-      <div className="card-copy"><p className="card-category">{form.category}</p><h2>{form.name || "Your business"}</h2><p className="card-line">{form.line || "Your offer goes here."}</p>{form.message.trim() ? <p className="composer-preview-message">{form.message}</p> : null}</div>
+      <div className="card-copy"><p className="card-category">{form.category}{form.subcategory ? <> · {form.subcategory}</> : null}</p><h2>{form.name || "Your business"}</h2><p className="card-line">{form.line || "Your offer goes here."}</p>{form.message.trim() ? <p className="composer-preview-message">{form.message}</p> : null}</div>
       {image ? <img src={image} alt="" draggable={false} /> : null}
       <footer><span>{location}</span>{form.price ? <strong>{form.price}</strong> : null}</footer>
     </article>
@@ -328,6 +330,7 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
     }
     onReady({
       ...form,
+      subcategory: form.subcategory,
       area: form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall",
       message: form.message.trim() || undefined,
       neighborhood: form.neighborhood.trim() || undefined,
@@ -390,7 +393,8 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
             {Object.keys(fieldErrors).length ? <div className="validation-summary" role="alert"><strong>Fix these details to continue</strong>{(Object.keys(fieldErrors) as DetailField[]).map((field) => <button type="button" key={field} onClick={() => (formRef.current?.elements.namedItem(field) as HTMLElement | null)?.focus()}><span>{detailFieldLabels[field]}</span>{fieldErrors[field]}</button>)}</div> : null}
             <label>Business or service<input name="name" required maxLength={60} autoFocus value={form.name} onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))} placeholder="What should the wall call you?" />{fieldError("name")}</label>
             <div className="form-grid">
-              <label>Category<select value={form.category} onChange={(event) => setForm((value) => ({ ...value, category: event.target.value as CardCategory }))}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>
+              <label>Category<select value={form.category} onChange={(event) => setForm((value) => ({ ...value, category: event.target.value as CardCategory, subcategory: "" }))}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>
+              <label>Subcategory<select required value={form.subcategory} onChange={(event) => setForm((value) => ({ ...value, subcategory: event.target.value }))}><option value="" disabled>— Select a type —</option>{SUBCATEGORY_OPTIONS[form.category].map((sub) => <option key={sub} value={sub}>{sub}</option>)}</select></label>
               <label>Posting on selected wall<input value={`${form.city}${form.state ? `, ${form.state}` : ""}${form.country ? `, ${form.country}` : ""}`} readOnly aria-readonly /></label>
             </div>
             <div className="form-grid">

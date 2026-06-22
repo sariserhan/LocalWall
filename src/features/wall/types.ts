@@ -1,4 +1,49 @@
-export const categories = ["All", "Services", "Food", "Home", "Classes", "Pets", "Repairs", "Shops"] as const;
+export const categories = [
+  "All",
+  "Services",
+  "Repairs",
+  "Home & Garden",
+  "Food & Catering",
+  "Pets",
+  "Classes & Education",
+  "Shops & Retail",
+  "Automotive",
+  "Health & Fitness",
+  "Beauty & Personal Care",
+  "Professional Services",
+  "Technology",
+  "Events & Entertainment",
+  "Real Estate",
+  "Child & Family",
+  "Community",
+  "Jobs",
+  "Dating",
+  "Buy & Sell Marketplace",
+  "Vehicles",
+] as const;
+
+export const SUBCATEGORY_OPTIONS: Record<Exclude<(typeof categories)[number], "All">, string[]> = {
+  "Services": ["Cleaning", "Moving", "Security", "Consulting", "Translation", "Notary", "Virtual Assistant", "Delivery", "Printing", "Marketing"],
+  "Repairs": ["Appliances", "Plumbing", "Electrical", "HVAC", "Roofing", "Handyman", "Painting", "Flooring", "Drywall", "Locksmith"],
+  "Home & Garden": ["Landscaping", "Lawn Care", "Pest Control", "Pool Services", "Interior Design", "Tree Service", "Gardening", "Pressure Washing", "Fencing", "Decks & Patios"],
+  "Food & Catering": ["Restaurants", "Catering", "Food Trucks", "Bakery", "Meal Prep", "Coffee Shops", "Desserts", "Private Chef", "Grocery Delivery", "Specialty Foods"],
+  "Pets": ["Grooming", "Boarding", "Training", "Pet Sitting", "Veterinary", "Dog Walking", "Pet Supplies", "Pet Adoption", "Lost & Found Pets", "Breeders"],
+  "Classes & Education": ["Tutoring", "Music Lessons", "Language Lessons", "Fitness Training", "Driving Lessons", "Computer Training", "Art Classes", "Dance Classes", "Test Preparation", "Online Courses"],
+  "Shops & Retail": ["Clothing", "Electronics", "Furniture", "Gifts", "Jewelry", "Books", "Toys", "Sporting Goods", "Beauty Products", "Home Decor"],
+  "Automotive": ["Auto Repair", "Mobile Mechanic", "Car Detailing", "Tires", "Towing", "Oil Change", "Auto Body", "Car Audio", "Window Tinting", "Vehicle Sales"],
+  "Health & Fitness": ["Personal Training", "Gym", "Yoga", "Massage", "Nutrition", "Physical Therapy", "Martial Arts", "CrossFit", "Wellness Coaching", "Weight Loss"],
+  "Beauty & Personal Care": ["Barber", "Hair Salon", "Nail Salon", "Makeup", "Skincare", "Eyelash Extensions", "Tattoo", "Spa", "Waxing", "Cosmetic Services"],
+  "Professional Services": ["Accounting", "Tax Preparation", "Legal Services", "Insurance", "Real Estate", "Mortgage", "Financial Planning", "Business Consulting", "HR Services", "Bookkeeping"],
+  "Technology": ["Computer Repair", "Phone Repair", "Web Design", "App Development", "IT Support", "Networking", "Cybersecurity", "Software Training", "AI Services", "Data Recovery"],
+  "Events & Entertainment": ["DJ", "Photographer", "Videographer", "Party Rentals", "Event Planning", "Live Music", "Catering", "Wedding Services", "Photo Booth", "Decorations"],
+  "Real Estate": ["Homes for Sale", "Rentals", "Commercial Property", "Roommates", "Vacation Rentals", "Property Management", "Real Estate Agents", "Land for Sale", "New Construction", "Open Houses"],
+  "Child & Family": ["Daycare", "Babysitting", "Elder Care", "Family Counseling", "Child Activities", "Special Needs Care", "Summer Camps", "After School Programs", "Parenting Services", "Senior Services"],
+  "Community": ["Events", "Yard Sales", "Lost & Found", "Volunteer Opportunities", "Announcements", "Local Groups", "Charity", "Church Activities", "Neighborhood Watch", "Community Projects"],
+  "Jobs": ["Full-Time", "Part-Time", "Contract", "Remote", "Healthcare", "Technology", "Retail", "Hospitality", "Construction", "Transportation"],
+  "Dating": ["Men Seeking Women", "Women Seeking Men", "Men Seeking Men", "Women Seeking Women", "Friendship", "Activity Partners", "Travel Partners", "Networking", "Events", "Groups"],
+  "Buy & Sell Marketplace": ["Furniture", "Electronics", "Appliances", "Clothing", "Tools", "Home Decor", "Collectibles", "Sporting Goods", "Musical Instruments", "Miscellaneous"],
+  "Vehicles": ["Cars", "Trucks", "SUVs", "Motorcycles", "RVs", "Boats", "Commercial Vehicles", "Parts & Accessories", "Auto Services", "Vehicle Rentals"],
+};
 export const cardThemes = ["yellow", "paper", "pink", "cyan", "dark", "cream", "biz", "kraft", "blueprint", "photo", "ticket"] as const;
 
 export type CardCategory = Exclude<(typeof categories)[number], "All">;
@@ -29,6 +74,7 @@ export interface WallCard {
   id: string | Id<"cards">;
   name: string;
   category: CardCategory;
+  subcategory?: string;
   line: string;
   message?: string;
   area: string;
@@ -80,11 +126,12 @@ export interface OwnerCard extends WallCard {
 
 export type RenewalAmount = 0 | 2.99 | 7.99 | 24.99;
 
-export type CardUpdate = Pick<OwnerCard, "name" | "category" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "theme">;
+export type CardUpdate = Pick<OwnerCard, "name" | "category" | "subcategory" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "theme">;
 
 export interface CardDraft {
   name: string;
   category: CardCategory;
+  subcategory?: string;
   line: string;
   message?: string;
   area: string;

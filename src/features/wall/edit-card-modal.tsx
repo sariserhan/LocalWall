@@ -2,7 +2,7 @@
 
 import { Save, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { cardThemes, categories, type CardTheme, type CardUpdate, type OwnerCard } from "./types";
+import { cardThemes, categories, SUBCATEGORY_OPTIONS, type CardTheme, type CardUpdate, type OwnerCard } from "./types";
 
 const themeLabels: Record<CardTheme, string> = {
   yellow: "Sticky note", paper: "Flyer", pink: "Neon flyer", cyan: "Color card", dark: "Night card", cream: "Cream paper", biz: "Business card", kraft: "Kraft note", blueprint: "Blueprint", photo: "Photo print", ticket: "Ticket",
@@ -12,6 +12,7 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
   const [form, setForm] = useState<CardUpdate>(() => ({
     name: card.name,
     category: card.category,
+    subcategory: card.subcategory,
     line: card.line,
     message: card.message,
     area: card.area,
@@ -66,7 +67,8 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
           {error ? <div className="dashboard-error" role="alert">{error}</div> : null}
           <div className="form-grid">
             <label>Business or service<input required minLength={2} maxLength={60} value={form.name} onChange={(event) => setField("name", event.target.value)} /></label>
-            <label>Category<select value={form.category} onChange={(event) => setField("category", event.target.value as CardUpdate["category"])}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>
+            <label>Category<select value={form.category} onChange={(event) => { setField("category", event.target.value as CardUpdate["category"]); setField("subcategory", undefined); }}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>
+            <label>Subcategory<select required value={form.subcategory ?? ""} onChange={(event) => setField("subcategory", event.target.value || undefined)}><option value="" disabled>— Select a type —</option>{SUBCATEGORY_OPTIONS[form.category].map((sub) => <option key={sub} value={sub}>{sub}</option>)}</select></label>
           </div>
           <label>Subtitle<textarea required minLength={5} maxLength={90} value={form.line} onChange={(event) => setField("line", event.target.value)} /></label>
           <label>Message <span>(optional)</span><textarea maxLength={300} value={form.message ?? ""} onChange={(event) => setField("message", event.target.value || undefined)} /></label>

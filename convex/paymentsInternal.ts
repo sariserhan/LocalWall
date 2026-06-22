@@ -38,6 +38,7 @@ export const completePaidCard = internalMutation({
       ownerId: pending.ownerId,
       name: payload.name,
       category: payload.category,
+      subcategory: payload.subcategory,
       line: payload.line,
       message: payload.message,
       area: payload.area,

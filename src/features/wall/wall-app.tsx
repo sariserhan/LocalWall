@@ -26,6 +26,7 @@ import { OwnerDashboard } from "./owner-dashboard";
 import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
 import { categories, getCardFormat, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
+import { parseSmartQuery, toCategorySlug, toLocationSlug } from "@/lib/wall-slug";
 
 interface WallAppProps {
   mode: "demo" | "connected";
@@ -52,6 +53,9 @@ interface WallAppProps {
   onCardEvent?: (card: WallCardModel, event: "website" | "phone" | "email" | "social" | "save" | "share") => void;
   onReportCard?: (card: WallCardModel, reason: "spam" | "scam" | "inappropriate" | "expired" | "other", details?: string) => Promise<void>;
   initialCardId?: string;
+  initialLocation?: { country: string; state: string; city: string };
+  initialKeyword?: string;
+  initialCategory?: string;
   savedCards?: WallCardModel[];
   onSetSavedCard?: (card: WallCardModel, saved: boolean) => Promise<void>;
   profile?: { displayName: string | null; username: string | null; businessName: string | null } | null;
@@ -103,14 +107,19 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, savedCards = [], onSetSavedCard, profile, onUpdateProfile }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, profile, onUpdateProfile }: WallAppProps) {
   const [demoCards, setDemoCards] = useState<WallCardModel[]>(seedCards);
   const cards = mode === "connected" ? (remoteCards ?? []) : demoCards;
   const [selected, setSelected] = useState<WallCardModel | null>(null);
   const [composer, setComposer] = useState(false);
   const [dashboard, setDashboard] = useState(false);
-  const [category, setCategory] = useState<(typeof categories)[number]>("All");
-  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<(typeof categories)[number]>(
+    initialCategory && (categories as readonly string[]).includes(initialCategory)
+      ? initialCategory as (typeof categories)[number]
+      : "All",
+  );
+  const [query, setQuery] = useState(initialKeyword ?? "");
+  const initialLocationRef = useRef(initialLocation);
   const deferredQuery = useDeferredValue(query);
   const [fresh, setFresh] = useState(false);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
@@ -438,6 +447,15 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       return;
     }
 
+    if (initialLocationRef.current) {
+      const loc = initialLocationRef.current;
+      setSelectedCountry(loc.country);
+      setSelectedState(loc.state);
+      setSelectedCity(loc.city);
+      setLocationReady(true);
+      return;
+    }
+
     const loaded = loadLocalLocation();
     if (loaded) {
       updateLocationQuery(loaded.country, loaded.state, loaded.city);
@@ -543,7 +561,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       if (selectedCountry && card.country !== selectedCountry) return false;
       if (selectedState && card.state !== selectedState) return false;
       if (selectedCity && card.city !== selectedCity) return false;
-      const text = `${card.name}`.toLowerCase();
+      const text = `${card.name} ${card.line ?? ""} ${card.category} ${card.area}`.toLowerCase();
       return text.includes(needle);
     });
     return fresh ? result.toReversed() : result;
@@ -770,7 +788,15 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         </button>
         {/* Map picker temporarily hidden */}
         <nav className={mobileMenu ? "open" : ""}>
-          <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by card" aria-label="Search advertisements" /></div>
+          <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => {
+              if (event.key !== "Enter" || !query.trim()) return;
+              const parsed = parseSmartQuery(query, (state) => City.getCitiesOfState("US", state).map((c) => c.name));
+              if (parsed.city && parsed.state) {
+                const locSlug = toLocationSlug(parsed.city, parsed.state);
+                const kwSlug = toCategorySlug(parsed.keyword);
+                router.push(kwSlug ? `/wall/${locSlug}/${kwSlug}` : `/wall/${locSlug}`);
+              }
+            }} placeholder="Search ads by name, location or category" aria-label="Search advertisements" /></div>
           <label className="filter-select">Browse<select value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number])}>{categories.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown /></label>
           {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenu(false); }}><LayoutDashboard /> My cards</button> : null}
           {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenu(false); }}><ShieldCheck /> Admin</button> : null}

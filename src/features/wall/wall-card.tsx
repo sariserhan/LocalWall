@@ -105,7 +105,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
     >
       <span className="card-tape" aria-hidden="true" />
       <div className="card-copy">
-        <p className="card-category">{card.category}</p>
+        <p className="card-category">{card.category}{card.subcategory ? <> · {card.subcategory}</> : null}</p>
         <h2>{card.name}</h2>
         <p className="card-line">{card.line}</p>
       </div>

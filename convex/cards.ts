@@ -3,7 +3,28 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 
-const category = v.union(v.literal("Services"), v.literal("Food"), v.literal("Home"), v.literal("Classes"), v.literal("Pets"), v.literal("Repairs"), v.literal("Shops"));
+const category = v.union(
+  v.literal("Services"),
+  v.literal("Repairs"),
+  v.literal("Home & Garden"),
+  v.literal("Food & Catering"),
+  v.literal("Pets"),
+  v.literal("Classes & Education"),
+  v.literal("Shops & Retail"),
+  v.literal("Automotive"),
+  v.literal("Health & Fitness"),
+  v.literal("Beauty & Personal Care"),
+  v.literal("Professional Services"),
+  v.literal("Technology"),
+  v.literal("Events & Entertainment"),
+  v.literal("Real Estate"),
+  v.literal("Child & Family"),
+  v.literal("Community"),
+  v.literal("Jobs"),
+  v.literal("Dating"),
+  v.literal("Buy & Sell Marketplace"),
+  v.literal("Vehicles"),
+);
 const theme = v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream"), v.literal("biz"), v.literal("kraft"), v.literal("blueprint"), v.literal("photo"), v.literal("ticket"));
 const imageMode = v.union(v.literal("photo"), v.literal("business-card"));
 const MAX_CARD_Y = 1500;
@@ -101,6 +122,7 @@ export const listPublished = query({
         ownerId: card.ownerId,
         name: card.name,
         category: card.category,
+        subcategory: card.subcategory,
         line: card.line,
         message: card.message,
         area: card.area,
@@ -154,6 +176,7 @@ export const getPublishedById = query({
       ownerId: card.ownerId,
       name: card.name,
       category: card.category,
+      subcategory: card.subcategory,
       line: card.line,
       message: card.message,
       area: card.area,
@@ -233,6 +256,7 @@ export const listMine = query({
         ownerId: card.ownerId,
         name: card.name,
         category: card.category,
+        subcategory: card.subcategory,
         line: card.line,
         message: card.message,
         area: card.area,
@@ -347,6 +371,7 @@ export const update = mutation({
     cardId: v.id("cards"),
     name: v.string(),
     category,
+    subcategory: v.optional(v.string()),
     line: v.string(),
     message: v.optional(v.string()),
     area: v.string(),
@@ -389,6 +414,7 @@ export const update = mutation({
     await ctx.db.patch(card._id, {
       name,
       category: args.category,
+      subcategory: args.subcategory?.trim() || undefined,
       line,
       message: args.message?.trim() || undefined,
       area: args.area.trim(),
@@ -449,6 +475,7 @@ export const create = mutation({
   args: {
     name: v.string(),
     category,
+    subcategory: v.optional(v.string()),
     line: v.string(),
     message: v.optional(v.string()),
     area: v.string(),
@@ -561,6 +588,7 @@ export const create = mutation({
       ownerId: user._id,
       name: args.name.trim(),
       category: args.category,
+      subcategory: args.subcategory?.trim() || undefined,
       line: args.line.trim(),
       message: args.message?.trim() || undefined,
       area: args.area.trim(),
@@ -606,6 +634,7 @@ export const create = mutation({
       ownerId: user._id,
       name: args.name.trim(),
       category: args.category,
+      subcategory: args.subcategory?.trim() || undefined,
       line: args.line.trim(),
       message: args.message?.trim() || undefined,
       area: args.area.trim(),
