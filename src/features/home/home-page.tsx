@@ -223,14 +223,9 @@ export async function HomePage() {
             <div className="home-container">
               <h2 className="home-section-title">Recently posted</h2>
               <div className="home-recent-grid">
-                {recentCards.slice(0, 9).map((card) => (
+                {recentCards.slice(0, 4).map((card) => (
                   <RecentCard key={String(card.id)} card={card} />
                 ))}
-              </div>
-              <div className="home-recent-cta">
-                <Link href="/us" className="primary home-browse-btn">
-                  Browse all ads
-                </Link>
               </div>
             </div>
           </section>
@@ -321,7 +316,7 @@ export async function HomePage() {
           <div className="home-container home-footer-inner">
             <Link href="/" className="home-footer-brand">LocalWall</Link>
             <nav className="home-footer-links">
-              <Link href="/us">Browse ads</Link>
+              {/* <Link href="/us">Browse ads</Link> */}
               <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>
               <Link href="/privacy-policy">Privacy Policy</Link>
             </nav>

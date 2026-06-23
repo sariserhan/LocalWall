@@ -107,12 +107,12 @@ export const listPublished = query({
   handler: async (ctx, args) => {
     const now = Date.now();
     const cards = args.country && args.state && args.city
-      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!).eq("state", args.state!).eq("city", args.city!)).order("desc").take(100)
+      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!).eq("state", args.state!).eq("city", args.city!)).order("desc").collect()
       : args.country && args.state
-      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!).eq("state", args.state!)).order("desc").take(200)
+      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!).eq("state", args.state!)).order("desc").collect()
       : args.country
-      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!)).order("desc").take(500)
-      : await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).order("desc").take(100);
+      ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!)).order("desc").collect()
+      : await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).order("desc").take(200);
 
     const visibleCards = cards.filter((card) => card.expiresAt > now);
 
