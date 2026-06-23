@@ -10,7 +10,6 @@ import {
   Link2,
   LocateFixed,
   MapPin,
-  Menu,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -146,7 +145,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [stackPickerCards, setStackPickerCards] = useState<WallCardModel[] | null>(null);
   const [layers, setLayers] = useState<string[]>(seedCards.map((card) => card.id));
   const [listView, setListView] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
   const [pendingCard, setPendingCard] = useState<CardDraft | null>(null);
   const [placement, setPlacement] = useState<Placement>({ x: 40, y: 170 });
   const [dragging, setDragging] = useState(false);
@@ -930,7 +928,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           <span>Locate</span>
         </button>
         {/* Map picker temporarily hidden */}
-        <nav className={mobileMenu ? "open" : ""}>
+        <nav>
           <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, business or creator" aria-label="Search advertisements" /></div>
           <div className="filter-wrap">
             {filterOpen && <div className="filter-backdrop" onClick={() => setFilterOpen(false)} />}
@@ -1038,13 +1036,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               <Bookmark />{savedWall ? "Wall saved" : "Save wall"}
             </button>
           ) : null}
-          {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenu(false); }}><LayoutDashboard /> My Board</button> : null}
-          {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenu(false); }}><ShieldCheck /> Admin</button> : null}
+          {ownerCards ? <button onClick={() => setDashboard(true)}><LayoutDashboard /> My Board</button> : null}
+          {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => onOpenAdmin()}><ShieldCheck /> Admin</button> : null}
           <button className="mobile-nav-post" onClick={openComposer}><Plus />Post your card</button>
         </nav>
         {authControl ? <div className="auth-control">{authControl}</div> : null}
         <button className="primary post-button" onClick={openComposer}><Plus />Post your card</button>
-        <button className="icon-btn mobile-menu" onClick={() => setMobileMenu((value) => !value)} aria-label={mobileMenu ? "Close menu" : "Open menu"} aria-expanded={mobileMenu}><Menu /></button>
       </header>
       {MAP_ENABLED && mapPickerOpen ? (
         <div className="map-picker-backdrop" onClick={() => setMapPickerOpen(false)}>
