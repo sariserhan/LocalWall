@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Country, State } from "country-state-city";
-import { parseCountrySlug, parseStateSlug, parseCategorySlug } from "@/lib/wall-slug";
+import { parseCountrySlug, parseStateSlug, parseCategorySlug } from "@/lib/wall-slug-server";
 import { fetchInitialCards } from "@/lib/server-cards";
 import { WallPageShell } from "@/features/wall/wall-page-shell";
 

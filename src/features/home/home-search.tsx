@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { City, State } from "country-state-city";
 import { Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
@@ -18,83 +17,42 @@ type DetectedLoc = {
   precise?: boolean;
 };
 
-function normalizeKey(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]/g, "");
-}
+type ResolvedLoc = { country: string; state: string; city: string };
 
-async function resolveIpLocation(): Promise<{ country: string; state: string; city: string } | null> {
-  try {
-    const cached = window.sessionStorage.getItem("wall-ip-location-v1");
-    const entry = cached
-      ? (JSON.parse(cached) as { expiresAt: number; data: Record<string, unknown> })
-      : null;
-    const data =
-      entry && entry.expiresAt > Date.now()
-        ? entry.data
-        : ((await fetch("https://ipapi.co/json/").then((r) => r.json())) as Record<string, unknown>);
-    if (!entry || entry.expiresAt <= Date.now()) {
-      window.sessionStorage.setItem(
-        "wall-ip-location-v1",
-        JSON.stringify({ expiresAt: Date.now() + 30 * 60 * 1000, data }),
-      );
-    }
-    const country = String(data.country_code ?? "US").toUpperCase();
-    const regionCode = String(data.region_code ?? "").trim();
-    const cityNameRaw = String(data.city ?? "").trim();
-    const states = State.getStatesOfCountry(country);
-    let stateCode = "";
-    if (regionCode) {
-      const found = states.find((s) => s.isoCode.toUpperCase() === regionCode.toUpperCase());
-      stateCode = found?.isoCode ?? "";
-    }
-    const cities = stateCode ? City.getCitiesOfState(country, stateCode) : [];
-    let cityName = "";
-    if (cityNameRaw && cities.length > 0) {
-      const norm = normalizeKey(cityNameRaw);
-      const found =
-        cities.find((c) => normalizeKey(c.name) === norm) ??
-        cities.find((c) => normalizeKey(c.name).includes(norm) || norm.includes(normalizeKey(c.name)));
-      cityName = found?.name ?? cities[0]?.name ?? "";
-    }
-    return { country, state: stateCode, city: cityName };
-  } catch {
-    return null;
-  }
-}
+const CACHE_KEY = "wall-ip-location-v2";
 
 function makeLabel(city: string, stateCode: string): string {
   return [city, stateCode].filter(Boolean).join(", ");
 }
 
-function resolveLocationQuery(query: string): { country: string; state: string; city: string } | null {
-  const parts = query.split(",").map((p) => p.trim());
-  const cityPart = parts[0];
-  const statePart = parts[1] ?? "";
-  const usStates = State.getStatesOfCountry("US");
-
-  if (statePart) {
-    const stateMatch =
-      usStates.find((s) => s.isoCode.toLowerCase() === statePart.toLowerCase()) ??
-      usStates.find((s) => normalizeKey(s.name) === normalizeKey(statePart));
-    if (stateMatch) {
-      const cities = City.getCitiesOfState("US", stateMatch.isoCode);
-      const cityMatch =
-        cities.find((c) => normalizeKey(c.name) === normalizeKey(cityPart)) ??
-        cities.find((c) => normalizeKey(c.name).includes(normalizeKey(cityPart)));
-      if (cityMatch) return { country: "US", state: stateMatch.isoCode, city: cityMatch.name };
+async function resolveIpLocation(): Promise<ResolvedLoc | null> {
+  try {
+    const cached = window.sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const entry = JSON.parse(cached) as { expiresAt: number; data: ResolvedLoc };
+      if (entry.expiresAt > Date.now()) return entry.data;
     }
-  }
 
-  for (const state of usStates) {
-    const cities = City.getCitiesOfState("US", state.isoCode);
-    const match = cities.find((c) => normalizeKey(c.name) === normalizeKey(cityPart));
-    if (match) return { country: "US", state: state.isoCode, city: match.name };
+    const ipData = (await fetch("https://ipapi.co/json/").then((r) => r.json())) as Record<string, unknown>;
+    const countryCode = String(ipData.country_code ?? "US").toUpperCase();
+    const regionCode = String(ipData.region_code ?? "").trim();
+    const cityNameRaw = String(ipData.city ?? "").trim();
+
+    const res = await fetch("/api/location/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ countryCode, regionCode, cityNameRaw }),
+    });
+    const resolved = (await res.json()) as ResolvedLoc;
+
+    window.sessionStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ expiresAt: Date.now() + 30 * 60 * 1000, data: resolved }),
+    );
+    return resolved;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 export function HomeSearch() {
@@ -145,9 +103,7 @@ export function HomeSearch() {
       setLocationError("Could not detect your location. Please type it in the search bar.");
       return;
     }
-    router.push(
-      buildWallPath(loc.country, loc.state, loc.city, category !== "All" ? category : undefined),
-    );
+    router.push(buildWallPath(loc.country, loc.state, loc.city, category !== "All" ? category : undefined));
   };
 
   const handlePreciseLocation = () => {
@@ -161,48 +117,11 @@ export function HomeSearch() {
       async (pos) => {
         try {
           const { latitude: lat, longitude: lon } = pos.coords;
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
-          );
-          const data = (await res.json()) as { address?: Record<string, string> };
-          const address = data.address ?? {};
-          const countryCode = String(address.country_code ?? "US").toUpperCase();
-          const states = State.getStatesOfCountry(countryCode);
-          const stateName = String(address.state ?? address.region ?? "");
-          const matchedState =
-            states.find((s) => normalizeKey(s.name) === normalizeKey(stateName)) ??
-            states.find(
-              (s) =>
-                stateName.toLowerCase().includes(s.name.toLowerCase()) ||
-                s.name.toLowerCase().includes(stateName.toLowerCase()),
-            );
-          const stateCode = matchedState?.isoCode ?? "";
-          const cityRaw = String(
-            address.city ?? address.town ?? address.village ?? address.county ?? "",
-          );
-          const cities = City.getCitiesOfState(countryCode, stateCode);
-          let finalCity = "";
-          if (cityRaw) {
-            const exact = cities.find((c) => normalizeKey(c.name) === normalizeKey(cityRaw));
-            if (exact) {
-              finalCity = exact.name;
-            } else {
-              let best = cities[0];
-              let minDist = Infinity;
-              for (const city of cities) {
-                if (city.latitude != null && city.longitude != null) {
-                  const d = Math.hypot(Number(city.latitude) - lat, Number(city.longitude) - lon);
-                  if (d < minDist) {
-                    minDist = d;
-                    best = city;
-                  }
-                }
-              }
-              finalCity = best?.name ?? "";
-            }
-          }
-          const label = makeLabel(finalCity, stateCode);
-          setDetectedLoc({ country: countryCode, state: stateCode, city: finalCity, label, precise: true });
+          const res = await fetch(`/api/location/from-coords?lat=${lat}&lon=${lon}`);
+          const data = (await res.json()) as ResolvedLoc | null;
+          if (!data) throw new Error("No location found");
+          const label = makeLabel(data.city, data.state);
+          setDetectedLoc({ ...data, label, precise: true });
           setLocationInput(label);
         } catch {
           setLocationError("Could not resolve your precise location.");
@@ -218,7 +137,7 @@ export function HomeSearch() {
     );
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const kw = keyword.trim();
     const locQuery = locationInput.trim();
@@ -231,12 +150,11 @@ export function HomeSearch() {
         state = detectedLoc.state;
         city = detectedLoc.city;
       } else {
-        const resolved = resolveLocationQuery(locQuery);
-        if (resolved) {
-          country = resolved.country;
-          state = resolved.state;
-          city = resolved.city;
-        }
+        try {
+          const res = await fetch(`/api/location/search?q=${encodeURIComponent(locQuery)}`);
+          const resolved = (await res.json()) as ResolvedLoc | null;
+          if (resolved) { country = resolved.country; state = resolved.state; city = resolved.city; }
+        } catch { /* fall through to default US */ }
       }
     }
 
@@ -269,7 +187,7 @@ export function HomeSearch() {
         </button>
       </div>
 
-      <form className="home-search-form" onSubmit={handleSearch}>
+      <form className="home-search-form" onSubmit={(e) => void handleSearch(e)}>
         <div className="home-search-field">
           <span className="home-search-label">Keyword</span>
           <input
@@ -290,9 +208,7 @@ export function HomeSearch() {
             aria-label="Category"
           >
             {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>

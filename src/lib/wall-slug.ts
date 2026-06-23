@@ -1,5 +1,3 @@
-import { Country, State, City } from "country-state-city";
-
 const US_STATE_CODES = new Set([
   "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA",
   "KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
@@ -37,23 +35,6 @@ export function buildWallPath(
   if (city) parts.push(toCitySlug(city));
   if (category && category !== "All") parts.push(toCategorySlug(category));
   return `/${parts.join("/")}`;
-}
-
-// ─── Path slug parsers ────────────────────────────────────────────────────────
-
-export function parseCountrySlug(slug: string): string | null {
-  const code = slug.toUpperCase();
-  return Country.getAllCountries().some((c) => c.isoCode === code) ? code : null;
-}
-
-export function parseStateSlug(country: string, slug: string): string | null {
-  const code = slug.toUpperCase();
-  return State.getStatesOfCountry(country).some((s) => s.isoCode === code) ? code : null;
-}
-
-export function parseCityFromSlug(country: string, state: string, slug: string): string | null {
-  const cities = City.getCitiesOfState(country, state);
-  return cities.find((c) => toCitySlug(c.name) === slug)?.name ?? null;
 }
 
 const CATEGORY_SLUGS: Record<string, string> = {

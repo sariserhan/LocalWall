@@ -23,6 +23,7 @@ import Link from "next/link";
 import { startTransition, useDeferredValue, useMemo, useRef, useState, useEffect, type PointerEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Country, State, City } from "country-state-city";
+import { LocationCombobox } from "./location-combobox";
 import { Composer } from "./composer";
 import { DetailPanel } from "./detail-panel";
 import { PlacementMode } from "./placement-mode";
@@ -168,6 +169,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [selectedState, setSelectedState] = useState(defaultSeedLocation.state);
   const [selectedCity, setSelectedCity] = useState(defaultSeedLocation.city);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(searchParams.get("neighborhood") ?? "");
+  // Draft state — only committed when the user clicks Apply
+  const [draftCountry, setDraftCountry] = useState(defaultSeedLocation.country);
+  const [draftState, setDraftState] = useState(defaultSeedLocation.state);
+  const [draftCity, setDraftCity] = useState(defaultSeedLocation.city);
+  const [draftNeighborhood, setDraftNeighborhood] = useState(searchParams.get("neighborhood") ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<(typeof categories)[number]>("All");
   const [pendingSubcategory, setPendingSubcategory] = useState("");
@@ -504,8 +510,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterOpen]);
 
-  const availableStates = State.getStatesOfCountry(selectedCountry);
-  const availableCities = selectedState ? City.getCitiesOfState(selectedCountry, selectedState) : [];
+  const availableStates = State.getStatesOfCountry(draftCountry);
+  const availableCities = draftState ? City.getCitiesOfState(draftCountry, draftState) : [];
   const hasStateOptions = availableStates.length > 0;
   const hasCityOptions = availableCities.length > 0;
 
@@ -514,11 +520,17 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     ? buildWallPath(selectedCountry, selectedState || undefined, selectedCity || undefined)
     : "/";
 
-  const applyLocation = (country: string, state: string, city: string) => {
+  const applyLocation = (country: string, state: string, city: string, neighborhood: string) => {
+    setSelectedCountry(country);
+    setSelectedState(state);
+    setSelectedCity(city);
+    setSelectedNeighborhood(neighborhood);
     setQuery("");
-    updateLocationQuery(country, state, city, selectedNeighborhood);
+    updateLocationQuery(country, state, city, neighborhood);
     persistLocation(country, state, city);
-    setLocationNotice(`Location applied. Showing ${locationLabel()} wall.`);
+    const stateName = state ? getStateName(country, state) : "";
+    const label = city ? `${city}${stateName ? `, ${stateName}` : ""}` : stateName || getCountryName(country);
+    setLocationNotice(`Location applied. Showing ${label} wall.`);
     window.setTimeout(() => setLocationNotice(null), 3200);
     setLocationDropdown(false);
   };
@@ -848,7 +860,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       <header className="topbar">
         <button className="brand" onClick={resetFilters}>LocalWall<span>your local bulletin board</span></button>
         <div className="location-wrap">
-          <button className="location" onClick={() => { if (locationReady) setLocationDropdown(!locationDropdown); }} aria-expanded={locationDropdown}>
+          <button className="location" onClick={() => { if (locationReady) { if (!locationDropdown) { setDraftCountry(selectedCountry); setDraftState(selectedState); setDraftCity(selectedCity); setDraftNeighborhood(selectedNeighborhood); } setLocationDropdown(!locationDropdown); } }} aria-expanded={locationDropdown}>
             <MapPin />
             <span className="location-inner">
               {locationReady ? <span aria-hidden>{countryFlagEmoji(selectedCountry)}</span> : null}
@@ -865,36 +877,41 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   <button className="icon-btn" onClick={() => setLocationDropdown(false)} aria-label="Close"><X /></button>
                 </div>
                 <div className="location-panel-body">
-                  <label className="filter-panel-label">Country<select value={selectedCountry} onChange={(event) => {
-                    setSelectedCountry(event.target.value);
-                    setSelectedState("");
-                    setSelectedCity("");
-                  }}>
-                    {Country.getAllCountries().map((country) => <option key={country.isoCode} value={country.isoCode}>{country.name}</option>)}
-                  </select></label>
+                  <label className="filter-panel-label">Country
+                    <LocationCombobox
+                      value={draftCountry}
+                      options={Country.getAllCountries().map((c) => ({ value: c.isoCode, label: c.name }))}
+                      onChange={(val) => { setDraftCountry(val); setDraftState(""); setDraftCity(""); }}
+                      placeholder="Type a country…"
+                    />
+                  </label>
                   {hasStateOptions ? (
-                    <label className="filter-panel-label">State<select value={selectedState} onChange={(event) => {
-                      setSelectedState(event.target.value);
-                      setSelectedCity("");
-                      setSelectedNeighborhood("");
-                    }}>
-                      <option value="">— All states —</option>
-                      {availableStates.map((state) => <option key={state.isoCode} value={state.isoCode}>{state.name}</option>)}
-                    </select></label>
+                    <label className="filter-panel-label">State
+                      <LocationCombobox
+                        value={draftState}
+                        options={[{ value: "", label: "— All states —" }, ...availableStates.map((s) => ({ value: s.isoCode, label: s.name }))]}
+                        onChange={(val) => { setDraftState(val); setDraftCity(""); setDraftNeighborhood(""); }}
+                        placeholder="Type a state…"
+                      />
+                    </label>
                   ) : null}
                   {hasCityOptions ? (
-                    <label className="filter-panel-label">City<select value={selectedCity} onChange={(event) => { setSelectedCity(event.target.value); setSelectedNeighborhood(""); }}>
-                      <option value="">— All cities —</option>
-                      {availableCities.map((city) => <option key={`${city.name}-${city.latitude}-${city.longitude}`} value={city.name}>{city.name}</option>)}
-                    </select></label>
+                    <label className="filter-panel-label">City
+                      <LocationCombobox
+                        value={draftCity}
+                        options={[{ value: "", label: "— All cities —" }, ...availableCities.map((c) => ({ value: c.name, label: c.name }))]}
+                        onChange={(val) => { setDraftCity(val); setDraftNeighborhood(""); }}
+                        placeholder="Type a city…"
+                      />
+                    </label>
                   ) : null}
-                  {selectedCity ? (
-                    <label className="filter-panel-label">Neighborhood (optional)<input type="text" value={selectedNeighborhood} onChange={(event) => setSelectedNeighborhood(event.target.value)} placeholder="e.g. Downtown, Williamsburg" /></label>
+                  {draftCity ? (
+                    <label className="filter-panel-label">Neighborhood (optional)<input type="text" value={draftNeighborhood} onChange={(event) => setDraftNeighborhood(event.target.value)} placeholder="e.g. Downtown, Williamsburg" /></label>
                   ) : null}
                 </div>
                 {locationNotice ? <div className="location-panel-notice">{locationNotice}</div> : null}
                 <div className="filter-panel-footer">
-                  <button type="button" className="primary" onClick={() => applyLocation(selectedCountry, selectedState, selectedCity)}>Apply</button>
+                  <button type="button" className="primary" onClick={() => applyLocation(draftCountry, draftState, draftCity, draftNeighborhood)}>Apply</button>
                   <button type="button" className="filter-clear-btn" onClick={useMyLocation}>My location</button>
                   <button type="button" className="filter-clear-btn" onClick={resetToDefault}>Reset</button>
                 </div>
