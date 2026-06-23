@@ -74,6 +74,7 @@ interface WallAppProps {
   onRemoveSavedWall?: (wall: SavedWall) => Promise<void>;
   profile?: { displayName: string | null; username: string | null; businessName: string | null } | null;
   onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
+  wallViewCount?: number;
 }
 
 const MAX_CARD_Y = 1500;
@@ -121,7 +122,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, wallViewCount }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -571,6 +572,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       setSelectedCity(location.city);
       setQuery("");
       persistLocation(location.country, location.state, location.city);
+      sessionStorage.setItem("wall-visit-skip", "1");
       updateLocationQuery(location.country, location.state, location.city);
       setLocationNotice(`Using your location: ${locationText}`);
       window.setTimeout(() => setLocationNotice(null), 3200);
@@ -1269,8 +1271,9 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           <button aria-label="Reset wall" onClick={resetFilters}><RotateCcw /><span>Reset</span></button>
         </div>
         <div className="wall-count">
+          {wallViewCount !== undefined && mode === "connected" ? `${wallViewCount.toLocaleString()} WALL VIEWS · ` : ""}
           {locationReady
-            ? `${visible.length} CARDS · ${locationLabel()}${locationWeather ? ` · ${Math.round(locationWeather.tempC)}°C/${Math.round(locationWeather.tempC * 9 / 5 + 32)}°F` : ""}`
+            ? `${visible.length} CARDS · ${locationLabel()}${locationWeather ? ` · ${Math.round(locationWeather.tempC)}°C / ${Math.round(locationWeather.tempC * 9 / 5 + 32)}°F` : ""}`
             : "LOCATING..."}
         </div>
         {pendingCard ? <PlacementMode card={pendingCard} position={placement} dragging={dragging} onDragStart={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }} onMove={movePlacement} onDragEnd={() => setDragging(false)} onCancel={() => { setPendingCard(null); setDragging(false); }} onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })} onConfirm={post} isSaving={isSaving} /> : null}

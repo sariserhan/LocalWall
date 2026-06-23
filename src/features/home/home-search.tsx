@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Country, State } from "country-state-city";
 import { Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import Link from "next/link";
-import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
+import { buildWallPath } from "@/lib/wall-slug";
 import { categories } from "@/features/wall/types";
+import { HomeLocationPicker } from "./home-location-picker";
 
 type DetectedLoc = {
   country: string;
@@ -60,12 +62,20 @@ export function HomeSearch() {
   const recordSearch = useMutation(api.cards.recordSearch);
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("All");
-  const [locationInput, setLocationInput] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("US");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [detectedLoc, setDetectedLoc] = useState<DetectedLoc | null>(null);
   const [detectingOnLoad, setDetectingOnLoad] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
   const [isPreciseLocating, setIsPreciseLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+
+  const locationDisplayLabel = useMemo(() => {
+    if (selectedCity) return selectedCity;
+    if (selectedState) return State.getStatesOfCountry(selectedCountry).find((s) => s.isoCode === selectedState)?.name ?? selectedState;
+    return Country.getAllCountries().find((c) => c.isoCode === selectedCountry)?.name ?? selectedCountry;
+  }, [selectedCountry, selectedState, selectedCity]);
 
   useEffect(() => {
     resolveIpLocation()
@@ -73,7 +83,9 @@ export function HomeSearch() {
         if (loc) {
           const label = makeLabel(loc.city, loc.state);
           setDetectedLoc({ ...loc, label });
-          setLocationInput(label);
+          setSelectedCountry(loc.country);
+          setSelectedState(loc.state);
+          setSelectedCity(loc.city);
         }
       })
       .finally(() => setDetectingOnLoad(false));
@@ -81,8 +93,8 @@ export function HomeSearch() {
 
   const nearbyCards = useQuery(
     api.cards.listPublished,
-    detectedLoc && !detectingOnLoad
-      ? { country: detectedLoc.country, state: detectedLoc.state, city: detectedLoc.city }
+    selectedCountry && !detectingOnLoad
+      ? { country: selectedCountry, state: selectedState, city: selectedCity }
       : "skip",
   );
 
@@ -96,14 +108,17 @@ export function HomeSearch() {
         const label = makeLabel(resolved.city, resolved.state);
         loc = { ...resolved, label };
         setDetectedLoc(loc);
-        setLocationInput(label);
+        setSelectedCountry(resolved.country);
+        setSelectedState(resolved.state);
+        setSelectedCity(resolved.city);
       }
     }
     setIsLocating(false);
     if (!loc) {
-      setLocationError("Could not detect your location. Please type it in the search bar.");
+      setLocationError("Could not detect your location. Please select it below.");
       return;
     }
+    sessionStorage.setItem("wall-visit-skip", "1");
     router.push(buildWallPath(loc.country, loc.state, loc.city, category !== "All" ? category : undefined));
   };
 
@@ -123,7 +138,9 @@ export function HomeSearch() {
           if (!data) throw new Error("No location found");
           const label = makeLabel(data.city, data.state);
           setDetectedLoc({ ...data, label, precise: true });
-          setLocationInput(label);
+          setSelectedCountry(data.country);
+          setSelectedState(data.state);
+          setSelectedCity(data.city);
         } catch {
           setLocationError("Could not resolve your precise location.");
         } finally {
@@ -141,27 +158,14 @@ export function HomeSearch() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const kw = keyword.trim();
-    const locQuery = locationInput.trim();
-
-    let country = "US", state = "", city = "";
-    if (locQuery) {
-      const isDetected = detectedLoc && makeLabel(detectedLoc.city, detectedLoc.state) === locQuery;
-      if (isDetected && detectedLoc) {
-        country = detectedLoc.country;
-        state = detectedLoc.state;
-        city = detectedLoc.city;
-      } else {
-        try {
-          const res = await fetch(`/api/location/search?q=${encodeURIComponent(locQuery)}`);
-          const resolved = (await res.json()) as ResolvedLoc | null;
-          if (resolved) { country = resolved.country; state = resolved.state; city = resolved.city; }
-        } catch { /* fall through to default US */ }
-      }
-    }
+    const country = selectedCountry || "US";
+    const state = selectedState;
+    const city = selectedCity;
 
     void recordSearch({ keyword: kw || undefined, category: category !== "All" ? category : undefined, country, state, city }).catch(() => {});
     const path = buildWallPath(country, state, city, category !== "All" ? category : undefined);
     const qs = kw ? `?keyword=${encodeURIComponent(kw)}` : "";
+    sessionStorage.setItem("wall-visit-skip", "1");
     router.push(`${path}${qs}`);
   };
 
@@ -179,9 +183,8 @@ export function HomeSearch() {
         <button
           className="home-hero-btn-outline"
           onClick={() => {
-            const path = detectedLoc
-              ? buildWallPath(detectedLoc.country, detectedLoc.state, detectedLoc.city)
-              : "/us";
+            const path = buildWallPath(selectedCountry, selectedState, selectedCity);
+            sessionStorage.setItem("wall-visit-skip", "1");
             router.push(path);
           }}
         >
@@ -219,13 +222,12 @@ export function HomeSearch() {
             Location
             {detectingOnLoad ? <Loader2 size={9} className="locate-spin" style={{ marginLeft: 4 }} /> : null}
           </span>
-          <input
-            type="text"
-            className="home-search-input"
-            placeholder={detectingOnLoad ? "Detecting…" : "City or area"}
-            value={locationInput}
-            onChange={(e) => setLocationInput(e.target.value)}
-            aria-label="Location"
+          <HomeLocationPicker
+            country={selectedCountry}
+            state={selectedState}
+            city={selectedCity}
+            onChange={(c, s, ci) => { setSelectedCountry(c); setSelectedState(s); setSelectedCity(ci); }}
+            loading={detectingOnLoad}
           />
         </div>
         <button type="submit" className="primary home-search-submit">
@@ -234,7 +236,7 @@ export function HomeSearch() {
         </button>
       </form>
 
-      {nearbyCards && nearbyCards.length > 0 && detectedLoc ? (
+      {/* {nearbyCards && nearbyCards.length > 0 ? (
         <div className="home-hero-nearby">
           <span className="home-hero-nearby-label">Live near you</span>
           <div className="home-hero-nearby-cards">
@@ -246,13 +248,13 @@ export function HomeSearch() {
             ))}
           </div>
           <Link
-            href={buildWallPath(detectedLoc.country, detectedLoc.state, detectedLoc.city)}
+            href={buildWallPath(selectedCountry, selectedState, selectedCity)}
             className="home-hero-nearby-all"
           >
-            See all in {detectedLoc.city || detectedLoc.state} →
+            See all in {locationDisplayLabel} →
           </Link>
         </div>
-      ) : null}
+      ) : null} */}
 
       <div className="home-location-hint">
         {locationError ? (

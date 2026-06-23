@@ -18,6 +18,7 @@ import type * as reminders from "../reminders.js";
 import type * as reviews from "../reviews.js";
 import type * as savedCards from "../savedCards.js";
 import type * as savedWalls from "../savedWalls.js";
+import type * as walls from "../walls.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   reviews: typeof reviews;
   savedCards: typeof savedCards;
   savedWalls: typeof savedWalls;
+  walls: typeof walls;
 }>;
 
 /**

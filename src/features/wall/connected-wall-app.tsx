@@ -12,6 +12,7 @@ import { WallApp } from "./wall-app";
 
 const AdminPanel = dynamic(() => import("./admin-panel").then((m) => ({ default: m.AdminPanel })), { ssr: false, loading: () => null });
 import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
+import { buildWallPath } from "@/lib/wall-slug";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -85,6 +86,11 @@ export function ConnectedWallApp({
     city: queryCity,
   }) as WallCard[] | undefined;
   const directCard = useQuery(api.cards.getPublishedById, initialCardId ? { cardId: initialCardId as Id<"cards"> } : "skip") as WallCard | null | undefined;
+  const isCardPage = typeof pathname === "string" && pathname.startsWith("/card/");
+  const cardWallPath = useMemo(() => {
+    if (!isCardPage || !directCard?.country) return null;
+    return buildWallPath(directCard.country, directCard.state ?? "", directCard.city ?? "");
+  }, [isCardPage, directCard]);
   const renderCards = useMemo(() => {
     const baseCards = layoutCards ?? publishedCards ?? initialCards ?? [];
     if (!directCard || baseCards.some((card) => String(card.id) === String(directCard.id))) return baseCards;
@@ -129,6 +135,9 @@ export function ConnectedWallApp({
   const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const adminSendTestEmail = useAction(api.admin.sendTestReminderEmail);
+  const recordWallVisit = useMutation(api.walls.recordVisit);
+  const effectiveWallPath = isCardPage ? cardWallPath : (pathname && pathname !== "/" ? pathname : null);
+  const wallData = useQuery(api.walls.getWall, effectiveWallPath ? { path: effectiveWallPath } : "skip");
   const recordCardEvent = useMutation(api.cards.recordEvent);
   const reportCard = useMutation(api.cards.report);
   const setSavedCard = useMutation(api.savedCards.setSaved);
@@ -171,6 +180,31 @@ export function ConnectedWallApp({
     };
     void merge();
   }, [isAuthenticated, mergeLocalSavedCards, savedCards]);
+
+  const hasRecordedCardWallRef = useRef(false);
+
+  useEffect(() => {
+    if (!pathname || pathname === "/" || isCardPage) return;
+    if (sessionStorage.getItem("wall-visit-skip")) {
+      sessionStorage.removeItem("wall-visit-skip");
+      return;
+    }
+    const key = `wv:${pathname}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    void recordWallVisit({ path: pathname }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isCardPage || !cardWallPath || hasRecordedCardWallRef.current) return;
+    hasRecordedCardWallRef.current = true;
+    const key = `wv:${cardWallPath}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    void recordWallVisit({ path: cardWallPath }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardWallPath]);
 
   useEffect(() => {
     if (publishedCards === undefined) return;
@@ -345,6 +379,7 @@ export function ConnectedWallApp({
       <WallApp
       mode="connected"
       cards={cards}
+      wallViewCount={wallData?.viewCount}
       pendingCreatedCards={pendingCreatedCards}
       onRefreshWall={refreshWallFromServer}
       isLoading={cards === undefined && layoutCards === null}

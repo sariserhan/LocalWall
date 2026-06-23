@@ -189,4 +189,20 @@ export default defineSchema({
     city: v.string(),
     createdAt: v.number(),
   }).index("by_createdAt", ["createdAt"]),
+
+  walls: defineTable({
+    path: v.string(),
+    viewCount: v.number(),
+    createdBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_path", ["path"]),
+
+  wallVisits: defineTable({
+    wallId: v.id("walls"),
+    userId: v.optional(v.id("users")),
+    visitedAt: v.number(),
+  })
+    .index("by_wall", ["wallId"])
+    .index("by_wall_and_user", ["wallId", "userId"]),
 });

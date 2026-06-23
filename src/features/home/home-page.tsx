@@ -59,19 +59,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Vehicles": Truck,
 };
 
-const TOP_CATEGORIES = [
-  "Services",
-  "Repairs",
-  "Jobs",
-  "Real Estate",
-  "Buy & Sell Marketplace",
-  "Food & Catering",
-  "Health & Fitness",
-  "Shops & Retail",
-  "Home & Garden",
-  "Events & Entertainment",
-] as const;
-
 const POPULAR_LOCATIONS = [
   { label: "New York, NY",      path: "/us/ny/new-york" },
   { label: "Brooklyn, NY",      path: "/us/ny/brooklyn" },
@@ -237,7 +224,7 @@ export async function HomePage() {
           <div className="home-container">
             <h2 className="home-section-title">Browse by category</h2>
             <div className="home-category-grid">
-              {TOP_CATEGORIES.map((cat) => {
+              {categories.filter((cat) => cat !== "All").map((cat) => {
                 const Icon = CATEGORY_ICONS[cat];
                 return (
                   <Link key={cat} href={`/us/${toCategorySlug(cat)}`} className="home-category-item">
@@ -246,11 +233,6 @@ export async function HomePage() {
                   </Link>
                 );
               })}
-            </div>
-            <div className="home-category-footer">
-              <Link href="/us" className="home-category-view-all">
-                Browse all {categories.length - 1} categories →
-              </Link>
             </div>
           </div>
         </section>
