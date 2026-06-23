@@ -140,6 +140,15 @@ export default defineSchema({
     .index("by_userId_and_cardId", ["userId", "cardId"])
     .index("by_cardId", ["cardId"]),
 
+  savedWalls: defineTable({
+    userId: v.id("users"),
+    path: v.string(),
+    label: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_userId_and_createdAt", ["userId", "createdAt"])
+    .index("by_userId_and_path", ["userId", "path"]),
+
   cardStats: defineTable({
     cardId: v.id("cards"),
     clicks: v.number(),

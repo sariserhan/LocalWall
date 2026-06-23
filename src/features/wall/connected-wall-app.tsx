@@ -3,12 +3,12 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AdminPanel, type AdminDashboardData } from "./admin-panel";
 import { WallApp } from "./wall-app";
-import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type WallCard } from "./types";
+import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -63,6 +63,12 @@ export function ConnectedWallApp({
   initialCards?: WallCard[];
 }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const wallPath = useMemo(() => {
+    if (!pathname || pathname === "/") return null;
+    const sub = searchParams.get("subcategory");
+    return sub ? `${pathname}?subcategory=${encodeURIComponent(sub)}` : pathname;
+  }, [pathname, searchParams]);
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
@@ -118,6 +124,16 @@ export function ConnectedWallApp({
   const reportCard = useMutation(api.cards.report);
   const setSavedCard = useMutation(api.savedCards.setSaved);
   const mergeLocalSavedCards = useMutation(api.savedCards.mergeLocal);
+  const setSavedWall = useMutation(api.savedWalls.setSaved);
+  const savedWallData = useQuery(
+    api.savedWalls.isSaved,
+    isAuthenticated && wallPath ? { path: wallPath } : "skip",
+  ) as boolean | undefined;
+  const savedWallsList = useQuery(api.savedWalls.list, isAuthenticated ? {} : "skip") as Array<{ path: string; label: string; createdAt: number }> | undefined;
+  const savedWalls = useMemo<SavedWall[]>(() => {
+    if (!savedWallsList) return [];
+    return savedWallsList.map((item) => ({ path: item.path, label: item.label, createdAt: item.createdAt }));
+  }, [savedWallsList]);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
   const { openSignUp } = useClerk();
@@ -359,6 +375,15 @@ export function ConnectedWallApp({
       initialCategory={initialCategory}
       onSetSavedCard={async (card, saved) => {
         await setSavedCard({ cardId: card.id as Id<"cards">, saved });
+      }}
+      savedWall={savedWallData ?? false}
+      onSetSavedWall={async (label, saved) => {
+        if (!wallPath) return;
+        await setSavedWall({ path: wallPath, label, saved });
+      }}
+      savedWalls={savedWalls}
+      onRemoveSavedWall={async (wall) => {
+        await setSavedWall({ path: wall.path, label: wall.label, saved: false });
       }}
       ownedCardIds={ownedCardIds}
       isAdmin={adminAccess?.isAdmin ?? false}

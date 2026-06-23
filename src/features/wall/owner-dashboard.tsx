@@ -1,18 +1,21 @@
 "use client";
 
-import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Eye, EyeOff, MousePointerClick, Pencil, Plus, RefreshCw, Trash2, User, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Eye, EyeOff, MapPin, MousePointerClick, Pencil, Plus, RefreshCw, Trash2, User, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EditCardModal } from "./edit-card-modal";
-import type { CardUpdate, OwnerCard, RenewalAmount, WallCard } from "./types";
+import type { CardUpdate, OwnerCard, RenewalAmount, SavedWall, WallCard } from "./types";
 
 interface OwnerDashboardProps {
   cards: OwnerCard[];
   savedCards: WallCard[];
+  savedWalls: SavedWall[];
   loading: boolean;
   onClose: () => void;
   onCreate: () => void;
   onView: (card: WallCard) => void;
   onRemoveSaved: (card: WallCard) => void;
+  onRemoveSavedWall: (wall: SavedWall) => Promise<void>;
+  onNavigateToWall: (wall: SavedWall) => void;
   onSetVisibility: (card: OwnerCard, status: "published" | "hidden") => Promise<void>;
   onUpdate: (card: OwnerCard, update: CardUpdate) => Promise<void>;
   onDelete: (card: OwnerCard) => Promise<void>;
@@ -36,7 +39,7 @@ function expiryLabel(expiresAt: number) {
   return `${days} days left`;
 }
 
-export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, onView, onRemoveSaved, onSetVisibility, onUpdate, onDelete, onRenew, profile, onUpdateProfile }: OwnerDashboardProps) {
+export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, profile, onUpdateProfile }: OwnerDashboardProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
@@ -118,7 +121,7 @@ export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, 
     <div className="dashboard-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="owner-dashboard" aria-label="Your card dashboard">
         <header className="dashboard-header">
-          <div><span>YOUR WALL</span><h2>Card dashboard</h2></div>
+          <div><span>YOUR WALL</span><h2>My Board</h2></div>
           <button className="icon-btn" onClick={onClose} aria-label="Close dashboard"><X /></button>
         </header>
 
@@ -193,6 +196,26 @@ export function OwnerDashboard({ cards, savedCards, loading, onClose, onCreate, 
                     <button className="secondary danger-action" onClick={() => onRemoveSaved(card)}>Remove from saved</button>
                   </div>
                 </article>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="dashboard-saved-section">
+          <div className="dashboard-saved-header"><strong>Saved walls</strong><span>Neighborhoods you saved for quick access.</span></div>
+          {savedWalls.length === 0 ? <div className="dashboard-saved-empty">No saved walls yet. Browse a city and hit "Save wall".</div> : (
+            <div className="dashboard-walls-list">
+              {savedWalls.map((wall) => (
+                <div className="dashboard-wall-row" key={wall.path}>
+                  <div className="dashboard-wall-copy">
+                    <MapPin size={14} />
+                    <span>{wall.label}</span>
+                  </div>
+                  <div className="dashboard-card-actions">
+                    <button className="secondary" onClick={() => { onNavigateToWall(wall); onClose(); }}>Visit</button>
+                    <button className="secondary danger-action" onClick={() => void onRemoveSavedWall(wall)}>Remove</button>
+                  </div>
+                </div>
               ))}
             </div>
           )}

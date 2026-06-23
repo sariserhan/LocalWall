@@ -27,6 +27,8 @@ button { color: inherit; }
 .topbar nav { margin-left: auto; display: flex; align-items: stretch; }
 .topbar nav > button, .filter-select { display: flex; align-items: center; justify-content: center; position: relative; min-width: 102px; border: 0; border-left: 1px solid #c4c1bb; background: transparent; text-transform: uppercase; font: 800 14px var(--font-barlow-condensed); cursor: pointer; }
 .topbar nav > button svg { width: 16px; margin-right: 7px; }
+.save-wall-btn.saved { color: #f43d38; }
+.save-wall-btn.saved svg { fill: #f43d38; }
 .filter-select select { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .filter-select select:disabled { cursor: not-allowed; }
 .filter-select:has(select:disabled) { opacity: 0.45; cursor: not-allowed; }
@@ -607,6 +609,11 @@ button { color: inherit; }
 .dashboard-saved-empty { padding: 14px; color: #666; font: 600 12px var(--font-inter); }
 .dashboard-saved-list { padding: 10px; }
 .dashboard-saved-list .dashboard-card-actions { grid-template-columns: 1fr; }
+.dashboard-walls-list { display: grid; gap: 8px; padding: 10px; }
+.dashboard-wall-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: #f8f6f1; border: 1px solid #b4b1aa; }
+.dashboard-wall-copy { display: flex; align-items: center; gap: 8px; font: 700 13px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .03em; }
+.dashboard-wall-copy svg { flex-shrink: 0; color: #f43d38; }
+.dashboard-wall-row .dashboard-card-actions { flex-shrink: 0; }
 .dashboard-owned-section { margin: 0 22px 20px; border: 1px solid #bbb6ab; background: #f4f2ec; }
 .dashboard-owned-header { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #cdc9be; }
 .dashboard-owned-header strong { font: 900 17px var(--font-barlow-condensed); text-transform: uppercase; }

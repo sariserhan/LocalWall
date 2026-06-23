@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bookmark,
   ChevronDown,
   LayoutDashboard,
   LayoutGrid,
@@ -30,6 +31,7 @@ import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
+import type { SavedWall } from "./types";
 
 interface WallAppProps {
   mode: "demo" | "connected";
@@ -61,6 +63,10 @@ interface WallAppProps {
   initialCategory?: string;
   savedCards?: WallCardModel[];
   onSetSavedCard?: (card: WallCardModel, saved: boolean) => Promise<void>;
+  savedWall?: boolean;
+  onSetSavedWall?: (label: string, saved: boolean) => Promise<void>;
+  savedWalls?: SavedWall[];
+  onRemoveSavedWall?: (wall: SavedWall) => Promise<void>;
   profile?: { displayName: string | null; username: string | null; businessName: string | null } | null;
   onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
 }
@@ -110,7 +116,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, profile, onUpdateProfile }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -992,7 +998,20 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             )}
           </div>
           <button onClick={shareWall}><Link2 />{shareNotice ? "Copied!" : "Share"}</button>
-          {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenu(false); }}><LayoutDashboard /> My cards</button> : null}
+          {pathname && pathname !== "/" ? (
+            <button
+              className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
+              onClick={() => {
+                if (!isSignedIn) { onRequestSignIn?.(); return; }
+                const wallLabel = [locationLabel(), category !== "All" ? category : null, subcategory || null].filter(Boolean).join(" · ");
+                void onSetSavedWall?.(wallLabel, !savedWall);
+              }}
+              aria-label={savedWall ? "Unsave this wall" : "Save this wall"}
+            >
+              <Bookmark />{savedWall ? "Wall saved" : "Save wall"}
+            </button>
+          ) : null}
+          {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenu(false); }}><LayoutDashboard /> My Board</button> : null}
           {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenu(false); }}><ShieldCheck /> Admin</button> : null}
           <button className="mobile-nav-post" onClick={openComposer}><Plus />Post your card</button>
         </nav>
@@ -1289,11 +1308,14 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         <OwnerDashboard
           cards={ownerCards}
           savedCards={savedCards}
+          savedWalls={savedWalls}
           loading={ownerCardsLoading}
           onClose={() => setDashboard(false)}
           onCreate={createFromDashboard}
           onView={(card) => { setDashboard(false); openCard(card); }}
           onRemoveSaved={removeSavedCard}
+          onRemoveSavedWall={async (wall) => { await onRemoveSavedWall?.(wall); }}
+          onNavigateToWall={(wall) => { router.push(wall.path); }}
           onSetVisibility={onSetCardStatus}
           onUpdate={async (card, update) => {
             await onUpdateCard(card, update);

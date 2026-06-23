@@ -164,4 +164,10 @@ export interface Placement {
   y: number;
 }
 
+export interface SavedWall {
+  path: string;
+  label: string;
+  createdAt: number;
+}
+
 export type CreateCard = (draft: CardDraft, placement: Placement) => Promise<WallCard | void>;
