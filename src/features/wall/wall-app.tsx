@@ -20,14 +20,16 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { startTransition, useDeferredValue, useMemo, useRef, useState, useEffect, type PointerEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Country, State, City } from "country-state-city";
 import { LocationCombobox } from "./location-combobox";
-import { Composer } from "./composer";
-import { DetailPanel } from "./detail-panel";
-import { PlacementMode } from "./placement-mode";
-import { OwnerDashboard } from "./owner-dashboard";
+
+const Composer = dynamic(() => import("./composer").then((m) => ({ default: m.Composer })), { ssr: false, loading: () => null });
+const DetailPanel = dynamic(() => import("./detail-panel").then((m) => ({ default: m.DetailPanel })), { ssr: false, loading: () => null });
+const PlacementMode = dynamic(() => import("./placement-mode").then((m) => ({ default: m.PlacementMode })), { ssr: false, loading: () => null });
+const OwnerDashboard = dynamic(() => import("./owner-dashboard").then((m) => ({ default: m.OwnerDashboard })), { ssr: false, loading: () => null });
 import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";

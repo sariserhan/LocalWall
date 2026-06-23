@@ -6,8 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { AdminPanel, type AdminDashboardData } from "./admin-panel";
+import dynamic from "next/dynamic";
+import type { AdminDashboardData } from "./admin-panel";
 import { WallApp } from "./wall-app";
+
+const AdminPanel = dynamic(() => import("./admin-panel").then((m) => ({ default: m.AdminPanel })), { ssr: false, loading: () => null });
 import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
