@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ExternalLink, Flag, Mail, Phone, Share2, X } from "lucide-react";
+import { Bookmark, ExternalLink, Flag, Heart, Mail, Phone, Share2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { WallCard } from "./types";
@@ -13,7 +13,7 @@ function websiteHref(website: string) {
 
 type CardEvent = "website" | "phone" | "email" | "social" | "save" | "share";
 
-export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn }: {
+export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn, liked = false, canLike = true, onToggleLike }: {
   card: WallCard;
   onClose: () => void;
   viewCount: number;
@@ -23,14 +23,22 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   saved?: boolean;
   onSetSaved?: (saved: boolean) => Promise<void>;
   onRequestSignIn?: () => void;
+  liked?: boolean;
+  canLike?: boolean;
+  onToggleLike?: () => Promise<void>;
 }) {
   const [optimisticSaved, setOptimisticSaved] = useState(saved);
   const [saving, setSaving] = useState(false);
+  const [optimisticLiked, setOptimisticLiked] = useState(liked);
+  const [optimisticLikeCount, setOptimisticLikeCount] = useState(card.likes ?? 0);
+  const [liking, setLiking] = useState(false);
   const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const phoneRevealed = revealedPhoneFor === String(card.id);
 
   useEffect(() => setOptimisticSaved(saved), [saved]);
+  useEffect(() => { setOptimisticLiked(liked); }, [liked]);
+  useEffect(() => { setOptimisticLikeCount(card.likes ?? 0); }, [card.likes]);
 
   useEffect(() => {
     if (!expandedImage) return;
@@ -40,6 +48,22 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [expandedImage]);
+
+  const handleToggleLike = async () => {
+    if (!onToggleLike || liking) return;
+    const next = !optimisticLiked;
+    setOptimisticLiked(next);
+    setOptimisticLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
+    setLiking(true);
+    try {
+      await onToggleLike();
+    } catch {
+      setOptimisticLiked(!next);
+      setOptimisticLikeCount((c) => Math.max(0, c + (next ? -1 : 1)));
+    } finally {
+      setLiking(false);
+    }
+  };
 
   const toggleSaved = async () => {
     if (!onSetSaved || saving) return;
@@ -117,7 +141,10 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         </div>
       ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
       <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
-      {canSaveCard ? <button className={`secondary wide ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save card"}</button> : null}
+      <div className="detail-card-actions">
+        {canSaveCard ? <button className={`secondary ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save"}</button> : null}
+        {canLike ? <button className={`secondary like-btn${optimisticLiked ? " is-liked" : ""}`} onClick={() => { if (!onToggleLike) { onRequestSignIn?.(); return; } void handleToggleLike(); }} aria-pressed={optimisticLiked} disabled={liking}><Heart fill={optimisticLiked ? "currentColor" : "none"} /> {optimisticLikeCount > 0 ? optimisticLikeCount : "Like"}</button> : null}
+      </div>
       <div className="detail-secondary-actions">
         <button type="button" className="secondary" onClick={() => void shareCard()}><Share2 /> Share</button>
         {onReport ? <button type="button" className="secondary" onClick={() => void report()}><Flag /> Report</button> : null}

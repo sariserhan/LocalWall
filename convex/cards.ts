@@ -228,10 +228,51 @@ export const getLiveViewCounts = query({
     if (args.cardIds.length > 200) throw new Error("Too many cards requested.");
     return await Promise.all(args.cardIds.map(async (cardId) => {
       const stats = await ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", cardId)).unique();
-      if (stats) return { id: cardId, clicks: stats.clicks };
+      if (stats) return { id: cardId, clicks: stats.clicks, likes: stats.likes ?? 0 };
       const card = await ctx.db.get(cardId);
-      return { id: cardId, clicks: card?.clicks ?? 0 };
+      return { id: cardId, clicks: card?.clicks ?? 0, likes: 0 };
     }));
+  },
+});
+
+export const toggleLike = mutation({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Sign in to like cards.");
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) throw new Error("Your profile could not be found.");
+    const card = await ctx.db.get(args.cardId);
+    if (!card) throw new Error("Card not found.");
+
+    const existing = await ctx.db.query("cardLikes").withIndex("by_user_and_card", (q) => q.eq("userId", user._id).eq("cardId", args.cardId)).unique();
+    let stats = await ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", args.cardId)).unique();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      if (stats) await ctx.db.patch(stats._id, { likes: Math.max(0, (stats.likes ?? 0) - 1), updatedAt: Date.now() });
+      return { liked: false };
+    }
+
+    await ctx.db.insert("cardLikes", { userId: user._id, cardId: args.cardId, createdAt: Date.now() });
+    if (stats) {
+      await ctx.db.patch(stats._id, { likes: (stats.likes ?? 0) + 1, updatedAt: Date.now() });
+    } else {
+      await ctx.db.insert("cardStats", { cardId: args.cardId, clicks: card.clicks ?? 0, websiteClicks: 0, phoneClicks: 0, emailClicks: 0, socialClicks: 0, saves: 0, shares: 0, likes: 1, updatedAt: Date.now() });
+    }
+    return { liked: true };
+  },
+});
+
+export const getLikedCards = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [] as Id<"cards">[];
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) return [] as Id<"cards">[];
+    const likes = await ctx.db.query("cardLikes").withIndex("by_user", (q) => q.eq("userId", user._id)).order("desc").take(500);
+    return likes.map((l) => l.cardId);
   },
 });
 

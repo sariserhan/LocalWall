@@ -56,6 +56,8 @@ interface WallAppProps {
   onRenewCard?: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
   onMoveCard?: (card: WallCardModel, placement: Placement) => Promise<void>;
   ownedCardIds?: ReadonlySet<string>;
+  likedCardIds?: ReadonlySet<string>;
+  onToggleLike?: (card: WallCardModel) => Promise<void>;
   isAdmin?: boolean;
   onOpenAdmin?: () => void;
   onCardEvent?: (card: WallCardModel, event: "website" | "phone" | "email" | "social" | "save" | "share") => void;
@@ -119,7 +121,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1327,7 +1329,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           </div>
         </div>
       ) : null}
-      {selected ? <DetailPanel key={String(selected.id)} card={selected} onClose={closeCard} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} canSaveCard={isSignedIn} saved={savedCardIds.has(String(selected.id))} onSetSaved={onSetSavedCard ? (saved) => onSetSavedCard(selected, saved) : undefined} onRequestSignIn={onRequestSignIn} /> : null}
+      {selected ? (() => { const isOwnedCard = ownedCardIds?.has(String(selected.id)) ?? false; return <DetailPanel key={String(selected.id)} card={selected} onClose={closeCard} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} canSaveCard={isSignedIn && !isOwnedCard} saved={savedCardIds.has(String(selected.id))} onSetSaved={onSetSavedCard ? (saved) => onSetSavedCard(selected, saved) : undefined} onRequestSignIn={onRequestSignIn} liked={likedCardIds?.has(String(selected.id)) ?? false} canLike={!isOwnedCard} onToggleLike={onToggleLike ? () => onToggleLike(selected) : undefined} />; })() : null}
       {dashboard && ownerCards && onSetCardStatus && onUpdateCard && onDeleteCard && onRenewCard ? (
         <OwnerDashboard
           cards={ownerCards}

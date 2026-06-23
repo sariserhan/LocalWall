@@ -109,6 +109,7 @@ export interface WallCard {
   paidAmount?: number;
   expiresAt?: number;
   clicks?: number;
+  likes?: number;
   featuredTier?: "bronze" | "silver" | "gold";
   reviewCount?: number;
 }

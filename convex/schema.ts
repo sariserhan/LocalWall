@@ -158,8 +158,17 @@ export default defineSchema({
     socialClicks: v.number(),
     saves: v.number(),
     shares: v.number(),
+    likes: v.optional(v.number()),
     updatedAt: v.number(),
   }).index("by_card", ["cardId"]),
+
+  cardLikes: defineTable({
+    userId: v.id("users"),
+    cardId: v.id("cards"),
+    createdAt: v.number(),
+  })
+    .index("by_user_and_card", ["userId", "cardId"])
+    .index("by_user", ["userId"]),
 
   reports: defineTable({
     cardId: v.id("cards"),

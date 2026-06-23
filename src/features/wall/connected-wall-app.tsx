@@ -96,11 +96,17 @@ export function ConnectedWallApp({
     return publishedCards.filter((card) => !layoutIds.has(String(card.id)));
   }, [layoutCards, publishedCards]);
   const liveCardIds = useMemo(() => renderCards.map((card) => card.id as Id<"cards">), [renderCards]);
-  const liveViewCounts = useQuery(api.cards.getLiveViewCounts, liveCardIds.length === 0 ? "skip" : { cardIds: liveCardIds }) as Array<{ id: Id<"cards">; clicks: number }> | undefined;
+  const liveViewCounts = useQuery(api.cards.getLiveViewCounts, liveCardIds.length === 0 ? "skip" : { cardIds: liveCardIds }) as Array<{ id: Id<"cards">; clicks: number; likes: number }> | undefined;
+  const likedCardData = useQuery(api.cards.getLikedCards, isAuthenticated ? {} : "skip") as Id<"cards">[] | undefined;
+  const likedCardIds = useMemo(() => new Set((likedCardData ?? []).map((id) => String(id))), [likedCardData]);
+  const toggleLike = useMutation(api.cards.toggleLike);
   const cards = useMemo(() => {
     if (renderCards.length === 0 && publishedCards === undefined && layoutCards === null && !initialCards?.length) return undefined;
-    const counts = new Map((liveViewCounts ?? []).map((item) => [String(item.id), item.clicks]));
-    return renderCards.map((card) => ({ ...card, clicks: counts.get(String(card.id)) ?? card.clicks ?? 0 }));
+    const statsMap = new Map((liveViewCounts ?? []).map((item) => [String(item.id), item]));
+    return renderCards.map((card) => {
+      const stats = statsMap.get(String(card.id));
+      return { ...card, clicks: stats?.clicks ?? card.clicks ?? 0, likes: stats?.likes ?? card.likes ?? 0 };
+    });
   }, [layoutCards, liveViewCounts, publishedCards, renderCards]);
   const ownerCards = useQuery(api.cards.listMine, isAuthenticated ? {} : "skip") as OwnerCard[] | undefined;
   const savedCards = useQuery(api.savedCards.list, isAuthenticated ? {} : "skip") as WallCard[] | undefined;
@@ -388,6 +394,8 @@ export function ConnectedWallApp({
         await setSavedWall({ path: wall.path, label: wall.label, saved: false });
       }}
       ownedCardIds={ownedCardIds}
+      likedCardIds={likedCardIds}
+      onToggleLike={isAuthenticated ? async (card) => { await toggleLike({ cardId: card.id as Id<"cards"> }); } : undefined}
       isAdmin={adminAccess?.isAdmin ?? false}
       onOpenAdmin={() => setAdminOpen(true)}
       profile={profile ?? null}

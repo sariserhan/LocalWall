@@ -265,10 +265,14 @@ button { color: inherit; }
 .detail-socials a { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #dedbd3; color: #222; text-decoration: none; transition: background .16s, color .16s, transform .16s; }
 .detail-socials a:hover, .detail-socials a:focus-visible { background: #111; color: #f5f1e8; transform: translateY(-2px); outline: 2px solid #111; outline-offset: 2px; }
 .detail-socials svg { width: 17px; height: 17px; }
+.detail-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.detail-card-actions .secondary { min-height: 54px; }
 .detail-secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .detail-secondary-actions button { justify-content: center; }
 .secondary.is-saved { background: #111; color: #f5f1e8; }
+.secondary.like-btn.is-liked { background: #f43d38; color: #fff; border-color: #f43d38; }
 .wide { width: 100%; min-height: 54px; margin-top: 12px; }
+.card-likes { color: #f43d38; font-size: 10px; font-weight: 800; letter-spacing: .02em; }
 .secondary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px; border: 1px solid #222; background: transparent; text-transform: uppercase; font: 800 14px var(--font-barlow-condensed); cursor: pointer; }
 .secondary svg { width: 18px; }
 .sheet-byline { margin: -4px 0 0; font: 600 11px var(--font-inter); opacity: .6; }
