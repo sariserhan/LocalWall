@@ -20,14 +20,14 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl }: AppPr
       localization={{
         signIn: {
           start: {
-            title: "Sign in to WALL",
-            subtitle: "Sign in to post and manage your local card",
+            title: "Sign in to LocalWall",
+            subtitle: "Sign in to post and manage your local listings",
           },
         },
         signUp: {
           start: {
-            title: "Create your WALL account",
-            subtitle: "Create an account to post cards and access your authorized tools",
+            title: "Join LocalWall",
+            subtitle: "Create an account to post listings and track your reach",
           },
         },
       }}

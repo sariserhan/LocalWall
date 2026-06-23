@@ -416,10 +416,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     return () => { cancelled = true; };
   }, [selectedCountry, selectedState, selectedCity]);
 
-  // Navigate to the path-based URL for a new location, preserving current category and query params
+  // Navigate to the path-based URL for a new location. Start with clean params — don't carry over
+  // keyword, subcategory, or other stale filters from the previous wall.
   const updateLocationQuery = (country: string, state: string, city: string, neighborhood = "") => {
-    const next = new URLSearchParams(window.location.search);
-    if (neighborhood) next.set("neighborhood", neighborhood); else next.delete("neighborhood");
+    const next = new URLSearchParams();
+    if (neighborhood) next.set("neighborhood", neighborhood);
     const newPath = buildWallPath(country, state, city, category !== "All" ? category : undefined);
     const qs = next.toString();
     router.push(`${newPath}${qs ? `?${qs}` : ""}`);
@@ -514,6 +515,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     : "/";
 
   const applyLocation = (country: string, state: string, city: string) => {
+    setQuery("");
     updateLocationQuery(country, state, city, selectedNeighborhood);
     persistLocation(country, state, city);
     setLocationNotice(`Location applied. Showing ${locationLabel()} wall.`);
@@ -528,6 +530,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     setSelectedCountry(defaultCountry);
     setSelectedState(defaultState);
     setSelectedCity(defaultCity);
+    setQuery("");
     persistLocation(defaultCountry, defaultState, defaultCity);
     updateLocationQuery(defaultCountry, defaultState, defaultCity);
     setLocationNotice("Reset to default wall.");
@@ -550,6 +553,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       setSelectedCountry(location.country);
       setSelectedState(location.state);
       setSelectedCity(location.city);
+      setQuery("");
       persistLocation(location.country, location.state, location.city);
       updateLocationQuery(location.country, location.state, location.city);
       setLocationNotice(`Using your location: ${locationText}`);
@@ -842,7 +846,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   return (
     <main className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={resetFilters}><center>WALL</center><span>LOCAL ADS, STUCK HERE</span></button>
+        <button className="brand" onClick={resetFilters}>LOCAL WALL<span>YOUR CITY'S COMMUNITY BOARD</span></button>
         <div className="location-wrap">
           <button className="location" onClick={() => { if (locationReady) setLocationDropdown(!locationDropdown); }} aria-expanded={locationDropdown}>
             <MapPin />
@@ -997,7 +1001,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
             )}
           </div>
-          <button onClick={shareWall}><Link2 />{shareNotice ? "Copied!" : "Share"}</button>
+          <button onClick={shareWall}><Link2 />{shareNotice ? "Copied!" : "Share Wall"}</button>
           {pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
@@ -1170,6 +1174,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 setSelectedCountry(selectedMapPoint.countryCode || selectedCountry);
                 setSelectedState(selectedMapPoint.stateCode || selectedState);
                 setSelectedCity(selectedMapPoint.city || selectedCity);
+                setQuery("");
                 updateLocationQuery(selectedMapPoint.countryCode || selectedCountry, selectedMapPoint.stateCode || selectedState, selectedMapPoint.city || selectedCity);
                 setMapPickerOpen(false);
                 setSelectedMapPoint(null);
@@ -1245,7 +1250,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         <div className="wall-count">
           {locationReady
             ? `${visible.length} CARDS · ${locationLabel()}${locationWeather ? ` · ${Math.round(locationWeather.tempC)}°C/${Math.round(locationWeather.tempC * 9 / 5 + 32)}°F` : ""}`
-            : "LOCATING WALL..."}
+            : "LOCATING..."}
         </div>
         {pendingCard ? <PlacementMode card={pendingCard} position={placement} dragging={dragging} onDragStart={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }} onMove={movePlacement} onDragEnd={() => setDragging(false)} onCancel={() => { setPendingCard(null); setDragging(false); }} onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })} onConfirm={post} isSaving={isSaving} /> : null}
       </section>

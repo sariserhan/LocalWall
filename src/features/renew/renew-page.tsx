@@ -37,7 +37,7 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
   if (isLoading) {
     return (
       <div className="app-loading">
-        <strong>WALL</strong>
+        <strong>LocalWall</strong>
         <span>Loading…</span>
       </div>
     );
@@ -51,7 +51,7 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
           <div style={{ padding: "32px 28px 28px", textAlign: "center" }}>
             <p style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700, color: "#1a1a18" }}>Sign in to renew</p>
             <p style={{ margin: "0 0 24px", color: "#666", fontSize: 14 }}>
-              Sign in to your WALL account to renew this card.
+              Sign in to your LocalWall account to renew this card.
             </p>
             <button
               className="primary"
@@ -69,7 +69,7 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
   if (card === undefined) {
     return (
       <div className="app-loading">
-        <strong>WALL</strong>
+        <strong>LocalWall</strong>
         <span>Loading card…</span>
       </div>
     );
@@ -222,8 +222,10 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
 function Header() {
   return (
     <div style={{ background: "#1a1a18", padding: "20px 28px", textAlign: "center" }}>
-      <p style={{ color: "#f5f1e8", fontSize: 22, fontWeight: 800, letterSpacing: "0.15em", margin: 0 }}>WALL</p>
-      <p style={{ color: "#888", fontSize: 11, letterSpacing: "0.1em", margin: "3px 0 0" }}>LOCAL ADS, STUCK HERE</p>
+      <p style={{ color: "#f5f1e8", fontSize: 22, fontWeight: 800, letterSpacing: "0.1em", margin: 0 }}>
+        Local<span style={{ color: "#f43d38" }}>Wall</span>
+      </p>
+      <p style={{ color: "#888", fontSize: 11, letterSpacing: "0.1em", margin: "3px 0 0" }}>YOUR LOCAL BULLETIN BOARD, ONLINE.</p>
     </div>
   );
 }

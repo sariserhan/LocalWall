@@ -1,12 +1,31 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { toCitySlug, toCategorySlug } from "@/lib/wall-slug";
-import { WallPageShell } from "@/features/wall/wall-page-shell";
+import { AppProviders } from "@/components/app-providers";
+import { HomePage } from "@/features/home/home-page";
+
+export const metadata: Metadata = {
+  title: "LocalWall — Your local community board",
+  description:
+    "Post and browse local ads for services, jobs, real estate, pets, and more in your city. Free listings, affordable upgrades.",
+  openGraph: {
+    title: "LocalWall — Your local community board",
+    description: "Post and browse local ads in your city.",
+    images: [{ url: "/assets/logo-big.png", width: 1254, height: 1254, alt: "LocalWall" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "LocalWall — Your local community board",
+    description: "Post and browse local ads in your city.",
+    images: ["/assets/logo-big.png"],
+  },
+};
 
 interface Props {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
-export default async function HomePage({ searchParams }: Props) {
+export default async function RootPage({ searchParams }: Props) {
   const params = await searchParams;
 
   // Redirect legacy ?country= URLs to path-based routes
@@ -24,5 +43,11 @@ export default async function HomePage({ searchParams }: Props) {
     redirect(`/${parts.join("/")}${qStr ? `?${qStr}` : ""}`);
   }
 
-  return <WallPageShell initialCardId={params.card} initialKeyword={params.keyword} />;
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  return (
+    <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
+      <HomePage />
+    </AppProviders>
+  );
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Country, State } from "country-state-city";
-import { parseCountrySlug, parseStateSlug, parseCityFromSlug } from "@/lib/wall-slug";
+import { parseCountrySlug, parseStateSlug, parseCityFromSlug, parseCategorySlug } from "@/lib/wall-slug";
 import { fetchInitialCards } from "@/lib/server-cards";
 import { WallPageShell } from "@/features/wall/wall-page-shell";
 
@@ -16,16 +16,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!country) return { title: "Wall" };
   const state = parseStateSlug(country, sSlug);
   if (!state) return { title: "Wall" };
-  const city = parseCityFromSlug(country, state, citySlug);
-  if (!city) return { title: "Wall" };
-  const stateName = State.getStatesOfCountry(country).find((s) => s.isoCode === state)?.name ?? state;
   const countryName = Country.getAllCountries().find((c) => c.isoCode === country)?.name ?? country;
-  const loc = `${city}, ${stateName}`;
-  return {
-    title: `${loc} Wall — Local Ads`,
-    description: `Browse local ads and services in ${loc}, ${countryName}. Find plumbers, restaurants, tutors and more.`,
-    openGraph: { title: `${loc} Wall`, description: `Local ads in ${loc}` },
-  };
+  const stateName = State.getStatesOfCountry(country).find((s) => s.isoCode === state)?.name ?? state;
+
+  const city = parseCityFromSlug(country, state, citySlug);
+  if (city) {
+    const loc = `${city}, ${stateName}`;
+    return {
+      title: `${loc} Wall — Local Ads`,
+      description: `Browse local ads and services in ${loc}, ${countryName}. Find plumbers, restaurants, tutors and more.`,
+      openGraph: { title: `${loc} Wall`, description: `Local ads in ${loc}` },
+    };
+  }
+
+  const { category } = parseCategorySlug(citySlug);
+  if (category) {
+    const loc = `${stateName}, ${countryName}`;
+    return {
+      title: `${category} · ${loc} Wall — Local Ads`,
+      description: `Browse ${category} ads in ${loc}.`,
+      openGraph: { title: `${category} in ${loc}`, description: `Local ${category} ads in ${loc}` },
+    };
+  }
+
+  return { title: "Wall" };
 }
 
 export default async function CityPage({ params, searchParams }: Props) {
@@ -35,18 +49,35 @@ export default async function CityPage({ params, searchParams }: Props) {
   if (!country) notFound();
   const state = parseStateSlug(country, sSlug);
   if (!state) notFound();
+
+  // Segment is a city name → country + state + city wall
   const city = parseCityFromSlug(country, state, citySlug);
-  if (!city) notFound();
+  if (city) {
+    const initialCards = await fetchInitialCards({ country, state, city });
+    return (
+      <WallPageShell
+        initialLocation={{ country, state, city }}
+        initialCards={initialCards}
+        initialCardId={sp.card}
+        initialKeyword={sp.keyword}
+      />
+    );
+  }
 
-  const initialCards = await fetchInitialCards({ country, state, city });
-  const location = { country, state, city };
+  // Segment is a category slug → country + state + category wall (no city)
+  const { category } = parseCategorySlug(citySlug);
+  if (category) {
+    const initialCards = await fetchInitialCards({ country, state });
+    return (
+      <WallPageShell
+        initialLocation={{ country, state, city: "" }}
+        initialCategory={category}
+        initialCards={initialCards}
+        initialCardId={sp.card}
+        initialKeyword={sp.keyword}
+      />
+    );
+  }
 
-  return (
-    <WallPageShell
-      initialLocation={location}
-      initialCards={initialCards}
-      initialCardId={sp.card}
-      initialKeyword={sp.keyword}
-    />
-  );
+  notFound();
 }

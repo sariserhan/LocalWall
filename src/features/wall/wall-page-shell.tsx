@@ -26,7 +26,7 @@ export function WallPageShell({
   return (
     <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
       {isConnected ? (
-        <Suspense fallback={<div className="app-loading"><strong>WALL</strong><span>Loading your local wall…</span></div>}>
+        <Suspense fallback={<div className="app-loading"><strong>LocalWall</strong><span>Loading your local wall…</span></div>}>
           <ConnectedWallApp
             initialLocation={initialLocation}
             initialCategory={initialCategory}

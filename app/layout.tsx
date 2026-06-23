@@ -13,8 +13,8 @@ import "@fontsource/inter/800.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WALL - Local ads, stuck here",
-  description: "A community wall for local businesses and services.",
+  title: "LocalWall — Your city's community board",
+  description: "Find and post local ads for services, jobs, real estate, and more in your city.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
