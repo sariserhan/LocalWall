@@ -60,6 +60,7 @@ async function resolveIpLocation(): Promise<ResolvedLoc | null> {
 export function HomeSearch() {
   const router = useRouter();
   const recordSearch = useMutation(api.cards.recordSearch);
+  const stats = useQuery(api.cards.getStats);
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("All");
   const [selectedCountry, setSelectedCountry] = useState("US");
@@ -188,7 +189,7 @@ export function HomeSearch() {
             router.push(path);
           }}
         >
-          Post an ad
+          Post for free
         </button>
       </div>
 
@@ -198,7 +199,7 @@ export function HomeSearch() {
           <input
             type="text"
             className="home-search-input"
-            placeholder="e.g. Plumber"
+            placeholder="Plumber, couch, tutor..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             aria-label="Keyword"
@@ -213,7 +214,7 @@ export function HomeSearch() {
             aria-label="Category"
           >
             {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>{c === "All" ? "All categories" : c}</option>
             ))}
           </select>
         </div>
@@ -288,6 +289,16 @@ export function HomeSearch() {
           </span>
         ) : null}
       </div>
+
+      {stats ? (
+        <div className="home-hero-stats">
+          <span>{stats.totalListings.toLocaleString()} ACTIVE LISTINGS</span>
+          <span className="home-hero-stats-sep">·</span>
+          <span>{stats.totalBusinesses.toLocaleString()} {stats.totalBusinesses === 1 ? "BUSINESS" : "BUSINESSES"}</span>
+          <span className="home-hero-stats-sep">·</span>
+          <span>{stats.totalCities.toLocaleString()} CITIES</span>
+        </div>
+      ) : null}
     </div>
   );
 }

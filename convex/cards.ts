@@ -820,3 +820,19 @@ export const report = mutation({
     return { success: true };
   },
 });
+
+export const getStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const published = await ctx.db
+      .query("cards")
+      .withIndex("by_status_created", (q) => q.eq("status", "published"))
+      .collect();
+    const active = published.filter((c) => c.expiresAt > now);
+    const totalListings = active.length;
+    const totalBusinesses = new Set(active.map((c) => String(c.ownerId)).filter((id) => id !== "undefined")).size;
+    const totalCities = new Set(active.filter((c) => c.city).map((c) => `${c.country}/${c.state}/${c.city}`)).size;
+    return { totalListings, totalBusinesses, totalCities };
+  },
+});

@@ -12,7 +12,7 @@ export function HomeNav() {
         <small>your local bulletin board</small>
       </Link>
       <nav className="home-nav-right">
-        <Link href="/us" className="home-nav-link">Browse ads</Link>
+        {/* <Link href="/us" className="home-nav-link">Browse ads</Link> */}
         {isSignedIn ? (
           <UserButton />
         ) : (

@@ -5,7 +5,6 @@ import {
   Briefcase,
   Building2,
   Car,
-  Check,
   ClipboardList,
   DollarSign,
   GraduationCap,
@@ -153,12 +152,6 @@ const WHY_ITEMS = [
   },
 ];
 
-const QUAL_STATS = [
-  { Icon: Check, label: "Free to post" },
-  { Icon: Check, label: "No account required" },
-  { Icon: Check, label: "Live in minutes" },
-];
-
 function RecentCard({ card }: { card: WallCard }) {
   const thumb = card.thumbnailImages?.[0] ?? card.images?.[0];
   return (
@@ -197,27 +190,14 @@ export async function HomePage() {
         <section className="home-hero">
           <div className="home-hero-inner">
             <div className="home-hero-text">
-              <h1 className="home-hero-title">Your local bulletin wall</h1>
+              <h1 className="home-hero-title">Your city&apos;s local wall</h1>
               <p className="home-hero-subtitle">
-                Find and post local ads for services, jobs, real estate, and everything in between.
+                Post and discover local services, jobs, rentals, deals, events, and community updates near you.
               </p>
             </div>
             <HomeSearch />
           </div>
         </section>
-
-        {/* ── Qualitative social proof ──────────────────────────────────── */}
-        <div className="home-stats-bar">
-          <div className="home-container home-stats-row">
-            {QUAL_STATS.map((stat, i) => (
-              <div key={stat.label} className="home-stat-item">
-                {i > 0 ? <div className="home-stat-divider" /> : null}
-                <stat.Icon size={16} className="home-stat-icon" />
-                <span className="home-stat-label">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* ── Browse by category ───────────────────────────────────────── */}
         <section className="home-section">
