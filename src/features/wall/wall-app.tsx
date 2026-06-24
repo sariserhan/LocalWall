@@ -776,6 +776,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       onRequestSignIn?.();
       return;
     }
+    if (selected) closeCard();
     setComposer(true);
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, MapPin, Sparkles, X } from "lucide-react";
 import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import { Country, State, City } from "country-state-city";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
@@ -32,6 +32,8 @@ interface ComposerForm {
   facebook: string;
   tiktok: string;
   linkedin: string;
+  whatsapp: string;
+  telegram: string;
   theme: CardTheme;
   imageMode: CardImageMode;
   paymentOption: "free" | "2.99" | "7.99" | "24.99";
@@ -66,6 +68,8 @@ const initialForm: ComposerForm = {
   facebook: "",
   tiktok: "",
   linkedin: "",
+  whatsapp: "",
+  telegram: "",
   theme: "yellow",
   imageMode: "photo",
   paymentOption: "free",
@@ -155,10 +159,10 @@ async function clearImagesFromIDB(): Promise<void> {
 }
 
 type ModerationMatch = { field: "name" | "line" | "message"; term: string; start: number; end: number };
-type DetailField = "name" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin";
+type DetailField = "name" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram";
 
 const detailFieldLabels: Record<DetailField, string> = {
-  name: "Business or service", line: "Subtitle", message: "Message", area: "Neighborhood", zipcode: "Zip code", price: "Price", phone: "Phone", email: "Email", website: "Website", location: "Location", instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn",
+  name: "Business or service", line: "Subtitle", message: "Message", area: "Neighborhood", zipcode: "Zip code", price: "Price", phone: "Phone", email: "Email", website: "Website", location: "Location", instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn", whatsapp: "WhatsApp", telegram: "Telegram",
 };
 
 function validWebUrl(value: string) {
@@ -253,6 +257,8 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
     for (const field of ["instagram", "facebook", "tiktok", "linkedin"] as const) {
       if (form[field] && !validSocialProfile(form[field].trim())) errors[field] = "Enter a username, @handle, or complete profile URL.";
     }
+    if (form.whatsapp && !/^[+()0-9.\s-]{7,30}$/.test(form.whatsapp.trim())) errors.whatsapp = "Enter a valid phone number with country code, e.g. +1 555 123 4567.";
+    if (form.telegram && !/^@?[A-Za-z0-9_]{4,32}$|^https?:\/\/(t\.me|telegram\.me)\//.test(form.telegram.trim())) errors.telegram = "Enter a @username or t.me link.";
 
     const fields = Object.keys(detailFieldLabels) as DetailField[];
     fields.forEach((field) => {
@@ -430,6 +436,8 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
       facebook: form.facebook.trim() || undefined,
       tiktok: form.tiktok.trim() || undefined,
       linkedin: form.linkedin.trim() || undefined,
+      whatsapp: form.whatsapp.trim() || undefined,
+      telegram: form.telegram.trim() || undefined,
       featuredTier: form.featuredTier,
       files,
       previews,
@@ -490,7 +498,6 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
             <div className="form-grid">
               <label>Category<select required value={form.category} onChange={(event) => setForm((value) => ({ ...value, category: event.target.value as CardCategory, subcategory: "" }))}><option value="" disabled>— Select a category —</option>{categories.slice(1).map((cat) => <option key={cat}>{cat}</option>)}</select></label>
               <label>Subcategory<select required value={form.subcategory} disabled={!form.category} onChange={(event) => setForm((value) => ({ ...value, subcategory: event.target.value }))}><option value="" disabled>— Select a type —</option>{form.category ? SUBCATEGORY_OPTIONS[form.category as CardCategory].map((sub) => <option key={sub} value={sub}>{sub}</option>) : null}</select></label>
-              <label>Posting on selected wall<input value={`${form.city}${form.state ? `, ${form.state}` : ""}${form.country ? `, ${form.country}` : ""}`} readOnly aria-readonly /></label>
             </div>
             <div className="form-grid">
               <label>Neighborhood<input name="area" maxLength={50} value={form.area} onChange={(event) => setForm((value) => ({ ...value, area: event.target.value }))} placeholder="Optional" />{fieldError("area")}</label>
@@ -510,16 +517,31 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
               <label>Google Maps location <span>(optional)</span><input name="location" type="text" maxLength={300} value={form.location} onChange={(event) => setForm((value) => ({ ...value, location: event.target.value }))} placeholder="Address or Google Maps link" />{fieldError("location")}<small className="field-help">Share only a public business or meeting location.</small></label>
             </fieldset>
             <fieldset style={{ paddingBottom: "20px" }}>
-              <legend>Social media <span>(optional)</span></legend>
+              <legend>Social media &amp; messaging <span>(optional)</span></legend>
               <div className="form-grid social-fields">
                 <label>Instagram<input name="instagram" maxLength={240} value={form.instagram} onChange={(event) => setForm((value) => ({ ...value, instagram: event.target.value }))} placeholder="@yourbusiness" />{fieldError("instagram")}</label>
                 <label>Facebook<input name="facebook" maxLength={240} value={form.facebook} onChange={(event) => setForm((value) => ({ ...value, facebook: event.target.value }))} placeholder="facebook.com/yourbusiness" />{fieldError("facebook")}</label>
                 <label>TikTok<input name="tiktok" maxLength={240} value={form.tiktok} onChange={(event) => setForm((value) => ({ ...value, tiktok: event.target.value }))} placeholder="@yourbusiness" />{fieldError("tiktok")}</label>
                 <label>LinkedIn<input name="linkedin" maxLength={240} value={form.linkedin} onChange={(event) => setForm((value) => ({ ...value, linkedin: event.target.value }))} placeholder="linkedin.com/company/yourbusiness" />{fieldError("linkedin")}</label>
+                <label>WhatsApp<input name="whatsapp" type="tel" inputMode="tel" maxLength={30} value={form.whatsapp} onChange={(event) => setForm((value) => ({ ...value, whatsapp: event.target.value }))} placeholder="+1 555 123 4567" />{fieldError("whatsapp")}</label>
+                <label>Telegram<input name="telegram" maxLength={100} value={form.telegram} onChange={(event) => setForm((value) => ({ ...value, telegram: event.target.value }))} placeholder="@yourusername or t.me/..." />{fieldError("telegram")}</label>
               </div>
             </fieldset>
             </div>
-            <aside className="details-live-preview"><span>Live card</span><div className="details-preview-canvas"><LiveCardPreview form={form} image={previews[0]} /></div><small>Updates as you type</small></aside>
+            <aside className="details-live-preview">
+              <span>Live card</span>
+              <div className="details-preview-canvas"><LiveCardPreview form={form} image={previews[0]} /></div>
+              <small>Updates as you type</small>
+              <div className="details-wall-location">
+                <MapPin size={13} aria-hidden="true" />
+                <div>
+                  <span className="details-wall-location-label">Posting on</span>
+                  <strong className="details-wall-location-name">
+                    {[form.city, form.state, form.country].filter(Boolean).join(", ") || "Selected wall"}
+                  </strong>
+                </div>
+              </div>
+            </aside>
           </div>
         ) : step === 1 ? (
           <div className="composer-body design-step">

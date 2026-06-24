@@ -338,6 +338,11 @@ button { color: inherit; }
 .details-live-preview > span { justify-self: start; color: #555; font: 800 9px var(--font-inter); letter-spacing: 1px; text-transform: uppercase; }
 .details-live-preview > small { color: #666; font: 600 9px var(--font-inter); text-transform: uppercase; }
 .details-preview-canvas { width: 100%; height: 330px; display: grid; place-items: center; overflow: hidden; }
+.details-wall-location { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 14px; border: 2px solid #f43d38; background: #fff8f8; }
+.details-wall-location svg { flex-shrink: 0; color: #f43d38; }
+.details-wall-location > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.details-wall-location-label { font: 700 9px var(--font-inter); letter-spacing: .9px; text-transform: uppercase; color: #888; }
+.details-wall-location-name { display: block; font: 900 15px/1.1 var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .3px; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .composer-live-card { position: relative; left: auto; top: auto; flex: 0 0 auto; cursor: default; animation: none; transform: rotate(var(--r)); }
 .composer-live-card:hover { transform: rotate(var(--r)); filter: none; box-shadow: 2px 5px 2px #0005, 12px 18px 22px #0003; }
 .composer-preview-message { position: relative; z-index: 1; display: -webkit-box; margin: 4px 0 8px; overflow: hidden; font: 600 11px/1.35 var(--font-inter); opacity: .82; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
@@ -726,6 +731,21 @@ button { color: inherit; }
 .danger-confirm { background: #a51d16; box-shadow: 3px 3px 0 #64100c; }
 .renewal-dialog { width: min(560px, 100%); }
 .renewal-dialog > svg { color: #2a9d58; }
+.report-modal { width: min(480px, 100%); text-align: left; }
+.report-modal > svg { color: #b42318; }
+.report-modal h3 { text-align: center; }
+.report-modal > div { grid-template-columns: 1fr 1fr; }
+.report-modal-reasons { display: grid; gap: 7px; margin: 4px 0 16px; }
+.report-reason-btn { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 11px 14px; border: 1px solid #aaa; background: #f8f6f1; cursor: pointer; text-align: left; transition: border-color .13s, background .13s, box-shadow .13s; }
+.report-reason-btn:hover { border-color: #555; background: #f0ede6; }
+.report-reason-btn.selected { border-color: #111; background: #edcf35; box-shadow: 3px 3px 0 #111; }
+.report-reason-btn strong { font: 800 13px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; }
+.report-reason-btn span { font: 600 11px var(--font-inter); color: #555; }
+.report-reason-btn.selected span { color: #333; }
+.report-details-label { display: block; margin-bottom: 20px; font: 800 11px var(--font-inter); letter-spacing: .7px; text-transform: uppercase; }
+.report-details-label span { color: #777; text-transform: none; font-weight: 600; }
+.report-details-textarea { display: block; width: 100%; margin-top: 7px; padding: 10px 12px; border: 1px solid #aaa; background: #f6f4ef; font: 600 13px var(--font-inter); resize: vertical; outline: 0; }
+.report-details-textarea:focus { border-color: #111; box-shadow: 0 0 0 2px #edcf35; }
 .renewal-options { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 8px !important; margin: 4px 0 22px; }
 .renewal-option { position: relative; min-height: 82px; display: grid; place-content: center; gap: 4px; border: 1px solid #999; background: #f8f6f1; cursor: pointer; }
 .renewal-option:hover, .renewal-option.selected { border-color: #111; background: #edcf35; box-shadow: 3px 3px 0 #111; }

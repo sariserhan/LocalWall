@@ -60,6 +60,8 @@ export const completePaidCard = internalMutation({
       facebook: payload.facebook,
       tiktok: payload.tiktok,
       linkedin: payload.linkedin,
+      whatsapp: payload.whatsapp,
+      telegram: payload.telegram,
       theme: payload.theme,
       imageMode: payload.imageMode,
       imageIds: payload.imageIds,

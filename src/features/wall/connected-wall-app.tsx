@@ -328,6 +328,8 @@ export function ConnectedWallApp({
       facebook: draft.facebook,
       tiktok: draft.tiktok,
       linkedin: draft.linkedin,
+      whatsapp: draft.whatsapp,
+      telegram: draft.telegram,
       paidAmount: basePaidAmount,
       featuredTier: featuredTierArg,
       theme: draft.theme,

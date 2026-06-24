@@ -93,6 +93,8 @@ export interface WallCard {
   facebook?: string;
   tiktok?: string;
   linkedin?: string;
+  whatsapp?: string;
+  telegram?: string;
   theme: CardTheme;
   imageMode?: CardImageMode;
   images: string[];
@@ -129,7 +131,7 @@ export interface OwnerCard extends WallCard {
 
 export type RenewalAmount = 0 | 2.99 | 7.99 | 24.99;
 
-export type CardUpdate = Pick<OwnerCard, "name" | "category" | "subcategory" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "theme">;
+export type CardUpdate = Pick<OwnerCard, "name" | "category" | "subcategory" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram" | "theme">;
 
 export interface CardDraft {
   name: string;
@@ -152,6 +154,8 @@ export interface CardDraft {
   facebook?: string;
   tiktok?: string;
   linkedin?: string;
+  whatsapp?: string;
+  telegram?: string;
   theme: CardTheme;
   imageMode: CardImageMode;
   paymentOption: "free" | "2.99" | "7.99" | "24.99";

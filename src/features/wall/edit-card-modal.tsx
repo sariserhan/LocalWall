@@ -27,6 +27,8 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
     facebook: card.facebook,
     tiktok: card.tiktok,
     linkedin: card.linkedin,
+    whatsapp: card.whatsapp,
+    telegram: card.telegram,
     theme: card.theme,
   }));
   const [saving, setSaving] = useState(false);
@@ -82,7 +84,7 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
             <label>Card style<select value={form.theme} onChange={(event) => setField("theme", event.target.value as CardTheme)}>{cardThemes.map((theme) => <option key={theme} value={theme}>{themeLabels[theme]}</option>)}</select></label>
           </div>
           <fieldset><legend>Contact</legend><div className="form-grid"><label>Phone<input type="tel" maxLength={30} value={form.phone ?? ""} onChange={(event) => setField("phone", event.target.value || undefined)} /></label><label>Email<input type="email" maxLength={120} value={form.email ?? ""} onChange={(event) => setField("email", event.target.value || undefined)} /></label></div><label>Website <span>(optional)</span><input inputMode="url" maxLength={240} value={form.website ?? ""} onChange={(event) => setField("website", event.target.value || undefined)} /></label><label>Google Maps location <span>(optional)</span><input maxLength={300} value={form.location ?? ""} onChange={(event) => setField("location", event.target.value || undefined)} /></label></fieldset>
-          <fieldset><legend>Social media <span>(optional)</span></legend><div className="form-grid"><label>Instagram<input maxLength={240} value={form.instagram ?? ""} onChange={(event) => setField("instagram", event.target.value || undefined)} /></label><label>Facebook<input maxLength={240} value={form.facebook ?? ""} onChange={(event) => setField("facebook", event.target.value || undefined)} /></label><label>TikTok<input maxLength={240} value={form.tiktok ?? ""} onChange={(event) => setField("tiktok", event.target.value || undefined)} /></label><label>LinkedIn<input maxLength={240} value={form.linkedin ?? ""} onChange={(event) => setField("linkedin", event.target.value || undefined)} /></label></div></fieldset>
+          <fieldset><legend>Social media &amp; messaging <span>(optional)</span></legend><div className="form-grid"><label>Instagram<input maxLength={240} value={form.instagram ?? ""} onChange={(event) => setField("instagram", event.target.value || undefined)} /></label><label>Facebook<input maxLength={240} value={form.facebook ?? ""} onChange={(event) => setField("facebook", event.target.value || undefined)} /></label><label>TikTok<input maxLength={240} value={form.tiktok ?? ""} onChange={(event) => setField("tiktok", event.target.value || undefined)} /></label><label>LinkedIn<input maxLength={240} value={form.linkedin ?? ""} onChange={(event) => setField("linkedin", event.target.value || undefined)} /></label><label>WhatsApp<input type="tel" maxLength={30} value={form.whatsapp ?? ""} onChange={(event) => setField("whatsapp", event.target.value || undefined)} placeholder="+1 555 123 4567" /></label><label>Telegram<input maxLength={100} value={form.telegram ?? ""} onChange={(event) => setField("telegram", event.target.value || undefined)} placeholder="@yourusername" /></label></div></fieldset>
         </div>
         <footer><button type="button" className="secondary" onClick={onClose}>Cancel</button><button className="primary" disabled={saving}><Save /> {saving ? "Saving…" : "Save changes"}</button></footer>
       </form>

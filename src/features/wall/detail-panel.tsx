@@ -1,7 +1,7 @@
 "use client";
 
 import { Bookmark, ExternalLink, Flag, Heart, Mail, Phone, Share2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { WallCard } from "./types";
 import { SocialLinks } from "./social-links";
@@ -12,6 +12,15 @@ function websiteHref(website: string) {
 }
 
 type CardEvent = "website" | "phone" | "email" | "social" | "save" | "share";
+type ReportReason = "spam" | "scam" | "inappropriate" | "expired" | "other";
+
+const REPORT_REASONS: { value: ReportReason; label: string; description: string }[] = [
+  { value: "spam", label: "Spam", description: "Repeated, irrelevant, or unsolicited content" },
+  { value: "scam", label: "Scam", description: "Fraudulent or misleading listing" },
+  { value: "inappropriate", label: "Inappropriate", description: "Adult, offensive, or unsafe content" },
+  { value: "expired", label: "Expired", description: "Service no longer available" },
+  { value: "other", label: "Other", description: "Something else not listed above" },
+];
 
 export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn, liked = false, canLike = true, onToggleLike }: {
   card: WallCard;
@@ -34,6 +43,12 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [liking, setLiking] = useState(false);
   const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<ReportReason>("spam");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
+  const reportFirstRef = useRef<HTMLButtonElement>(null);
   const phoneRevealed = revealedPhoneFor === String(card.id);
 
   useEffect(() => setOptimisticSaved(saved), [saved]);
@@ -102,11 +117,23 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     }
   };
 
-  const report = async () => {
-    const details = window.prompt("Why are you reporting this card? Describe spam, a scam, inappropriate content, or an expired listing.");
-    if (!details?.trim() || !onReport) return;
-    await onReport("other", details.trim());
-    window.alert("Thanks. The report was sent to the WALL moderation queue.");
+  const openReport = () => {
+    setReportReason("spam");
+    setReportDetails("");
+    setReportDone(false);
+    setReportOpen(true);
+    window.setTimeout(() => reportFirstRef.current?.focus(), 50);
+  };
+
+  const submitReport = async () => {
+    if (!onReport || reportSubmitting) return;
+    setReportSubmitting(true);
+    try {
+      await onReport(reportReason, reportDetails.trim() || undefined);
+      setReportDone(true);
+    } finally {
+      setReportSubmitting(false);
+    }
   };
 
   const hasContact = Boolean(card.phone || card.email || card.website);
@@ -147,7 +174,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
       </div>
       <div className="detail-secondary-actions">
         <button type="button" className="secondary" onClick={() => void shareCard()}><Share2 /> Share</button>
-        {onReport ? <button type="button" className="secondary" onClick={() => void report()}><Flag /> Report</button> : null}
+        {onReport ? <button type="button" className="secondary" onClick={openReport}><Flag /> Report</button> : null}
       </div>
       <div className="sheet-meta"><span>{viewCount > 0 ? `${viewCount} views` : "No views yet"}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
       <ReviewsSection cardId={card.id} onRequestSignIn={onRequestSignIn} />
@@ -155,6 +182,63 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         <div className="image-lightbox" role="dialog" aria-modal="true" aria-label={`${card.name} image preview`} onMouseDown={(event) => event.target === event.currentTarget && setExpandedImage(null)}>
           <button className="image-lightbox-close" type="button" onClick={() => setExpandedImage(null)} aria-label="Close full-screen image" autoFocus><X /></button>
           <img src={expandedImage} alt={`${card.name} full-screen preview`} />
+        </div>,
+        document.body,
+      ) : null}
+      {reportOpen ? createPortal(
+        <div
+          className="dashboard-confirm-backdrop"
+          onMouseDown={(e) => e.target === e.currentTarget && setReportOpen(false)}
+          onKeyDown={(e) => e.key === "Escape" && setReportOpen(false)}
+        >
+          <div className="dashboard-confirm report-modal" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+            <Flag size={34} />
+            <h3 id="report-modal-title">Report this card</h3>
+            {reportDone ? (
+              <>
+                <p>Thanks — your report was sent to the moderation queue.</p>
+                <div style={{ gridTemplateColumns: "1fr" }}>
+                  <button className="primary" onClick={() => setReportOpen(false)}>Close</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="report-modal-reasons" role="radiogroup" aria-label="Report reason">
+                  {REPORT_REASONS.map(({ value, label, description }, i) => (
+                    <button
+                      key={value}
+                      ref={i === 0 ? reportFirstRef : undefined}
+                      type="button"
+                      role="radio"
+                      aria-checked={reportReason === value}
+                      className={`report-reason-btn${reportReason === value ? " selected" : ""}`}
+                      onClick={() => setReportReason(value)}
+                    >
+                      <strong>{label}</strong>
+                      <span>{description}</span>
+                    </button>
+                  ))}
+                </div>
+                <label className="report-details-label">
+                  Additional details <span>(optional)</span>
+                  <textarea
+                    className="report-details-textarea"
+                    maxLength={500}
+                    rows={3}
+                    placeholder="Anything else the moderation team should know?"
+                    value={reportDetails}
+                    onChange={(e) => setReportDetails(e.target.value)}
+                  />
+                </label>
+                <div>
+                  <button className="secondary" onClick={() => setReportOpen(false)} disabled={reportSubmitting}>Cancel</button>
+                  <button className="primary danger-confirm" onClick={() => void submitReport()} disabled={reportSubmitting}>
+                    {reportSubmitting ? "Sending…" : "Submit report"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>,
         document.body,
       ) : null}
