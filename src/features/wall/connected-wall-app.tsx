@@ -3,6 +3,8 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/lib/use-theme";
 import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -75,6 +77,7 @@ export function ConnectedWallApp({
   }, [pathname, searchParams]);
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
   const hasAppliedInitialServerSnapshotRef = useRef(false);
   const queryCountry = initialLocation?.country || undefined;
@@ -481,7 +484,17 @@ export function ConnectedWallApp({
       onReportCard={async (card, reason, details) => {
         await reportCard({ cardId: card.id as Id<"cards">, reason, details });
       }}
-      authControl={isClerkSignedIn ? <UserButton /> : null}
+      authControl={isClerkSignedIn ? (
+        <UserButton>
+          <UserButton.MenuItems>
+            <UserButton.Action
+              label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              labelIcon={isDark ? <Sun size={14} /> : <Moon size={14} />}
+              onClick={toggleTheme}
+            />
+          </UserButton.MenuItems>
+        </UserButton>
+      ) : null}
       notice={checkoutMessage}
       ownerCards={isAuthenticated ? (ownerCards ?? []) : undefined}
       savedCards={isAuthenticated ? (savedCards ?? []) : []}
