@@ -23,7 +23,14 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { startTransition, useCallback, useDeferredValue, useMemo, useRef, useState, useEffect, type PointerEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Country, State, City } from "country-state-city";
+// Lazy-loaded to keep ~1MB country-state-city out of the initial bundle.
+// All call sites await loadCSC() (async paths) or read `csc` state (render paths).
+let _csc: typeof import("country-state-city") | null = null;
+async function loadCSC() {
+  if (_csc) return _csc;
+  _csc = await import("country-state-city");
+  return _csc;
+}
 import { LocationCombobox } from "./location-combobox";
 
 const Composer = dynamic(() => import("./composer").then((m) => ({ default: m.Composer })), { ssr: false, loading: () => null });
@@ -158,6 +165,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       document.removeEventListener("touchmove", block);
     };
   }, [selected, dashboard, composer]);
+
+  // Preload country-state-city after mount so it's ready before any interaction
+  const [csc, setCSC] = useState<typeof import("country-state-city") | null>(null);
+  useEffect(() => { void loadCSC().then(setCSC); }, []);
+
   const [category, setCategory] = useState<(typeof categories)[number]>(() => {
     const cat = initialCategory ?? "";
     return (categories as readonly string[]).includes(cat) ? cat as (typeof categories)[number] : "All";
@@ -295,11 +307,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
 
   const getCountryName = (isoCode?: string) => {
     if (!isoCode) return "";
-    return Country.getAllCountries().find((country) => country.isoCode === isoCode)?.name ?? isoCode;
+    return csc?.Country.getAllCountries().find((country) => country.isoCode === isoCode)?.name ?? isoCode;
   };
 
   const getStateName = (country: string, stateCode: string) => {
-    return State.getStatesOfCountry(country).find((state) => state.isoCode === stateCode)?.name ?? stateCode;
+    return csc?.State.getStatesOfCountry(country).find((state) => state.isoCode === stateCode)?.name ?? stateCode;
   };
 
   const locationLabel = () => {
@@ -325,6 +337,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
 
   const fetchUserLocation = async () => {
     try {
+      const { Country, State, City } = await loadCSC();
       const cached = window.sessionStorage.getItem("wall-ip-location-v1");
       const cachedEntry = cached ? JSON.parse(cached) as { expiresAt: number; data: Record<string, unknown> } : null;
       const data = cachedEntry && cachedEntry.expiresAt > Date.now()
@@ -430,8 +443,9 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       }
     };
 
-    const tryFetchForSelected = () => {
+    const tryFetchForSelected = async () => {
       if (!selectedCountry) return;
+      const { City } = await loadCSC();
       const stateCode = selectedState;
       const cityName = selectedCity;
       if (stateCode && cityName) {
@@ -508,7 +522,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       const raw = window.localStorage.getItem("wallLocation");
       if (raw) {
         const saved = JSON.parse(raw) as { country: string; state: string; city: string };
-        if (saved?.country && Country.getAllCountries().some((c) => c.isoCode === saved.country)) {
+        if (saved?.country && /^[A-Z]{2,3}$/.test(saved.country)) {
           setSelectedCountry(saved.country);
           setSelectedState(saved.state || "");
           setSelectedCity(saved.city || "");
@@ -546,8 +560,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterOpen]);
 
-  const availableStates = State.getStatesOfCountry(draftCountry);
-  const availableCities = draftState ? City.getCitiesOfState(draftCountry, draftState) : [];
+  const availableStates = csc ? csc.State.getStatesOfCountry(draftCountry) : [];
+  const availableCities = (csc && draftState) ? csc.City.getCitiesOfState(draftCountry, draftState) : [];
   const hasStateOptions = availableStates.length > 0;
   const hasCityOptions = availableCities.length > 0;
 
@@ -925,7 +939,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   <label className="filter-panel-label">Country
                     <LocationCombobox
                       value={draftCountry}
-                      options={Country.getAllCountries().map((c) => ({ value: c.isoCode, label: c.name }))}
+                      options={csc ? csc.Country.getAllCountries().map((c) => ({ value: c.isoCode, label: c.name })) : []}
                       onChange={(val) => { setDraftCountry(val); setDraftState(""); setDraftCity(""); }}
                       placeholder="Type a country…"
                     />
@@ -1146,7 +1160,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                         setMapLoading(false);
                         return;
                       }
-                      const states = State.getStatesOfCountry(countryCode);
+                      const { State: CSCState, City: CSCCity } = await loadCSC();
+                      const states = CSCState.getStatesOfCountry(countryCode);
                       const stateName = String(address.state || address.region || address.county || "");
                       
                       // Improved state matching: try exact match, then partial match, then pick first available
@@ -1159,7 +1174,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                       const selectedStateCode = matchedState?.isoCode ?? states[0]?.isoCode ?? "";
                       
                       const cityName = String(address.city || address.town || address.village || address.hamlet || address.county || "");
-                      const availableCities = City.getCitiesOfState(countryCode, selectedStateCode);
+                      const availableCities = CSCCity.getCitiesOfState(countryCode, selectedStateCode);
                       
                       // Improved city matching: try exact match first, then find closest by lat/lon
                       let finalCity = "";
@@ -1216,7 +1231,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
               {selectedMapPoint ? (
                 (() => {
-                  const hasStates = State.getStatesOfCountry(selectedMapPoint.countryCode).length > 0;
+                  const hasStates = csc ? csc.State.getStatesOfCountry(selectedMapPoint.countryCode).length > 0 : false;
                   const suppressStateFor = new Set(["TR"]);
                   const showState = hasStates && selectedMapPoint.stateName && !suppressStateFor.has(selectedMapPoint.countryCode);
                   return (
