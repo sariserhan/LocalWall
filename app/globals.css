@@ -1118,6 +1118,9 @@ button { color: inherit; }
 .home-location-precise-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,.55); padding: 0 0 1px; font: 600 13px var(--font-inter); color: #fff; cursor: pointer; }
 .home-location-precise-btn:hover:not(:disabled) { border-bottom-color: #fff; opacity: 1; }
 .home-location-precise-btn:disabled { opacity: .5; cursor: wait; }
+.home-search-locate-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; background: none; border: 0; border-bottom: 1px dotted #888; padding: 0 0 1px; font: 700 9px var(--font-inter); letter-spacing: .5px; text-transform: uppercase; color: #666; cursor: pointer; white-space: nowrap; }
+.home-search-locate-btn:hover:not(:disabled) { color: #111; border-bottom-color: #111; }
+.home-search-locate-btn:disabled { opacity: .45; cursor: wait; }
 .home-search-error { margin: 0; font: 600 11px var(--font-inter); color: #ffa0a0; }
 .home-hero-stats { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 20px; font: 700 13px var(--font-inter); letter-spacing: 1px; color: #fff; text-transform: uppercase; background: rgba(0,0,0,.45); border-radius: 999px; padding: 10px 18px; }
 .home-hero-stats-sep { color: rgba(255,255,255,.35); }

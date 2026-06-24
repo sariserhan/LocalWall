@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Country, State } from "country-state-city";
-import { ChevronDown, Crosshair, Loader2, MapPin, Search } from "lucide-react";
+import { ChevronDown, Crosshair, LocateFixed, Loader2, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import { buildWallPath } from "@/lib/wall-slug";
 import { categories } from "@/features/wall/types";
@@ -225,6 +225,16 @@ export function HomeSearch() {
           <span className="home-search-label">
             Location
             {detectingOnLoad ? <Loader2 size={9} className="locate-spin" style={{ marginLeft: 4 }} /> : null}
+            <button
+              type="button"
+              className="home-search-locate-btn"
+              onClick={handlePreciseLocation}
+              disabled={isPreciseLocating || detectingOnLoad}
+              title="Use my location"
+            >
+              {isPreciseLocating ? <Loader2 size={9} className="locate-spin" /> : <LocateFixed size={9} />}
+              Use my location
+            </button>
           </span>
           <HomeLocationPicker
             country={selectedCountry}

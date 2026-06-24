@@ -625,7 +625,26 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     if (locating) return;
     setLocating(true);
     try {
-      const location = await fetchUserLocation();
+      let location: { country: string; state: string; city: string } | null = null;
+
+      if (navigator.geolocation) {
+        location = await new Promise<{ country: string; state: string; city: string } | null>((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              try {
+                const res = await fetch(`/api/location/from-coords?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                resolve(await res.json() as { country: string; state: string; city: string } | null);
+              } catch {
+                resolve(null);
+              }
+            },
+            () => resolve(null),
+            { timeout: 8000 },
+          );
+        });
+      }
+
+      if (!location) location = await fetchUserLocation();
       if (!location) {
         setLocationNotice("Could not detect your location.");
         window.setTimeout(() => setLocationNotice(null), 3200);
