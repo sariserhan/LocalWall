@@ -162,7 +162,6 @@ export function ConnectedWallApp({
   const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminVerifyUser = useMutation(api.admin.setUserVerified);
   const adminResolveReport = useMutation(api.admin.resolveReport);
-  const adminSendTestEmail = useAction(api.admin.sendTestReminderEmail);
   const recordWallVisit = useMutation(api.walls.recordVisit);
   const effectiveWallPath = isCardPage ? cardWallPath : (pathname && pathname !== "/" ? pathname : null);
   const wallData = useQuery(api.walls.getWall, effectiveWallPath ? { path: effectiveWallPath } : "skip");
@@ -569,7 +568,6 @@ export function ConnectedWallApp({
           }}
           onVerifyUser={async (userId, verified) => { await adminVerifyUser({ userId, verified }); }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
-          onSendTestEmail={async (to) => { await adminSendTestEmail({ to }); }}
           onApproveVerification={async (requestId) => { await adminApproveVerification({ requestId }); }}
           onRejectVerification={async (requestId) => { await adminRejectVerification({ requestId }); }}
         />

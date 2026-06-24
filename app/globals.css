@@ -737,7 +737,7 @@ button { color: inherit; }
 .admin-tools-ok { font: 700 11px var(--font-inter); color: #2a7f4f; }
 .admin-controls { display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-bottom: 1px solid #aaa; }
 .admin-tabs { display: flex; border: 1px solid #111; }
-.admin-tabs button { min-width: 92px; min-height: 42px; padding: 0 15px; border: 0; border-right: 1px solid #111; background: transparent; font: 800 12px var(--font-inter); text-transform: uppercase; cursor: pointer; }
+.admin-tabs button { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 92px; min-height: 42px; padding: 0 15px; border: 0; border-right: 1px solid #111; background: transparent; font: 800 12px var(--font-inter); text-transform: uppercase; cursor: pointer; white-space: nowrap; }
 .admin-tabs button:last-child { border-right: 0; }
 .admin-tabs button.selected { background: #111; color: #fff; }
 .admin-search { min-width: min(360px, 48%); display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 0 12px; border: 1px solid #888; background: #f8f6f1; }
@@ -1515,3 +1515,96 @@ button { color: inherit; }
 .nf-btn-secondary:hover { opacity: .8; }
 .nf-card-footer { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 16px; border-top: 1px solid #d4d0c8; font: 800 9px var(--font-barlow-condensed); letter-spacing: .12em; text-transform: uppercase; color: #bbb; }
 .nf-brand { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font: 900 11px var(--font-barlow-condensed); letter-spacing: .22em; color: #fff3; text-transform: uppercase; pointer-events: none; user-select: none; }
+
+/* ─── Admin Playground ─────────────────────────────────────────────────────── */
+.admin-tab-playground { background: #fff8e6 !important; color: #b45309 !important; }
+.admin-tab-playground.selected { background: #b45309 !important; color: #fff !important; }
+
+.pg-root { padding: 0 0 32px; }
+.pg-header { display: flex; align-items: flex-start; gap: 10px; padding: 14px 22px; background: #fffbf0; border-bottom: 1px solid #eedba0; }
+.pg-header strong { display: block; font: 700 12px var(--font-inter); color: #92400e; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 2px; }
+.pg-header span { font: 400 11px/1.4 var(--font-inter); color: #92400e; opacity: .75; }
+.pg-header svg { margin-top: 2px; color: #b45309; flex-shrink: 0; }
+
+.pg-section { border-bottom: 1px solid #eee; }
+.pg-section-header { width: 100%; display: flex; align-items: center; gap: 8px; padding: 12px 22px; background: none; border: none; cursor: pointer; text-align: left; transition: background .12s; }
+.pg-section-header:hover { background: #f8f6f1; }
+.pg-section-icon { color: #b45309; display: flex; }
+.pg-section-title { flex: 1; font: 600 12px var(--font-inter); color: #333; text-transform: uppercase; letter-spacing: .05em; }
+.pg-section-header svg:last-child { color: #aaa; }
+.pg-section-body { padding: 18px 22px 20px; border-top: 1px solid #f0ede6; background: #fdfcfa; }
+
+.pg-fields { display: flex; flex-direction: column; gap: 12px; }
+.pg-field { display: flex; flex-direction: column; gap: 4px; }
+.pg-field span { font: 600 10px var(--font-inter); text-transform: uppercase; letter-spacing: .06em; color: #666; }
+.pg-field input, .pg-field select { padding: 7px 10px; border: 1px solid #d4d0c8; border-radius: 5px; font: 400 13px var(--font-inter); background: #fff; color: #1a1a18; outline: none; transition: border-color .12s; }
+.pg-field input:focus, .pg-field select:focus { border-color: #b45309; }
+.pg-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pg-row-3 { display: grid; grid-template-columns: 80px 80px 1fr; gap: 10px; }
+
+.pg-plan-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pg-plan-btn { padding: 6px 11px; border: 1.5px solid #d4d0c8; border-radius: 5px; background: #fff; font: 500 11px var(--font-inter); color: #444; cursor: pointer; transition: all .12s; display: flex; align-items: center; gap: 5px; }
+.pg-plan-btn:hover { border-color: #b45309; color: #b45309; }
+.pg-plan-btn.selected { border-color: #b45309; background: #b45309; color: #fff; }
+.pg-plan-tag { font: 700 8px var(--font-inter); text-transform: uppercase; letter-spacing: .06em; padding: 2px 5px; border-radius: 3px; background: #edcf35; color: #1a1a18; }
+.pg-plan-tag.free { background: #e5e5e5; color: #666; }
+
+.pg-action-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 16px; border: none; border-radius: 6px; background: #b45309; color: #fff; font: 700 12px var(--font-inter); cursor: pointer; transition: opacity .12s; }
+.pg-action-btn:hover:not(:disabled) { opacity: .85; }
+.pg-action-btn:disabled { opacity: .45; cursor: not-allowed; }
+.pg-action-btn.secondary { background: #1a1a18; }
+.pg-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.pg-hint { margin: 0; font: 400 11px/1.5 var(--font-inter); color: #999; }
+.pg-hint code { font-family: monospace; background: #f0ede6; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+.pg-loading, .pg-empty { font: 400 12px var(--font-inter); color: #aaa; padding: 16px 0; }
+
+.pg-error { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: #fee2e2; border-radius: 5px; font: 400 12px var(--font-inter); color: #b91c1c; }
+.pg-error button { background: none; border: none; cursor: pointer; color: #b91c1c; display: flex; padding: 0; }
+.pg-ok { display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #d1fae5; border-radius: 5px; font: 600 12px var(--font-inter); color: #065f46; }
+
+.pg-card-list { display: flex; flex-direction: column; gap: 14px; }
+.pg-card-row { border: 1px solid #e5e3de; border-radius: 7px; overflow: hidden; background: #fff; }
+.pg-card-info { display: flex; align-items: baseline; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #f0ede6; background: #faf8f5; }
+.pg-card-info strong { font: 600 13px var(--font-inter); color: #1a1a18; }
+.pg-card-meta { font: 400 11px var(--font-inter); color: #888; }
+.pg-card-tier { font: 700 9px var(--font-inter); text-transform: uppercase; letter-spacing: .06em; padding: 2px 6px; border-radius: 3px; background: #edcf35; color: #1a1a18; }
+.pg-card-actions { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; }
+.pg-card-action-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pg-card-action-right { justify-content: flex-end; }
+.pg-action-label { font: 600 10px var(--font-inter); text-transform: uppercase; letter-spacing: .05em; color: #888; min-width: 68px; }
+.pg-sm-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px solid #d4d0c8; border-radius: 5px; background: #fff; font: 500 11px var(--font-inter); color: #444; cursor: pointer; transition: all .12s; }
+.pg-sm-btn:hover:not(:disabled) { border-color: #b45309; color: #b45309; }
+.pg-sm-btn:disabled { opacity: .4; cursor: not-allowed; }
+.pg-sm-btn.danger { color: #b91c1c; border-color: #fca5a5; }
+.pg-sm-btn.danger:hover:not(:disabled) { background: #fee2e2; border-color: #b91c1c; }
+.pg-inline-select { padding: 5px 8px; border: 1px solid #d4d0c8; border-radius: 5px; font: 400 11px var(--font-inter); background: #fff; color: #444; cursor: pointer; }
+.pg-confirm-label { font: 600 11px var(--font-inter); color: #b91c1c; }
+
+.pg-verify-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pg-verify-status { font: 700 12px var(--font-inter); color: #999; }
+.pg-verify-status.yes { color: #065f46; }
+
+.pg-payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pg-payment-item { padding: 12px 14px; border: 1px solid #e5e3de; border-radius: 7px; background: #faf8f5; }
+.pg-payment-item strong { display: block; font: 700 12px var(--font-inter); color: #1a1a18; margin-bottom: 4px; }
+.pg-payment-item span { font: 400 11px/1.5 var(--font-inter); color: #666; }
+.pg-mode-toggle { display: flex; gap: 0; border: 1.5px solid #d4d0c8; border-radius: 7px; overflow: hidden; align-self: flex-start; }
+.pg-mode-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #fff; border: none; border-right: 1.5px solid #d4d0c8; font: 600 11px var(--font-inter); color: #666; cursor: pointer; transition: background .12s, color .12s; }
+.pg-mode-btn:last-child { border-right: none; }
+.pg-mode-btn:hover:not(.selected) { background: #f8f6f1; color: #333; }
+.pg-mode-btn.selected { background: #1a1a18; color: #f5f1e8; }
+.pg-plan-btn-disabled { opacity: .35 !important; cursor: not-allowed !important; }
+.pg-bulk-row { display: flex; flex-direction: column; gap: 6px; }
+.pg-action-label { font: 600 10px var(--font-inter); text-transform: uppercase; letter-spacing: .05em; color: #888; }
+.pg-bulk-input { width: 64px; padding: 6px 8px; border: 1.5px solid #d4d0c8; border-radius: 5px; font: 600 12px var(--font-inter); color: #333; text-align: center; }
+.pg-bulk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pg-progress { position: relative; background: #f0ede6; border-radius: 6px; overflow: hidden; height: 28px; display: flex; align-items: center; padding: 0 10px; }
+.pg-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; background: #b45309; transition: width .2s ease; }
+.pg-progress span { position: relative; z-index: 1; font: 700 11px var(--font-inter); color: #fff; mix-blend-mode: difference; }
+.pg-create-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pg-wall-link { display: inline-flex; align-items: center; gap: 5px; font: 600 11px var(--font-inter); color: #b45309; text-decoration: none; padding: 7px 12px; border: 1.5px solid #b45309; border-radius: 6px; transition: background .12s; white-space: nowrap; }
+.pg-wall-link:hover { background: #fff8e6; }
+.pg-wall-link-bottom { margin-top: 4px; }
+.pg-inline-link { color: #b45309; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 520px) { .pg-payment-grid { grid-template-columns: 1fr; } .pg-row-2 { grid-template-columns: 1fr; } .pg-create-row { flex-direction: column; align-items: flex-start; } }

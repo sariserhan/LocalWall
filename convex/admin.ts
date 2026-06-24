@@ -326,3 +326,193 @@ export const unblockUser = mutation({
     return { success: true, restoredCards };
   },
 });
+
+// ─── Admin Playground ────────────────────────────────────────────────────────
+
+const PG_DURATIONS: Record<number, number> = {
+  0:     1  * 24 * 60 * 60 * 1000,
+  2.99:  30 * 24 * 60 * 60 * 1000,
+  7.99:  90 * 24 * 60 * 60 * 1000,
+  19.99: 90 * 24 * 60 * 60 * 1000,
+  24.99: 365 * 24 * 60 * 60 * 1000,
+};
+
+export const playgroundGetMyCards = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) return { cards: [], verified: false };
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).take(100);
+    const now = Date.now();
+    return {
+      cards: cards.map((c) => ({
+        id: c._id,
+        name: c.name,
+        status: c.status === "published" && c.expiresAt <= now ? "expired" : c.status,
+        expiresAt: c.expiresAt,
+        paidAmount: c.paidAmount,
+        featuredTier: c.featuredTier ?? null,
+        city: c.city,
+        country: c.country,
+        createdAt: c.createdAt,
+      })),
+      verified: user.verified ?? false,
+    };
+  },
+});
+
+export const playgroundCreateCard = mutation({
+  args: {
+    name: v.string(),
+    category: v.string(),
+    line: v.string(),
+    country: v.string(),
+    state: v.string(),
+    city: v.string(),
+    theme: v.string(),
+    paidAmount: v.number(),
+    featuredTier: v.optional(v.union(v.literal("bronze"), v.literal("silver"), v.literal("gold"))),
+    pending: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) throw new Error("Admin user not found in database.");
+    const now = Date.now();
+    const duration = PG_DURATIONS[args.paidAmount] ?? PG_DURATIONS[0];
+    const status = args.pending ? "hidden" : "published";
+    const cardId = await ctx.db.insert("cards", {
+      ownerId: user._id,
+      name: args.name,
+      category: args.category as any,
+      line: args.line,
+      area: args.city,
+      country: args.country,
+      state: args.state,
+      city: args.city,
+      theme: args.theme as any,
+      imageIds: [],
+      x: 8 + Math.random() * 70,
+      y: 60 + Math.random() * 300,
+      rotation: (Math.random() - 0.5) * 10,
+      width: 220,
+      zIndex: now,
+      status,
+      paidAmount: args.paidAmount,
+      expiresAt: now + duration,
+      positionLockedAt: now,
+      clicks: 0,
+      createdAt: now,
+      ...(args.featuredTier ? { featuredTier: args.featuredTier } : {}),
+    });
+    return { cardId };
+  },
+});
+
+export const playgroundSetExpiry = mutation({
+  args: { cardId: v.id("cards"), expiresAt: v.number() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card) throw new Error("Card not found.");
+    const now = Date.now();
+    await ctx.db.patch(args.cardId, {
+      expiresAt: args.expiresAt,
+      status: args.expiresAt > now ? "published" : "expired",
+      updatedAt: now,
+    });
+    return { success: true };
+  },
+});
+
+export const playgroundSetFeaturedTier = mutation({
+  args: { cardId: v.id("cards"), tier: v.optional(v.union(v.literal("bronze"), v.literal("silver"), v.literal("gold"))) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    await ctx.db.patch(args.cardId, { featuredTier: args.tier, updatedAt: Date.now() });
+    return { success: true };
+  },
+});
+
+export const playgroundRenewCard = mutation({
+  args: { cardId: v.id("cards"), paidAmount: v.number() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card) throw new Error("Card not found.");
+    const duration = PG_DURATIONS[args.paidAmount] ?? PG_DURATIONS[0];
+    const now = Date.now();
+    const expiresAt = Math.max(now, card.expiresAt) + duration;
+    await ctx.db.patch(args.cardId, { paidAmount: args.paidAmount, expiresAt, status: "published", updatedAt: now });
+    return { success: true, expiresAt };
+  },
+});
+
+export const playgroundSetVerified = mutation({
+  args: { verified: v.boolean() },
+  handler: async (ctx, args) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) throw new Error("Admin user not found.");
+    await ctx.db.patch(user._id, {
+      verified: args.verified || undefined,
+      verifiedAt: args.verified ? Date.now() : undefined,
+    });
+    return { success: true };
+  },
+});
+
+export const playgroundDeleteCard = mutation({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const card = await ctx.db.get(args.cardId);
+    if (!card) throw new Error("Card not found.");
+    const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
+    await Promise.all([...storedImages].map((id) => ctx.storage.delete(id)));
+    await ctx.db.delete(args.cardId);
+    return { success: true };
+  },
+});
+
+export const playgroundDeleteAllMyCards = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) throw new Error("Admin user not found.");
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).take(500);
+    let deleted = 0;
+    for (const card of cards) {
+      const storedImages = [...card.imageIds, ...(card.thumbnailImageIds ?? [])];
+      for (const id of storedImages) await ctx.storage.delete(id);
+      await ctx.db.delete(card._id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});
+
+export const playgroundSendDigestTest = action({
+  args: { to: v.string() },
+  handler: async (ctx, args) => {
+    const access = await ctx.runQuery(api.admin.getAccess, {});
+    if (!access.isAdmin) throw new Error("Administrator access is required.");
+    const apiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    if (!apiKey) throw new Error("RESEND_API_KEY is not configured.");
+    const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0ede6;margin:0;padding:24px;"><div style="max-width:500px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);"><div style="background:#1a1a18;padding:22px 32px;text-align:center;"><p style="color:#f5f1e8;font-size:22px;font-weight:800;letter-spacing:.15em;margin:0;">WALL</p><p style="color:#888;font-size:11px;letter-spacing:.1em;margin:4px 0 0;">LOCAL ADS, STUCK HERE</p></div><div style="padding:32px 24px 28px;"><p style="margin:0 0 4px;font-size:11px;color:#e67e22;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">&#9888; Test digest from admin</p><h2 style="margin:0 0 6px;font-size:20px;color:#1a1a18;">New listings this week</h2><p style="color:#666;margin:0 0 24px;font-size:14px;line-height:1.6;">Here are the latest cards posted in <strong>Your City, US</strong>. This is a test digest to verify the email pipeline.</p><div style="background:#f5f1e8;border-radius:8px;padding:16px 18px;margin-bottom:12px;"><strong style="font-size:14px;color:#1a1a18;">Sample Plumber Co.</strong><p style="margin:4px 0 0;font-size:12px;color:#666;">Services &middot; Downtown</p></div><div style="background:#f5f1e8;border-radius:8px;padding:16px 18px;margin-bottom:24px;"><strong style="font-size:14px;color:#1a1a18;">Cats &amp; Dogs Grooming</strong><p style="margin:4px 0 0;font-size:12px;color:#666;">Pets &middot; Midtown</p></div><a href="${appUrl}/us" style="display:block;text-align:center;background:#f43d38;color:#fff;padding:14px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;">View all listings</a><p style="margin:28px 0 0;font-size:11px;color:#bbb;text-align:center;"><a href="${appUrl}/unsubscribe?token=test" style="color:#bbb;">Unsubscribe</a></p></div></div></body></html>`;
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: fromEmail, to: [args.to], subject: "TEST DIGEST — New listings on WALL", html }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Resend error: ${res.status} ${body}`);
+    }
+    return { ok: true };
+  },
+});

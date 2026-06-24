@@ -1,8 +1,9 @@
 "use client";
 
-import { AlertTriangle, BarChart2, Check, Eye, EyeOff, Flag, Mail, Phone, Search, Send, ShieldCheck, Share2, Bookmark, ExternalLink, MapPin, Trash2, UserRound, X, XCircle } from "lucide-react";
+import { AlertTriangle, BarChart2, Bookmark, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { AdminPlayground } from "./admin-playground";
 
 export interface AdminDashboardData {
   stats: { cards: number; published: number; users: number; reports: number; searches: number; pendingVerifications?: number };
@@ -58,7 +59,6 @@ interface AdminPanelProps {
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onVerifyUser: (userId: Id<"users">, verified: boolean) => Promise<void>;
   onResolveReport: (reportId: Id<"reports">) => Promise<void>;
-  onSendTestEmail: (to: string) => Promise<void>;
   onApproveVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
   onRejectVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
 }
@@ -67,14 +67,12 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onSendTestEmail, onApproveVerification, onRejectVerification }: AdminPanelProps) {
-  const [tab, setTab] = useState<"cards" | "users" | "reports" | "analytics" | "verification">("cards");
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+  const [tab, setTab] = useState<"cards" | "users" | "reports" | "analytics" | "verification" | "playground">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [testEmailTo, setTestEmailTo] = useState("");
-  const [testEmailStatus, setTestEmailStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
@@ -135,43 +133,17 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
           <div><Search /><span>Searches (30d)</span><strong>{data?.stats.searches ?? "—"}</strong></div>
         </div>
 
-        <div className="admin-tools">
-          <label htmlFor="admin-test-email-input"><Mail size={13} />Test reminder email</label>
-          <input
-            id="admin-test-email-input"
-            type="email"
-            placeholder="recipient@example.com"
-            value={testEmailTo}
-            onChange={(e) => { setTestEmailTo(e.target.value); setTestEmailStatus("idle"); }}
-          />
-          <button
-            className="secondary"
-            disabled={testEmailStatus === "sending" || !testEmailTo.includes("@")}
-            onClick={async () => {
-              setTestEmailStatus("sending");
-              setError(null);
-              try {
-                await onSendTestEmail(testEmailTo);
-                setTestEmailStatus("sent");
-              } catch (cause) {
-                setError(cause instanceof Error ? cause.message : "Test email failed.");
-                setTestEmailStatus("error");
-              }
-            }}
-          >
-            {testEmailStatus === "sending" ? "Sending…" : testEmailStatus === "sent" ? <><Check size={13} /> Sent</> : <><Send size={13} /> Send test</>}
-          </button>
-          {testEmailStatus === "sent" ? <span className="admin-tools-ok">Email sent</span> : null}
-        </div>
-
         <div className="admin-controls">
           <div className="admin-tabs" role="tablist" aria-label="Admin sections">
-            <button role="tab" aria-selected={tab === "cards"} className={tab === "cards" ? "selected" : ""} onClick={() => setTab("cards")}>Cards</button>
-            <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "selected" : ""} onClick={() => setTab("users")}>Users</button>
-            <button role="tab" aria-selected={tab === "reports"} className={tab === "reports" ? "selected" : ""} onClick={() => setTab("reports")}>Reports</button>
+            <button role="tab" aria-selected={tab === "cards"} className={tab === "cards" ? "selected" : ""} onClick={() => setTab("cards")}><Layers size={13} /> Cards</button>
+            <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "selected" : ""} onClick={() => setTab("users")}><UserRound size={13} /> Users</button>
+            <button role="tab" aria-selected={tab === "reports"} className={tab === "reports" ? "selected" : ""} onClick={() => setTab("reports")}><Flag size={13} /> Reports</button>
             <button role="tab" aria-selected={tab === "analytics"} className={tab === "analytics" ? "selected" : ""} onClick={() => setTab("analytics")}><BarChart2 size={13} /> Analytics</button>
             <button role="tab" aria-selected={tab === "verification"} className={tab === "verification" ? "selected" : ""} onClick={() => setTab("verification")}>
               <ShieldCheck size={13} /> Verifications{(data?.stats.pendingVerifications ?? 0) > 0 ? <span className="admin-tab-badge">{data?.stats.pendingVerifications}</span> : null}
+            </button>
+            <button role="tab" aria-selected={tab === "playground"} className={`${tab === "playground" ? "selected" : ""} admin-tab-playground`} onClick={() => setTab("playground")}>
+              <FlaskConical size={13} /> Playground
             </button>
           </div>
           {tab !== "analytics" ? <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}`} aria-label={`Search ${tab}`} /></label> : null}
@@ -394,6 +366,12 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
               );
             })}
             {!(data.verificationRequests ?? []).length ? <div className="dashboard-empty">No verification requests yet.</div> : null}
+          </div>
+        ) : null}
+
+        {tab === "playground" ? (
+          <div role="tabpanel">
+            <AdminPlayground />
           </div>
         ) : null}
       </section>
