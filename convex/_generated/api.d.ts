@@ -11,6 +11,8 @@
 import type * as admin from "../admin.js";
 import type * as cards from "../cards.js";
 import type * as crons from "../crons.js";
+import type * as digest from "../digest.js";
+import type * as http from "../http.js";
 import type * as payments from "../payments.js";
 import type * as paymentsInternal from "../paymentsInternal.js";
 import type * as rateLimits from "../rateLimits.js";
@@ -30,6 +32,8 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   cards: typeof cards;
   crons: typeof crons;
+  digest: typeof digest;
+  http: typeof http;
   payments: typeof payments;
   paymentsInternal: typeof paymentsInternal;
   rateLimits: typeof rateLimits;

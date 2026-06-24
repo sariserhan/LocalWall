@@ -189,6 +189,19 @@ export default defineSchema({
     .index("by_card", ["cardId"])
     .index("by_status_and_createdAt", ["status", "createdAt"]),
 
+  digestSubscriptions: defineTable({
+    email: v.string(),
+    country: v.string(),
+    state: v.string(),
+    city: v.string(),
+    unsubscribeToken: v.string(),
+    createdAt: v.number(),
+    lastSentAt: v.optional(v.number()),
+  })
+    .index("by_email", ["email"])
+    .index("by_token", ["unsubscribeToken"])
+    .index("by_city_and_createdAt", ["country", "state", "city", "createdAt"]),
+
   searchEvents: defineTable({
     keyword: v.optional(v.string()),
     category: v.optional(v.string()),

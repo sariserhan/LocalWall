@@ -86,6 +86,7 @@ interface WallAppProps {
   cardDailyStats?: { dates: string[]; byCard: Record<string, number[]> } | null;
   wallViewCount?: number;
   onCategoryChange?: (category: string) => void;
+  onSubscribeDigest?: (email: string, country: string, state: string, city: string) => Promise<{ alreadySubscribed: boolean }>;
 }
 
 const MAX_CARD_Y = 1500;
@@ -133,7 +134,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange, onSubscribeDigest }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -194,6 +195,9 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [placement, setPlacement] = useState<Placement>({ x: 40, y: 170 });
   const [dragging, setDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [digestEmail, setDigestEmail] = useState("");
+  const [digestStatus, setDigestStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [digestMessage, setDigestMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [locationDropdown, setLocationDropdown] = useState(false);
   const [locationNotice, setLocationNotice] = useState<string | null>(null);
@@ -1352,10 +1356,65 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       </section>
       {notice ? <div className="notice-toast" role="status">{notice}</div> : null}
       <footer className={`app-footer${mode === "connected" && pendingCardsOnSelectedWall > 0 && onRefreshWall ? " has-refresh-notice" : ""}`}>
-        <nav className="legal-links" aria-label="Legal links">
-          <Link href="/terms-and-conditions">Terms & Conditions</Link>
-          <Link href="/privacy-policy">Privacy Policy</Link>
-        </nav>
+        <div className="footer-inner">
+          {/* left — intentionally empty */}
+          <div className="footer-col footer-col-left" />
+
+          {/* center — legal links */}
+          <nav className="footer-col footer-col-center footer-legal" aria-label="Legal links">
+            <Link href="/terms-and-conditions">Terms & Conditions</Link>
+            <Link href="/privacy-policy">Privacy Policy</Link>
+          </nav>
+
+          {/* right — digest widget */}
+          <div className="footer-col footer-col-right">
+            {mode === "connected" && locationReady && selectedCity && onSubscribeDigest ? (
+              digestStatus === "done" ? (
+                <p className="footer-digest-success">{digestMessage}</p>
+              ) : (
+                <div className="footer-digest-widget">
+                  <div className="footer-digest-copy">
+                    <p className="footer-digest-eyebrow">Weekly Digest</p>
+                    <h3 className="footer-digest-headline">New in {selectedCity}, every Monday.</h3>
+                  </div>
+                  <form
+                    className="footer-digest-form"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!digestEmail.trim()) return;
+                      setDigestStatus("submitting");
+                      try {
+                        const result = await onSubscribeDigest(digestEmail.trim(), selectedCountry, selectedState, selectedCity);
+                        setDigestMessage(result.alreadySubscribed
+                          ? `Already subscribed for ${selectedCity}.`
+                          : `You're in! Digest for ${selectedCity} lands every Monday.`);
+                        setDigestStatus("done");
+                        setDigestEmail("");
+                      } catch {
+                        setDigestMessage("Could not subscribe. Try again.");
+                        setDigestStatus("error");
+                        setTimeout(() => setDigestStatus("idle"), 3000);
+                      }
+                    }}
+                  >
+                    <input
+                      type="email"
+                      className="footer-digest-input"
+                      placeholder="your@email.com"
+                      value={digestEmail}
+                      onChange={(e) => setDigestEmail(e.target.value)}
+                      disabled={digestStatus === "submitting"}
+                      required
+                    />
+                    <button type="submit" className="footer-digest-btn" disabled={digestStatus === "submitting"}>
+                      {digestStatus === "submitting" ? "…" : "Subscribe"}
+                    </button>
+                  </form>
+                </div>
+              )
+            ) : null}
+          </div>
+        </div>
       </footer>
       {mode === "connected" && pendingCardsOnSelectedWall > 0 && onRefreshWall ? (
         <button className="wall-refresh-notice" type="button" onClick={onRefreshWall}>

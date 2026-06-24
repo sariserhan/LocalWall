@@ -180,6 +180,7 @@ export function ConnectedWallApp({
     if (!savedWallsList) return [];
     return savedWallsList.map((item) => ({ path: item.path, label: item.label, createdAt: item.createdAt }));
   }, [savedWallsList]);
+  const subscribeDigest = useMutation(api.digest.subscribe);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
   const finalizeSubscriptionPosting = useAction(api.payments.finalizeSubscriptionPosting);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
@@ -525,6 +526,7 @@ export function ConnectedWallApp({
       }}
       onRenewCard={handleRenew}
       onCancelAutoRenewCard={handleCancelAutoRenew}
+      onSubscribeDigest={async (email, country, state, city) => subscribeDigest({ email, country, state, city })}
       onMoveCard={async (card, placement) => {
         await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y });
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
