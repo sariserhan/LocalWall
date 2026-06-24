@@ -77,7 +77,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
     const start = pointerRef.current;
     if (!start || start.id !== event.pointerId) return;
     pointerRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
     onDragEnd?.(event, card);
   };
 

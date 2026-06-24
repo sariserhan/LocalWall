@@ -10,6 +10,7 @@ import {
   Link2,
   LocateFixed,
   MapPin,
+  Menu,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -178,6 +179,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [draftCity, setDraftCity] = useState(defaultSeedLocation.city);
   const [draftNeighborhood, setDraftNeighborhood] = useState(searchParams.get("neighborhood") ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<(typeof categories)[number]>("All");
   const [pendingSubcategory, setPendingSubcategory] = useState("");
   const [pendingFresh, setPendingFresh] = useState(false);
@@ -536,6 +538,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     setLocationNotice(`Location applied. Showing ${label} wall.`);
     window.setTimeout(() => setLocationNotice(null), 3200);
     setLocationDropdown(false);
+    setMobileMenuOpen(false);
   };
 
   const resetToDefault = () => {
@@ -575,6 +578,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       setLocationNotice(`Using your location: ${locationText}`);
       window.setTimeout(() => setLocationNotice(null), 3200);
       setLocationDropdown(false);
+      setMobileMenuOpen(false);
     } finally {
       setLocating(false);
     }
@@ -916,7 +920,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 {locationNotice ? <div className="location-panel-notice">{locationNotice}</div> : null}
                 <div className="filter-panel-footer">
                   <button type="button" className="primary" onClick={() => applyLocation(draftCountry, draftState, draftCity, draftNeighborhood)}>Apply</button>
-                  <button type="button" className="filter-clear-btn" onClick={useMyLocation}>My location</button>
+                  <button type="button" className="filter-clear-btn locate-in-panel" onClick={useMyLocation} disabled={locating}><LocateFixed className={locating ? "locate-spin" : ""} />My location</button>
                   <button type="button" className="filter-clear-btn" onClick={resetToDefault}>Reset</button>
                 </div>
               </div>
@@ -928,7 +932,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           <span>Locate</span>
         </button>
         {/* Map picker temporarily hidden */}
-        <nav>
+        <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen((v) => !v)} aria-label="Toggle menu" aria-expanded={mobileMenuOpen}>
+          {mobileMenuOpen ? <X /> : <Menu />}
+          <span>Menu</span>
+        </button>
+        {mobileMenuOpen && <div className="mobile-menu-backdrop" onClick={() => setMobileMenuOpen(false)} />}
+        <nav className={mobileMenuOpen ? "mobile-open" : ""}>
           <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, business or creator" aria-label="Search advertisements" /></div>
           <div className="filter-wrap">
             {filterOpen && <div className="filter-backdrop" onClick={() => setFilterOpen(false)} />}
@@ -1022,7 +1031,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
             )}
           </div>
-          <button onClick={shareWall}><Link2 />{shareNotice ? "Copied!" : "Share Wall"}</button>
+          <button onClick={() => { void shareWall(); setMobileMenuOpen(false); }}><Link2 />{shareNotice ? "Copied!" : "Share Wall"}</button>
           {pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
@@ -1030,15 +1039,16 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 if (!isSignedIn) { onRequestSignIn?.(); return; }
                 const wallLabel = [locationLabel(), category !== "All" ? category : null, subcategory || null].filter(Boolean).join(" · ");
                 void onSetSavedWall?.(wallLabel, !savedWall);
+                setMobileMenuOpen(false);
               }}
               aria-label={savedWall ? "Unsave this wall" : "Save this wall"}
             >
               <Bookmark />{savedWall ? "Wall saved" : "Save wall"}
             </button>
           ) : null}
-          {ownerCards ? <button onClick={() => setDashboard(true)}><LayoutDashboard /> My Board</button> : null}
-          {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => onOpenAdmin()}><ShieldCheck /> Admin</button> : null}
-          <button className="mobile-nav-post" onClick={openComposer}><Plus />Post your card</button>
+          {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenuOpen(false); }}><LayoutDashboard /> My Board</button> : null}
+          {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}><ShieldCheck /> Admin</button> : null}
+          <button className="mobile-nav-post" onClick={() => { openComposer(); setMobileMenuOpen(false); }}><Plus />Post your card</button>
         </nav>
         {authControl ? <div className="auth-control">{authControl}</div> : null}
         <button className="primary post-button" onClick={openComposer}><Plus />Post your card</button>
@@ -1265,7 +1275,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             <span>{listView ? "Wall" : "List"}</span>
           </button>
           <button aria-label="Show newest cards" onClick={() => setFresh(true)}><Layers3 /><span>Newest</span></button>
-          <button aria-label="Reset wall" onClick={resetFilters}><RotateCcw /><span>Reset</span></button>
+          {/* <button aria-label="Reset wall" onClick={resetFilters}><RotateCcw /><span>Reset</span></button> */}
         </div>
         <div className="wall-count">
           {wallViewCount !== undefined && mode === "connected" ? `${wallViewCount.toLocaleString()} WALL VIEWS · ` : ""}

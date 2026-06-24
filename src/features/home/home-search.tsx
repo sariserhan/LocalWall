@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Country, State } from "country-state-city";
-import { Crosshair, Loader2, MapPin, Search } from "lucide-react";
+import { ChevronDown, Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import { buildWallPath } from "@/lib/wall-slug";
 import { categories } from "@/features/wall/types";
@@ -207,16 +207,19 @@ export function HomeSearch() {
         </div>
         <div className="home-search-field">
           <span className="home-search-label">Category</span>
-          <select
-            className="home-search-select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            aria-label="Category"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>{c === "All" ? "All categories" : c}</option>
-            ))}
-          </select>
+          <div className="home-select-wrap">
+            <select
+              className="home-search-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label="Category"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>{c === "All" ? "All categories" : c}</option>
+              ))}
+            </select>
+            <ChevronDown className="home-select-chevron" />
+          </div>
         </div>
         <div className="home-search-field home-search-field-location">
           <span className="home-search-label">
