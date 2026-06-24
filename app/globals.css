@@ -275,6 +275,13 @@ button { color: inherit; }
 .detail-card-actions .secondary { min-height: 54px; }
 .detail-secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .detail-secondary-actions button { justify-content: center; }
+.share-menu-wrap { position: relative; display: flex; flex-direction: column; }
+.share-menu-wrap > button { flex: 1; }
+.share-menu { position: absolute; bottom: calc(100% + 6px); left: 0; min-width: 170px; background: #fff; border: 1px solid #e0dbd0; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.12); overflow: hidden; z-index: 200; }
+.share-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 14px; font-size: 13px; font-weight: 500; background: none; border: none; border-radius: 0; cursor: pointer; color: #222; transition: background .12s; }
+.share-menu button:hover { background: #f5f1e8; }
+.share-menu-whatsapp { color: #128c3e !important; }
+.share-menu-whatsapp:hover { background: #f0faf3 !important; }
 .secondary.is-saved { background: #111; color: #f5f1e8; }
 .secondary.like-btn.is-liked { background: #f43d38; color: #fff; border-color: #f43d38; }
 .wide { width: 100%; min-height: 54px; margin-top: 12px; }

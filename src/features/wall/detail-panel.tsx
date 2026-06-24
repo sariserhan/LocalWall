@@ -1,11 +1,20 @@
 "use client";
 
-import { Bookmark, ExternalLink, Flag, Heart, Mail, Phone, Share2, X } from "lucide-react";
+import { Bookmark, Copy, ExternalLink, Flag, Heart, Mail, Phone, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { WallCard } from "./types";
 import { SocialLinks } from "./social-links";
 import { ReviewsSection } from "./reviews-section";
+
+function WhatsAppIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L.057 23.886a.75.75 0 0 0 .918.919l6.105-1.48A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.37l-.36-.214-3.724.902.922-3.63-.235-.374A9.818 9.818 0 1 1 12 21.818z"/>
+    </svg>
+  );
+}
 
 function websiteHref(website: string) {
   return /^https?:\/\//i.test(website) ? website : `https://${website}`;
@@ -43,6 +52,8 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [liking, setLiking] = useState(false);
   const [revealedPhoneFor, setRevealedPhoneFor] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState<ReportReason>("spam");
   const [reportDetails, setReportDetails] = useState("");
@@ -63,6 +74,17 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [expandedImage]);
+
+  useEffect(() => {
+    if (!shareMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target as Node)) setShareMenuOpen(false);
+    };
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === "Escape") setShareMenuOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleEscape);
+    return () => { document.removeEventListener("mousedown", handleClick); document.removeEventListener("keydown", handleEscape); };
+  }, [shareMenuOpen]);
 
   const handleToggleLike = async () => {
     if (!onToggleLike || liking) return;
@@ -95,7 +117,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     }
   };
 
-  const shareCard = async () => {
+  const buildCardUrl = () => {
     const url = new URL("/", window.location.origin);
     if (card.country) url.searchParams.set("country", card.country);
     if (card.state) url.searchParams.set("state", card.state);
@@ -103,18 +125,41 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     const rawId = String(card.id);
     const cleanId = rawId.length > 32 ? rawId.slice(0, 32) : rawId;
     url.searchParams.set("card", cleanId);
-    const shareData = { title: card.name, url: url.toString() };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(url.toString());
+    return url.toString();
+  };
+
+  const sharingRef = useRef(false);
+  const handleShareClick = async () => {
+    const url = buildCardUrl();
+    if (navigator.share) {
+      if (sharingRef.current) return;
+      sharingRef.current = true;
+      try {
+        await navigator.share({ title: card.name, url });
+        onEvent?.("share");
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        throw err;
+      } finally {
+        sharingRef.current = false;
       }
-      onEvent?.("share");
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      throw err;
+    } else {
+      setShareMenuOpen((o) => !o);
     }
+  };
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(buildCardUrl());
+    onEvent?.("share");
+    setShareMenuOpen(false);
+  };
+
+  const shareOnWhatsApp = () => {
+    const url = buildCardUrl();
+    const text = `${card.name}${card.line ? ` — ${card.line}` : ""}\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+    onEvent?.("share");
+    setShareMenuOpen(false);
   };
 
   const openReport = () => {
@@ -173,7 +218,15 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         {canLike ? <button className={`secondary like-btn${optimisticLiked ? " is-liked" : ""}`} onClick={() => { if (!onToggleLike) { onRequestSignIn?.(); return; } void handleToggleLike(); }} aria-pressed={optimisticLiked} disabled={liking}><Heart fill={optimisticLiked ? "currentColor" : "none"} /> {optimisticLikeCount > 0 ? optimisticLikeCount : "Like"}</button> : null}
       </div>
       <div className="detail-secondary-actions">
-        <button type="button" className="secondary" onClick={() => void shareCard()}><Share2 /> Share</button>
+        <div className="share-menu-wrap" ref={shareMenuRef}>
+          <button type="button" className="secondary" onClick={() => void handleShareClick()}><Share2 /> Share</button>
+          {shareMenuOpen ? (
+            <div className="share-menu" role="menu">
+              <button type="button" role="menuitem" onClick={() => void copyLink()}><Copy size={14} /> Copy link</button>
+              <button type="button" role="menuitem" className="share-menu-whatsapp" onClick={shareOnWhatsApp}><WhatsAppIcon /> WhatsApp</button>
+            </div>
+          ) : null}
+        </div>
         {onReport ? <button type="button" className="secondary" onClick={openReport}><Flag /> Report</button> : null}
       </div>
       <div className="sheet-meta"><span>{viewCount > 0 ? `${viewCount} views` : "No views yet"}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
