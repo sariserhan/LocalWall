@@ -1458,7 +1458,10 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         <div className="stack-picker-backdrop" onClick={() => setStackPickerCards(null)}>
           <div className="stack-picker" onClick={(event) => event.stopPropagation()}>
             <div className="stack-picker-header">
-              <strong>Stacked cards at this spot</strong>
+              <div className="stack-picker-title-row">
+                <span className="stack-picker-count" aria-label={`${stackPickerCards.length} cards`}>{stackPickerCards.length}</span>
+                <strong>Stacked cards at this spot</strong>
+              </div>
               <button className="icon-btn" onClick={() => setStackPickerCards(null)} aria-label="Close"><X /></button>
             </div>
             <p className="stack-picker-subtitle">Pick which card you want to open.</p>

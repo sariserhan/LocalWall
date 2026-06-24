@@ -149,7 +149,7 @@ export const listPublished = query({
       ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!).eq("state", args.state!)).order("desc").collect()
       : args.country
       ? await ctx.db.query("cards").withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) => q.eq("status", "published").eq("country", args.country!)).order("desc").collect()
-      : await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).order("desc").take(200);
+      : await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).order("desc").collect();
 
     const visibleCards = cards.filter((card) => card.expiresAt > now);
 
@@ -308,7 +308,6 @@ export const getCardForEmbed = query({
 export const getLiveViewCounts = query({
   args: { cardIds: v.array(v.id("cards")) },
   handler: async (ctx, args) => {
-    if (args.cardIds.length > 200) throw new Error("Too many cards requested.");
     return await Promise.all(args.cardIds.map(async (cardId) => {
       const stats = await ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", cardId)).unique();
       if (stats) return { id: cardId, clicks: stats.clicks, likes: stats.likes ?? 0 };
@@ -375,7 +374,7 @@ export const listMine = query({
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) return [];
 
-    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).order("desc").take(100);
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).order("desc").collect();
     return Promise.all(cards.map(async (card) => {
       const [urls, thumbnailUrls, stats] = await Promise.all([
         Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),

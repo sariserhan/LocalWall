@@ -622,7 +622,9 @@ button { color: inherit; }
 .stack-picker-backdrop { position: fixed; inset: 0; z-index: 7600; display: grid; place-items: center; padding: 18px; background: #111b; backdrop-filter: blur(2px); }
 .stack-picker { width: min(560px, 100%); max-height: min(78vh, 680px); overflow: auto; background: #eeece7; box-shadow: 8px 12px 35px #0007; }
 .stack-picker-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #aaa; }
+.stack-picker-title-row { display: flex; align-items: center; gap: 10px; }
 .stack-picker-header strong { font: 800 18px var(--font-barlow-condensed); text-transform: uppercase; }
+.stack-picker-count { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 8px; background: #edcf35; color: #1a1a18; font: 900 20px/1 var(--font-inter); border: 2.5px solid #1a1a18; outline: 2px solid #edcf35; outline-offset: 1px; box-shadow: 1px 1px 0 #1a1a18, 2px 2px 0 #1a1a18; transform: rotate(-3deg); flex-shrink: 0; }
 .stack-picker-subtitle { margin: 0; padding: 10px 20px 0; font: 600 12px var(--font-inter); letter-spacing: .04em; text-transform: uppercase; color: #555; }
 .stack-picker-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; padding: 14px 20px 20px; }
 .stack-picker-card { position: relative; min-height: 245px; display: flex; flex-direction: column; width: 100%; border: 0; border-radius: 1px; padding: 16px 14px 12px; text-align: left; cursor: pointer; background: #edede8; color: #171717; box-shadow: 2px 5px 2px #0005, 10px 14px 18px #0003; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; overflow: hidden; }

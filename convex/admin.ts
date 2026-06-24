@@ -343,7 +343,7 @@ export const playgroundGetMyCards = query({
     const identity = await requireAdmin(ctx);
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) return { cards: [], verified: false };
-    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).take(100);
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect();
     const now = Date.now();
     return {
       cards: cards.map((c) => ({
@@ -393,8 +393,8 @@ export const playgroundCreateCard = mutation({
       city: args.city,
       theme: args.theme as any,
       imageIds: [],
-      x: 8 + Math.random() * 70,
-      y: 60 + Math.random() * 300,
+      x: 4 + Math.random() * 82,
+      y: 40 + Math.random() * 1400,
       rotation: (Math.random() - 0.5) * 10,
       width: 220,
       zIndex: now,
@@ -482,7 +482,7 @@ export const playgroundDeleteAllMyCards = mutation({
     const identity = await requireAdmin(ctx);
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) throw new Error("Admin user not found.");
-    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).take(500);
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect();
     let deleted = 0;
     for (const card of cards) {
       const storedImages = [...card.imageIds, ...(card.thumbnailImageIds ?? [])];
