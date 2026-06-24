@@ -245,6 +245,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const closingCardRef = useRef<string | null>(null);
   const currentCardParam = initialCardId ?? searchParams.get("card");
   const savedCardIds = useMemo(() => new Set(savedCards.map((card) => String(card.id))), [savedCards]);
+  const ownerExpiryMap = useMemo(() => {
+    if (!ownerCards?.length) return null;
+    return new Map(ownerCards.map((c) => [String(c.id), c.expiresAt]));
+  }, [ownerCards]);
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
   useEffect(() => {
     if (cards.length === 0) return;
@@ -1311,6 +1316,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 const override = positionOverrides[String(sourceCard.id)];
                 const card = override ? { ...sourceCard, ...override } : sourceCard;
                 const ownerDraggable = Boolean(onMoveCard && ownedCardIds?.has(String(card.id)));
+                const ownerExpiry = ownerDraggable ? ownerExpiryMap?.get(String(card.id)) : undefined;
+                const expiringSoon = ownerExpiry !== undefined && ownerExpiry <= Date.now() + THREE_DAYS_MS;
                 return (
                   <WallCard
                     key={card.id}
@@ -1319,6 +1326,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                     onOpen={handleCardClick}
                     onFront={front}
                     ownerDraggable={ownerDraggable}
+                    expiringSoon={expiringSoon}
                     dragging={movingCardId === String(card.id)}
                     onDragStart={startCardMove}
                     onDragMove={moveOwnedCard}

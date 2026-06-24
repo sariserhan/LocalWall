@@ -9,6 +9,7 @@ interface WallCardProps {
   onOpen: (card: WallCardModel) => void;
   onFront: (id: string) => void;
   ownerDraggable?: boolean;
+  expiringSoon?: boolean;
   dragging?: boolean;
   onDragStart?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
   onDragMove?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
@@ -27,7 +28,7 @@ function hashString(value: string): number {
   return Math.abs(hash);
 }
 
-export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false, dragging = false, onDragStart, onDragMove, onDragEnd, zIndex }: WallCardProps) {
+export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false, expiringSoon = false, dragging = false, onDragStart, onDragMove, onDragEnd, zIndex }: WallCardProps) {
   const pointerRef = useRef<{ id: number; x: number; y: number } | null>(null);
   const didDragRef = useRef(false);
   const seed = hashString(String(card.id));
@@ -83,7 +84,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
 
   return (
     <article
-      className={`wall-card theme-${displayTheme} ${card.imageMode === "business-card" && cardImage ? "image-business-card" : ""} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""} ${card.featuredTier ? `featured-${card.featuredTier}` : ""}`}
+      className={`wall-card theme-${displayTheme} ${card.imageMode === "business-card" && cardImage ? "image-business-card" : ""} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""} ${card.featuredTier ? `featured-${card.featuredTier}` : ""} ${expiringSoon ? "is-expiring-soon" : ""}`}
       style={style}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -104,6 +105,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
       aria-label={ownerDraggable ? `Your advertisement for ${card.name}. Drag to reposition or activate to open.` : `Open advertisement for ${card.name}`}
     >
       <span className="card-tape" aria-hidden="true" />
+      {expiringSoon ? <span className="card-expiry-warn" aria-label="This card is expiring soon — open your dashboard to renew">⚠ Renew</span> : null}
       {card.featuredTier === "gold" ? <span className="featured-ribbon" aria-label="Featured Gold">⭐ Featured</span> : null}
       {card.featuredTier === "silver" || card.featuredTier === "bronze" ? <span className="featured-badge" aria-label={`Featured ${card.featuredTier}`}>⭐</span> : null}
       <div className="card-copy">

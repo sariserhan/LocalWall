@@ -96,10 +96,14 @@ button { color: inherit; }
 .wall-card::after { content: ''; position: absolute; inset: auto 0 -1px 0; height: 7px; background: inherit; clip-path: polygon(0 0, 8% 35%, 17% 0, 27% 48%, 38% 4%, 48% 35%, 58% 0, 70% 43%, 81% 7%, 91% 38%, 100% 0, 100% 60%, 0 60%); }
 .wall-card:hover, .wall-card:focus-visible, .wall-card.is-active { transform: rotate(calc(var(--r) * .72)) translateY(-4px) scale(1.015); z-index: 1000 !important; filter: saturate(1.03) brightness(1.01); box-shadow: 4px 10px 2px #0004, 12px 20px 26px #0004; }
 .wall-card:active { cursor: pointer; transform: rotate(0) scale(1.04); }
-.wall-card.is-owner-card { cursor: grab; touch-action: none; box-shadow: 2px 5px 2px #0005, 12px 18px 22px #0003, 0 0 0 2.5px #f43d38; }
-.wall-card.is-owner-card:hover, .wall-card.is-owner-card:focus-visible, .wall-card.is-owner-card.is-active { box-shadow: 4px 10px 2px #0004, 12px 20px 26px #0004, 0 0 0 2.5px #f43d38; }
+.wall-card.is-owner-card { cursor: grab; touch-action: none; box-shadow: 2px 5px 2px #0005, 12px 18px 22px #0003, 0 0 0 2.5px #edcf35; }
+.wall-card.is-owner-card:hover, .wall-card.is-owner-card:focus-visible, .wall-card.is-owner-card.is-active { box-shadow: 4px 10px 2px #0004, 12px 20px 26px #0004, 0 0 0 2.5px #edcf35; }
 .wall-card.is-owner-card:active { cursor: grabbing; }
-.wall-card.is-owner-dragging, .wall-card.is-owner-dragging:hover { cursor: grabbing; z-index: 4900 !important; transform: rotate(0) scale(1.035); filter: brightness(1.04); box-shadow: 8px 14px 3px #0004, 18px 28px 34px #0005, 0 0 0 2.5px #f43d38; transition: none; }
+.wall-card.is-owner-dragging, .wall-card.is-owner-dragging:hover { cursor: grabbing; z-index: 4900 !important; transform: rotate(0) scale(1.035); filter: brightness(1.04); box-shadow: 8px 14px 3px #0004, 18px 28px 34px #0005, 0 0 0 2.5px #edcf35; transition: none; }
+.wall-card.is-expiring-soon.is-owner-card { box-shadow: 2px 5px 2px #0005, 12px 18px 22px #0003, 0 0 0 2px #dc2626; }
+.wall-card.is-expiring-soon.is-owner-card:hover, .wall-card.is-expiring-soon.is-owner-card:focus-visible, .wall-card.is-expiring-soon.is-owner-card.is-active { box-shadow: 4px 10px 2px #0004, 12px 20px 26px #0004, 0 0 0 2px #dc2626; }
+.card-expiry-warn { position: absolute; bottom: 22px; right: 8px; padding: 2px 6px; border: 1.5px solid #dc2626; color: #dc2626; font: 800 7px var(--font-inter); letter-spacing: .1em; text-transform: uppercase; transform: rotate(7deg); z-index: 10; pointer-events: none; animation: expiry-pulse 2.8s ease-in-out infinite; }
+@keyframes expiry-pulse { 0%, 100% { opacity: .9; } 50% { opacity: .35; } }
 .card-tape { position: absolute; top: -13px; left: var(--tape-l, 50%); width: var(--tape-w, 80px); height: 25px; transform: translateX(-50%) rotate(var(--tape-r, -2deg)); background: #d9d2b7a8; box-shadow: 0 1px #fff5; opacity: .86; }
 .card-copy { position: relative; z-index: 1; overflow: hidden; }
 .card-view-counter { position: absolute; top: 8px; right: 9px; z-index: 5; display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; background: #111d; color: #f5f1e8; font: 800 8px/1.2 var(--font-inter); letter-spacing: .08em; text-transform: uppercase; border: 1px solid #fff5; pointer-events: none; }
