@@ -190,6 +190,16 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [movingCardId, setMovingCardId] = useState<string | null>(null);
   const [stackPickerCards, setStackPickerCards] = useState<WallCardModel[] | null>(null);
   const [layers, setLayers] = useState<string[]>(seedCards.map((card) => card.id));
+
+  // Keep layers in sync with new cards arriving from Convex (e.g. other users posting).
+  // New IDs are appended so they appear on top of older cards by default.
+  useEffect(() => {
+    setLayers((prev) => {
+      const existing = new Set(prev);
+      const incoming = cards.map((c) => c.id).filter((id) => !existing.has(id));
+      return incoming.length ? [...prev, ...incoming] : prev;
+    });
+  }, [cards]);
   const [listView, setListView] = useState(false);
   const [pendingCard, setPendingCard] = useState<CardDraft | null>(null);
   const [placement, setPlacement] = useState<Placement>({ x: 40, y: 170 });
@@ -730,7 +740,18 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   };
 
   const getCardRect = (card: WallCardModel) => {
-    const wallWidth = wallRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+    const wallEl = wallRef.current;
+    if (wallEl) {
+      const el = wallEl.querySelector<HTMLElement>(`[data-card-id="${card.id}"]`);
+      if (el) {
+        const wallRect = wallEl.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        const left = r.left - wallRect.left;
+        const top = r.top - wallRect.top;
+        return { left, top, right: left + r.width, bottom: top + r.height, width: r.width, height: r.height };
+      }
+    }
+    const wallWidth = wallEl?.getBoundingClientRect().width ?? window.innerWidth;
     const left = (card.x / 100) * wallWidth;
     const top = card.y;
     const width = card.width;
@@ -747,14 +768,16 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     return overlapArea / baseArea;
   };
 
-  const visualZIndex = (card: WallCardModel) => Math.max(card.zIndex, layers.indexOf(card.id) + 1);
+  const visualZIndex = (card: WallCardModel) => {
+    const idx = layers.indexOf(card.id);
+    return idx >= 0 ? idx + 1 : 1;
+  };
 
   const getStackAtCard = (targetCard: WallCardModel) => {
     const targetRect = getCardRect(targetCard);
-    const substantialOverlapThreshold = 0.9;
     const stack = visible.filter((candidate) => {
       const candidateRect = getCardRect(candidate);
-      return overlapRatio(targetRect, candidateRect) >= substantialOverlapThreshold;
+      return overlapRatio(targetRect, candidateRect) >= 0.4;
     });
     return stack.sort((a, b) => visualZIndex(b) - visualZIndex(a));
   };
@@ -1331,7 +1354,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                     onDragStart={startCardMove}
                     onDragMove={moveOwnedCard}
                     onDragEnd={finishCardMove}
-                    zIndex={Math.max(card.zIndex, layers.indexOf(card.id) + 1)}
+                    zIndex={visualZIndex(card)}
                   />
                 );
               })

@@ -85,6 +85,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
   return (
     <article
       className={`wall-card theme-${displayTheme} ${card.imageMode === "business-card" && cardImage ? "image-business-card" : ""} ${active ? "is-active" : ""} ${ownerDraggable ? "is-owner-card" : ""} ${dragging ? "is-owner-dragging" : ""} ${card.featuredTier ? `featured-${card.featuredTier}` : ""} ${expiringSoon ? "is-expiring-soon" : ""}`}
+      data-card-id={card.id}
       style={style}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
