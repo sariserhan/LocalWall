@@ -125,3 +125,28 @@ export const completePaidRenewal = internalMutation({
     return { success: true, status, expiresAt };
   },
 });
+
+export const completeVerificationRequest = internalMutation({
+  args: {
+    sessionId: v.string(),
+    paidAmount: v.number(),
+    plan: v.union(v.literal("monthly"), v.literal("annual")),
+    tokenIdentifier: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("verificationRequests").withIndex("by_session", (q) => q.eq("sessionId", args.sessionId)).unique();
+    if (existing) return { requestId: existing._id, status: existing.status };
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier)).unique();
+    if (!user) throw new Error("Your WALL profile could not be found.");
+    if (user.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
+    const requestId = await ctx.db.insert("verificationRequests", {
+      userId: user._id,
+      status: "pending",
+      plan: args.plan,
+      paidAmount: args.paidAmount,
+      sessionId: args.sessionId,
+      createdAt: Date.now(),
+    });
+    return { requestId, status: "pending" as const };
+  },
+});

@@ -44,6 +44,33 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
 
   try {
     const body = await request.json().catch(() => null);
+
+    const verificationPayload = body?.verificationPayload;
+    if (verificationPayload) {
+      const plan = verificationPayload.plan;
+      if (plan !== "monthly" && plan !== "annual") return json({ error: "Invalid verification plan." }, 400);
+      const unitAmount = plan === "monthly" ? 499 : 1999;
+      const origin = new URL(request.url).origin;
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: plan === "monthly" ? "Verified Business Badge — Monthly" : "Verified Business Badge — Annual",
+              description: "Verified checkmark on all your WALL cards",
+            },
+            unit_amount: unitAmount,
+          },
+          quantity: 1,
+        }],
+        metadata: { kind: "verification", plan, paidAmount: String(unitAmount / 100) },
+        success_url: `${origin}/?checkout=success&kind=verification&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+      });
+      return json({ url: session.url, sessionId: session.id });
+    }
+
     const renewalPayload = body?.renewalPayload;
     if (renewalPayload) {
       const paidAmount = Number(renewalPayload.paidAmount);

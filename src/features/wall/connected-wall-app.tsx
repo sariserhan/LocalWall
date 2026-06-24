@@ -119,7 +119,7 @@ export function ConnectedWallApp({
   const adminAccess = useQuery(api.admin.getAccess, isAuthenticated ? {} : "skip") as { isAdmin: boolean } | undefined;
   const [adminOpen, setAdminOpen] = useState(false);
   const adminDashboard = useQuery(api.admin.getDashboard, adminOpen && adminAccess?.isAdmin ? {} : "skip") as AdminDashboardData | undefined;
-  const profile = useQuery(api.cards.getMyProfile, isAuthenticated ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null } | null | undefined;
+  const profile = useQuery(api.cards.getMyProfile, isAuthenticated ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean; verificationStatus: "pending" | "approved" | "rejected" | null } | null | undefined;
   const updateProfileMutation = useMutation(api.cards.updateProfile);
   const generateUploadUrl = useMutation(api.cards.generateUploadUrl);
   const createCard = useMutation(api.cards.create);
@@ -133,6 +133,7 @@ export function ConnectedWallApp({
   const adminRemoveCard = useMutation(api.admin.removeCard);
   const adminBlockUser = useMutation(api.admin.blockUser);
   const adminUnblockUser = useMutation(api.admin.unblockUser);
+  const adminVerifyUser = useMutation(api.admin.setUserVerified);
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const adminSendTestEmail = useAction(api.admin.sendTestReminderEmail);
   const recordWallVisit = useMutation(api.walls.recordVisit);
@@ -154,6 +155,9 @@ export function ConnectedWallApp({
   }, [savedWallsList]);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
+  const finalizeVerification = useAction(api.payments.finalizeVerification);
+  const adminApproveVerification = useMutation(api.admin.approveVerification);
+  const adminRejectVerification = useMutation(api.admin.rejectVerification);
   const { openSignUp } = useClerk();
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
@@ -256,6 +260,11 @@ export function ConnectedWallApp({
           if (!cardId) throw new Error("The renewal card is missing.");
           await finalizePaidRenewal({ sessionId, cardId: cardId as Id<"cards"> });
           setCheckoutMessage("Payment succeeded and your card has been renewed.");
+          return;
+        }
+        if (checkoutKind === "verification") {
+          await finalizeVerification({ sessionId });
+          setCheckoutMessage("Payment succeeded. Your verification request is under review — we'll approve within 24 hours.");
           return;
         }
 
@@ -437,6 +446,16 @@ export function ConnectedWallApp({
       onOpenAdmin={() => setAdminOpen(true)}
       profile={profile ?? null}
       onUpdateProfile={async (username, businessName) => { await updateProfileMutation({ username, businessName }); }}
+      onRequestVerification={isAuthenticated ? async (plan) => {
+        const response = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ verificationPayload: { plan } }),
+        });
+        const result = await response.json() as { url?: string; error?: string };
+        if (!response.ok || !result.url) throw new Error(result.error || "Could not start verification checkout.");
+        window.location.assign(result.url);
+      } : undefined}
       ownerCardsLoading={isAuthenticated && ownerCards === undefined}
       onSetCardStatus={async (card, status) => {
         await setCardVisibility({ cardId: card.id as Id<"cards">, status });
@@ -481,8 +500,11 @@ export function ConnectedWallApp({
             if (!restoreCards) return;
             setLayoutCards(null);
           }}
+          onVerifyUser={async (userId, verified) => { await adminVerifyUser({ userId, verified }); }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
           onSendTestEmail={async (to) => { await adminSendTestEmail({ to }); }}
+          onApproveVerification={async (requestId) => { await adminApproveVerification({ requestId }); }}
+          onRejectVerification={async (requestId) => { await adminRejectVerification({ requestId }); }}
         />
       ) : null}
     </>

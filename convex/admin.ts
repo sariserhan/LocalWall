@@ -35,12 +35,13 @@ export const getDashboard = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const [cards, users, reports, allCardStats, recentSearches] = await Promise.all([
+    const [cards, users, reports, allCardStats, recentSearches, verificationRequests] = await Promise.all([
       ctx.db.query("cards").order("desc").take(150),
       ctx.db.query("users").order("desc").take(150),
       ctx.db.query("reports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("cardStats").take(500),
       ctx.db.query("searchEvents").withIndex("by_createdAt", (q) => q.gte("createdAt", thirtyDaysAgo)).order("desc").take(1000),
+      ctx.db.query("verificationRequests").order("desc").take(100),
     ]);
 
     const userById = new Map(users.map((user) => [user._id, user]));
@@ -73,6 +74,7 @@ export const getDashboard = query({
         users: users.length,
         reports: reports.length,
         searches: recentSearches.length,
+        pendingVerifications: verificationRequests.filter((r) => r.status === "pending").length,
       },
       cards: cards.map((card) => {
         const owner = userById.get(card.ownerId);
@@ -108,6 +110,8 @@ export const getDashboard = query({
         email: user.email,
         blockedAt: user.blockedAt,
         blockedReason: user.blockedReason,
+        verified: user.verified ?? false,
+        verifiedAt: user.verifiedAt,
         createdAt: user.createdAt,
         cardCount: cardCountByUser.get(String(user._id)) ?? 0,
       })),
@@ -120,6 +124,21 @@ export const getDashboard = query({
         topCategories,
         total: recentSearches.length,
       },
+      verificationRequests: verificationRequests.map((req) => {
+        const user = userById.get(req.userId);
+        return {
+          id: req._id,
+          userId: req.userId,
+          status: req.status,
+          plan: req.plan,
+          paidAmount: req.paidAmount,
+          userName: user?.displayName,
+          userEmail: user?.email,
+          createdAt: req.createdAt,
+          reviewedAt: req.reviewedAt,
+          rejectedReason: req.rejectedReason,
+        };
+      }),
     };
   },
 });
@@ -165,6 +184,46 @@ export const sendTestReminderEmail = action({
       throw new Error(`Resend rejected the request: ${res.status} ${body}`);
     }
     return { ok: true };
+  },
+});
+
+export const setUserVerified = mutation({
+  args: { userId: v.id("users"), verified: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("That user no longer exists.");
+    await ctx.db.patch(user._id, {
+      verified: args.verified || undefined,
+      verifiedAt: args.verified ? Date.now() : undefined,
+    });
+    return { success: true };
+  },
+});
+
+export const approveVerification = mutation({
+  args: { requestId: v.id("verificationRequests") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const request = await ctx.db.get(args.requestId);
+    if (!request) throw new Error("That verification request no longer exists.");
+    if (request.status !== "pending") throw new Error("This request has already been reviewed.");
+    const now = Date.now();
+    await ctx.db.patch(request._id, { status: "approved", reviewedAt: now });
+    await ctx.db.patch(request.userId, { verified: true, verifiedAt: now });
+    return { success: true };
+  },
+});
+
+export const rejectVerification = mutation({
+  args: { requestId: v.id("verificationRequests"), reason: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const request = await ctx.db.get(args.requestId);
+    if (!request) throw new Error("That verification request no longer exists.");
+    if (request.status !== "pending") throw new Error("This request has already been reviewed.");
+    await ctx.db.patch(request._id, { status: "rejected", reviewedAt: Date.now(), rejectedReason: args.reason });
+    return { success: true };
   },
 });
 

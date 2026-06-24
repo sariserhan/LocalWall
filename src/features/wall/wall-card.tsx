@@ -108,6 +108,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
       {card.featuredTier === "silver" || card.featuredTier === "bronze" ? <span className="featured-badge" aria-label={`Featured ${card.featuredTier}`}>⭐</span> : null}
       <div className="card-copy">
         <p className="card-category">{card.category}{card.subcategory ? <> · {card.subcategory}</> : null}</p>
+        {card.verified ? <span className="verified-badge" aria-label="Verified business">✓ Verified</span> : null}
         <h2>{card.name}</h2>
         <p className="card-line">{card.line}</p>
       </div>

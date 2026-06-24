@@ -83,7 +83,14 @@ export const getMyProfile = query({
     if (!identity) return null;
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) return null;
-    return { displayName: user.displayName ?? null, username: user.username ?? null, businessName: user.businessName ?? null };
+    const latestRequest = await ctx.db.query("verificationRequests").withIndex("by_user", (q) => q.eq("userId", user._id)).order("desc").first();
+    return {
+      displayName: user.displayName ?? null,
+      username: user.username ?? null,
+      businessName: user.businessName ?? null,
+      verified: user.verified ?? false,
+      verificationStatus: latestRequest?.status ?? null,
+    };
   },
 });
 
@@ -115,6 +122,10 @@ export const listPublished = query({
       : await ctx.db.query("cards").withIndex("by_status_created", (q) => q.eq("status", "published")).order("desc").take(200);
 
     const visibleCards = cards.filter((card) => card.expiresAt > now);
+
+    const uniqueOwnerIds = [...new Set(visibleCards.map((c) => String(c.ownerId)))];
+    const owners = await Promise.all(uniqueOwnerIds.map((id) => ctx.db.get(id as Id<"users">)));
+    const verifiedOwnerIds = new Set(owners.filter((u) => u?.verified).map((u) => String(u!._id)));
 
     return Promise.all(visibleCards.map(async (card) => {
       const [urls, thumbnailUrls] = await Promise.all([
@@ -164,6 +175,7 @@ export const listPublished = query({
         clicks: card.clicks,
         featuredTier: card.featuredTier,
         reviewCount: card.reviewCount ?? 0,
+        verified: verifiedOwnerIds.has(String(card.ownerId)),
       };
     }));
   },
@@ -174,10 +186,11 @@ export const getPublishedById = query({
   handler: async (ctx, args) => {
     const card = await ctx.db.get(args.cardId);
     if (!card || card.status !== "published" || card.expiresAt <= Date.now()) return null;
-    const [urls, thumbnailUrls, stats] = await Promise.all([
+    const [urls, thumbnailUrls, stats, owner] = await Promise.all([
       Promise.all(card.imageIds.map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
       Promise.all((card.thumbnailImageIds ?? []).map((imageId: Id<"_storage">) => ctx.storage.getUrl(imageId))),
       ctx.db.query("cardStats").withIndex("by_card", (q) => q.eq("cardId", card._id)).unique(),
+      ctx.db.get(card.ownerId),
     ]);
     return {
       id: card._id,
@@ -222,6 +235,7 @@ export const getPublishedById = query({
       clicks: stats?.clicks ?? card.clicks,
       featuredTier: card.featuredTier,
       reviewCount: card.reviewCount ?? 0,
+      verified: owner?.verified ?? false,
     };
   },
 });

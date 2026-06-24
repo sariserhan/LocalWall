@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Eye, EyeOff, MapPin, MousePointerClick, Pencil, Plus, RefreshCw, Trash2, User, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Eye, EyeOff, MapPin, MousePointerClick, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, User, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EditCardModal } from "./edit-card-modal";
 import type { CardUpdate, OwnerCard, RenewalAmount, SavedWall, WallCard } from "./types";
@@ -20,8 +20,9 @@ interface OwnerDashboardProps {
   onUpdate: (card: OwnerCard, update: CardUpdate) => Promise<void>;
   onDelete: (card: OwnerCard) => Promise<void>;
   onRenew: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
-  profile: { displayName: string | null; username: string | null; businessName: string | null } | null;
+  profile: { displayName: string | null; username: string | null; businessName: string | null; verified?: boolean; verificationStatus?: "pending" | "approved" | "rejected" | null } | null;
   onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
+  onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
 }
 
 const renewalOptions: ReadonlyArray<{ amount: RenewalAmount; name: string; price: string; duration: string }> = [
@@ -39,7 +40,7 @@ function expiryLabel(expiresAt: number) {
   return `${days} days left`;
 }
 
-export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, profile, onUpdateProfile }: OwnerDashboardProps) {
+export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, profile, onUpdateProfile, onRequestVerification }: OwnerDashboardProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
@@ -53,6 +54,21 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [verificationBusy, setVerificationBusy] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  const requestVerification = async (plan: "monthly" | "annual") => {
+    if (!onRequestVerification) return;
+    setVerificationBusy(true);
+    setVerificationError(null);
+    try {
+      await onRequestVerification(plan);
+    } catch (cause) {
+      setVerificationError(cause instanceof Error ? cause.message : "Verification could not be started.");
+    } finally {
+      setVerificationBusy(false);
+    }
+  };
 
   const saveProfile = async () => {
     if (!onUpdateProfile) return;
@@ -176,6 +192,50 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
             </div>
             {profileError ? <p className="dashboard-profile-error">{profileError}</p> : null}
           </div>
+        </div>
+
+        <div className="dashboard-verification">
+          <div className="dashboard-verification-header"><ShieldCheck size={14} /><strong>Verified Business Badge</strong></div>
+          {profile?.verified ? (
+            <div className="dashboard-verification-active">
+              <span className="verification-active-check">✓</span>
+              <div>
+                <strong>Your business is verified</strong>
+                <p>Your checkmark appears on all your cards.</p>
+              </div>
+            </div>
+          ) : profile?.verificationStatus === "pending" ? (
+            <div className="dashboard-verification-status">
+              <span className="verification-status-tag pending">Under Review</span>
+              <p>Our team is reviewing your request. Your badge will go live within 24 hours of approval.</p>
+            </div>
+          ) : profile?.verificationStatus === "rejected" ? (
+            <div className="dashboard-verification-status">
+              <span className="verification-status-tag rejected">Not Approved</span>
+              <p>Your last request was not approved. You can submit a new request:</p>
+              <div className="verification-plans">
+                <button className="verification-plan" onClick={() => void requestVerification("monthly")} disabled={verificationBusy || !onRequestVerification}>
+                  <strong>$4.99</strong><span>Monthly</span>
+                </button>
+                <button className="verification-plan verification-plan-featured" onClick={() => void requestVerification("annual")} disabled={verificationBusy || !onRequestVerification}>
+                  <strong>$19.99</strong><span>Annual — save 66%</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="dashboard-verification-cta">
+              <p>Get a ✓ verified checkmark on all your cards — builds trust and drives more clicks.</p>
+              <div className="verification-plans">
+                <button className="verification-plan" onClick={() => void requestVerification("monthly")} disabled={verificationBusy || !onRequestVerification}>
+                  <strong>$4.99 / mo</strong><span>Monthly</span>
+                </button>
+                <button className="verification-plan verification-plan-featured" onClick={() => void requestVerification("annual")} disabled={verificationBusy || !onRequestVerification}>
+                  <strong>$19.99 / yr</strong><span>Annual — save 66%</span>
+                </button>
+              </div>
+            </div>
+          )}
+          {verificationError ? <p className="dashboard-profile-error">{verificationError}</p> : null}
         </div>
 
         <div className="dashboard-stats">

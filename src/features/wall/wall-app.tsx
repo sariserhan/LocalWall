@@ -72,8 +72,9 @@ interface WallAppProps {
   onSetSavedWall?: (label: string, saved: boolean) => Promise<void>;
   savedWalls?: SavedWall[];
   onRemoveSavedWall?: (wall: SavedWall) => Promise<void>;
-  profile?: { displayName: string | null; username: string | null; businessName: string | null } | null;
+  profile?: { displayName: string | null; username: string | null; businessName: string | null; verified?: boolean; verificationStatus?: "pending" | "approved" | "rejected" | null } | null;
   onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
+  onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
   wallViewCount?: number;
 }
 
@@ -122,7 +123,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, wallViewCount }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, wallViewCount }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1382,6 +1383,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           onRenew={onRenewCard}
           profile={profile ?? null}
           onUpdateProfile={onUpdateProfile}
+          onRequestVerification={onRequestVerification}
         />
       ) : null}
       {composer ? <Composer onClose={() => setComposer(false)} onReady={beginPlacement} initialLocation={{ country: selectedCountry, state: selectedState, city: selectedCity }} /> : null}

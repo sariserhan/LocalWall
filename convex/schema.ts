@@ -13,6 +13,8 @@ export default defineSchema({
     avatarUrl: v.optional(v.string()),
     blockedAt: v.optional(v.number()),
     blockedReason: v.optional(v.string()),
+    verified: v.optional(v.boolean()),
+    verifiedAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_token", ["tokenIdentifier"])
@@ -207,4 +209,18 @@ export default defineSchema({
   })
     .index("by_wall", ["wallId"])
     .index("by_wall_and_user", ["wallId", "userId"]),
+
+  verificationRequests: defineTable({
+    userId: v.id("users"),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    plan: v.union(v.literal("monthly"), v.literal("annual")),
+    paidAmount: v.number(),
+    sessionId: v.string(),
+    createdAt: v.number(),
+    reviewedAt: v.optional(v.number()),
+    rejectedReason: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_session", ["sessionId"])
+    .index("by_status_and_createdAt", ["status", "createdAt"]),
 });

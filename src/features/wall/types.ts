@@ -114,6 +114,7 @@ export interface WallCard {
   likes?: number;
   featuredTier?: "bronze" | "silver" | "gold";
   reviewCount?: number;
+  verified?: boolean;
 }
 
 export interface OwnerCard extends WallCard {

@@ -201,7 +201,12 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
       <div className="sheet-pin" />
       <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
       <p className="sheet-category">{card.category} · {card.area}</p>
-      {card.ownerName ? <p className="sheet-byline">by {card.ownerName}</p> : null}
+      {card.ownerName ? (
+        <p className="sheet-byline">
+          by {card.ownerName}
+          {card.verified ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
+        </p>
+      ) : card.verified ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
       <h2>{card.name}</h2>
       <div className="rule" />
       <p className="sheet-service">{card.line}</p>

@@ -25,6 +25,27 @@ export const finalizePaidCard = action({
   },
 });
 
+export const finalizeVerification = action({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args): Promise<unknown> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("You must sign in to complete verification.");
+    if (!env.STRIPE_SECRET_KEY) throw new Error("Stripe is not configured in Convex.");
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+    const session = await stripe.checkout.sessions.retrieve(args.sessionId);
+    if (session.payment_status !== "paid") throw new Error("Payment is not complete.");
+    if (session.metadata?.kind !== "verification") throw new Error("Payment does not match a verification request.");
+    const paidAmount = (session.amount_total ?? 0) / 100;
+    const plan = (session.metadata.plan ?? "monthly") as "monthly" | "annual";
+    return await ctx.runMutation(internal.paymentsInternal.completeVerificationRequest, {
+      sessionId: session.id,
+      paidAmount,
+      plan,
+      tokenIdentifier: identity.tokenIdentifier,
+    });
+  },
+});
+
 export const finalizePaidRenewal = action({
   args: { sessionId: v.string(), cardId: v.id("cards") },
   handler: async (ctx, args): Promise<unknown> => {

@@ -1,11 +1,11 @@
 "use client";
 
-import { AlertTriangle, BarChart2, Check, Eye, EyeOff, Flag, Mail, Phone, Search, Send, ShieldCheck, Share2, Bookmark, ExternalLink, MapPin, Trash2, UserRound, X } from "lucide-react";
+import { AlertTriangle, BarChart2, Check, Eye, EyeOff, Flag, Mail, Phone, Search, Send, ShieldCheck, Share2, Bookmark, ExternalLink, MapPin, Trash2, UserRound, X, XCircle } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 export interface AdminDashboardData {
-  stats: { cards: number; published: number; users: number; reports: number; searches: number };
+  stats: { cards: number; published: number; users: number; reports: number; searches: number; pendingVerifications?: number };
   cards: Array<{
     id: Id<"cards">;
     name: string;
@@ -28,11 +28,25 @@ export interface AdminDashboardData {
     email?: string;
     blockedAt?: number;
     blockedReason?: string;
+    verified?: boolean;
+    verifiedAt?: number;
     createdAt: number;
     cardCount: number;
   }>;
   reports: Array<{ id: Id<"reports">; cardId: Id<"cards">; cardName: string; reason: string; details?: string; createdAt: number }>;
   searchInsights?: { topKeywords: Array<{ keyword: string; count: number }>; topCategories: Array<{ category: string; count: number }>; total: number };
+  verificationRequests?: Array<{
+    id: Id<"verificationRequests">;
+    userId: Id<"users">;
+    status: "pending" | "approved" | "rejected";
+    plan: "monthly" | "annual";
+    paidAmount: number;
+    userName?: string;
+    userEmail?: string;
+    createdAt: number;
+    reviewedAt?: number;
+    rejectedReason?: string;
+  }>;
 }
 
 interface AdminPanelProps {
@@ -42,16 +56,19 @@ interface AdminPanelProps {
   onDeleteCard: (cardId: Id<"cards">) => Promise<void>;
   onBlockUser: (userId: Id<"users">) => Promise<void>;
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
+  onVerifyUser: (userId: Id<"users">, verified: boolean) => Promise<void>;
   onResolveReport: (reportId: Id<"reports">) => Promise<void>;
   onSendTestEmail: (to: string) => Promise<void>;
+  onApproveVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
+  onRejectVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
 }
 
 function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onResolveReport, onSendTestEmail }: AdminPanelProps) {
-  const [tab, setTab] = useState<"cards" | "users" | "reports" | "analytics">("cards");
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onSendTestEmail, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+  const [tab, setTab] = useState<"cards" | "users" | "reports" | "analytics" | "verification">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
@@ -153,6 +170,9 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
             <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "selected" : ""} onClick={() => setTab("users")}>Users</button>
             <button role="tab" aria-selected={tab === "reports"} className={tab === "reports" ? "selected" : ""} onClick={() => setTab("reports")}>Reports</button>
             <button role="tab" aria-selected={tab === "analytics"} className={tab === "analytics" ? "selected" : ""} onClick={() => setTab("analytics")}><BarChart2 size={13} /> Analytics</button>
+            <button role="tab" aria-selected={tab === "verification"} className={tab === "verification" ? "selected" : ""} onClick={() => setTab("verification")}>
+              <ShieldCheck size={13} /> Verifications{(data?.stats.pendingVerifications ?? 0) > 0 ? <span className="admin-tab-badge">{data?.stats.pendingVerifications}</span> : null}
+            </button>
           </div>
           {tab !== "analytics" ? <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}`} aria-label={`Search ${tab}`} /></label> : null}
         </div>
@@ -200,9 +220,24 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
             {users.map((user) => (
               <article className="admin-row admin-user-row" key={String(user.id)}>
                 <div className="admin-avatar">{(user.displayName || user.email || "U").slice(0, 1).toUpperCase()}</div>
-                <div className="admin-row-main"><h3>{user.displayName || "Unnamed user"}</h3><p>{user.email || "No public email"}</p><small>Joined {dateLabel(user.createdAt)} · {user.cardCount} recent cards</small></div>
+                <div className="admin-row-main">
+                  <h3>{user.displayName || "Unnamed user"}{user.verified ? <span className="admin-verified-badge">✓ Verified</span> : null}</h3>
+                  <p>{user.email || "No public email"}</p>
+                  <small>Joined {dateLabel(user.createdAt)} · {user.cardCount} recent cards{user.verifiedAt ? ` · Verified ${dateLabel(user.verifiedAt)}` : ""}</small>
+                </div>
                 <div className="admin-row-actions admin-row-actions-wide">
                   <button className="secondary" disabled={!user.email} onClick={() => sendMessage(user.email, user.displayName || "WALL account")}><Mail /> Send message</button>
+                  <button className={`secondary${user.verified ? "" : " verify-action"}`} disabled={busyId === String(user.id)} onClick={async () => {
+                    setBusyId(String(user.id));
+                    setError(null);
+                    try {
+                      await onVerifyUser(user.id, !user.verified);
+                    } catch (cause) {
+                      setError(cause instanceof Error ? cause.message : "The verification status could not be updated.");
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}>{user.verified ? <><X size={13} /> Unverify</> : <><Check size={13} /> Verify</>}</button>
                   <button className="secondary danger-action" disabled={busyId === String(user.id)} onClick={async () => {
                     setBusyId(String(user.id));
                     setError(null);
@@ -323,6 +358,42 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
               );
             })}
             {!reports.length ? <div className="dashboard-empty">No open reports.</div> : null}
+          </div>
+        ) : null}
+
+        {data && tab === "verification" ? (
+          <div className="admin-list" role="tabpanel">
+            {(data.verificationRequests ?? []).map((req) => {
+              const busy = busyId === String(req.id);
+              return (
+                <article className="admin-row" key={String(req.id)}>
+                  <div className="admin-row-main">
+                    <div><span className={`verification-request-status vrs-${req.status}`}>{req.status}</span><span>{dateLabel(req.createdAt)}</span></div>
+                    <h3>{req.userName || "Unknown user"}</h3>
+                    <p>{req.userEmail || "No email on file"}</p>
+                    <small>{req.plan === "monthly" ? "Monthly — $4.99" : "Annual — $19.99"}{req.reviewedAt ? ` · Reviewed ${dateLabel(req.reviewedAt)}` : ""}{req.rejectedReason ? ` · ${req.rejectedReason}` : ""}</small>
+                  </div>
+                  <div className="admin-row-actions admin-row-actions-wide">
+                    {req.status === "pending" ? (
+                      <>
+                        <button className="secondary verify-action" disabled={busy} onClick={async () => {
+                          setBusyId(String(req.id));
+                          setError(null);
+                          try { await onApproveVerification(req.id); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not approve verification."); } finally { setBusyId(null); }
+                        }}><Check size={13} /> Approve</button>
+                        <button className="secondary danger-action" disabled={busy} onClick={async () => {
+                          setBusyId(String(req.id));
+                          setError(null);
+                          try { await onRejectVerification(req.id); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not reject verification."); } finally { setBusyId(null); }
+                        }}><XCircle size={13} /> Reject</button>
+                      </>
+                    ) : null}
+                    {req.userEmail ? <button className="secondary" onClick={() => sendMessage(req.userEmail, "Verification request")}><Mail size={13} /> Email</button> : null}
+                  </div>
+                </article>
+              );
+            })}
+            {!(data.verificationRequests ?? []).length ? <div className="dashboard-empty">No verification requests yet.</div> : null}
           </div>
         ) : null}
       </section>
