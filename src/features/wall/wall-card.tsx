@@ -114,6 +114,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
         {card.ownerName ? <span className="card-owner-inline">by {card.ownerName}</span> : null}
       </div>
       {cardImage ? <img src={cardImage} alt="" draggable="false" loading="lazy" decoding="async" /> : null}
+      {card.imageMode === "business-card" ? <span className="verified-badge card-biz-verified" aria-label="Verified business">✓ Verified</span> : null}
       <footer>
         <span>{card.area}</span>
         {card.price ? <strong className="card-price-right">{card.price}</strong> : null}

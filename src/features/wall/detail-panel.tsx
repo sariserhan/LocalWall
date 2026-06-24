@@ -204,9 +204,9 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
       {card.ownerName ? (
         <p className="sheet-byline">
           by {card.ownerName}
-          {card.verified ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
+          {(card.verified || card.imageMode === "business-card") ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
         </p>
-      ) : card.verified ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
+      ) : (card.verified || card.imageMode === "business-card") ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
       <h2>{card.name}</h2>
       <div className="rule" />
       <p className="sheet-service">{card.line}</p>
