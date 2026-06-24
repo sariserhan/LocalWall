@@ -126,8 +126,8 @@ test.describe("Composer steps @auth", () => {
     await page.fill("input[name='phone']", "+1 555 123 4567");
     await page.locator(".composer footer button[type='submit']").click();
     await expect(page.locator(".payment-options")).toBeVisible({ timeout: 15_000 });
-    // Four duration options.
-    await expect(page.locator(".payment-option")).toHaveCount(4);
+    // Five duration options (free, $2.99, $7.99, $24.99, bundle).
+    await expect(page.locator(".payment-option")).toHaveCount(5);
   });
 
   test("draft banner appears on reopening the composer with saved content", async ({ page }) => {
