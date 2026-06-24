@@ -54,6 +54,7 @@ const packageDurations: Record<number, number> = {
   0: 1 * 24 * 60 * 60 * 1000,
   2.99: 30 * 24 * 60 * 60 * 1000,
   7.99: 90 * 24 * 60 * 60 * 1000,
+  19.99: 90 * 24 * 60 * 60 * 1000,
   24.99: 365 * 24 * 60 * 60 * 1000,
 };
 
@@ -660,8 +661,9 @@ export const create = mutation({
     if (args.message && args.message.length > 300) throw new Error("Message must be 300 characters or fewer.");
     if (blockedTextContent.test([args.name, args.line, args.message ?? ""].join(" "))) throw new Error("Profanity, adult, or sexual content is not allowed on WALL.");
     if (!args.area.trim() || args.area.length > 50) throw new Error("Neighborhood must be between 1 and 50 characters.");
-    if (!args.city.trim() || args.city.length > 100) throw new Error("City must be specified.");
-    if (!args.state.trim() || args.state.length > 100) throw new Error("State must be specified.");
+    const isBundlePending = args.paidAmount === 19.99;
+    if (!isBundlePending && (!args.city.trim() || args.city.length > 100)) throw new Error("City must be specified.");
+    if (!isBundlePending && (!args.state.trim() || args.state.length > 100)) throw new Error("State must be specified.");
     if (!args.country.trim() || args.country.length > 100) throw new Error("Country must be specified.");
     if (args.zipcode && args.zipcode.length > 20) throw new Error("Zip code must be shorter than 20 characters.");
     if (args.zipcode && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,19}$/.test(args.zipcode.trim())) throw new Error("Enter a valid zip code.");
@@ -674,7 +676,7 @@ export const create = mutation({
     if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && (profile.length > 240 || !socialProfilePattern.test(profile.trim())))) throw new Error("Enter valid social usernames or profile URLs.");
     if (args.price && args.price.length > 50) throw new Error("Price must be 50 characters or fewer.");
     if (args.x < 0 || args.x > 88 || args.y < 0 || args.y > 1500) throw new Error("That position is outside the wall.");
-    if (![0, 2.99, 7.99, 24.99].includes(args.paidAmount)) throw new Error("Invalid payment option.");
+    if (![0, 2.99, 7.99, 19.99, 24.99].includes(args.paidAmount)) throw new Error("Invalid payment option.");
 
     let user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) {

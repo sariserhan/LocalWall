@@ -9,7 +9,7 @@ import { observe } from "../../_observe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
 // Validate using integer cents to avoid floating-point matching issues.
-// Valid base durations: free (0), $2.99, $7.99, $24.99
+// Valid base durations: free (0), $2.99, $7.99, $24.99; bundle: $19.99
 // Valid featured add-ons: none (0), Bronze $2.99, Silver $4.99, Gold $9.99
 const validBaseCents = [0, 299, 799, 2499];
 const validFeaturedCents = [0, 299, 499, 999];
@@ -19,6 +19,7 @@ for (const base of validBaseCents) {
     if (base + feat > 0) validAmountCents.add(base + feat);
   }
 }
+validAmountCents.add(1999); // multi-city bundle
 function isValidAmount(amount: number) {
   return validAmountCents.has(Math.round(amount * 100));
 }
@@ -137,6 +138,43 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
       });
 
+      return json({ url: session.url, sessionId: session.id });
+    }
+
+    const bundlePayload = body?.bundlePayload;
+    if (bundlePayload) {
+      if (typeof bundlePayload.pendingCardId !== "string") return json({ error: "Invalid bundle request." }, 400);
+      const cities = Array.isArray(bundlePayload.bundleCities) ? bundlePayload.bundleCities : [];
+      if (cities.length < 2 || cities.length > 3) return json({ error: "Bundle requires 2–3 cities." }, 400);
+      for (const city of cities) {
+        if (typeof city.country !== "string" || !city.country.trim()) {
+          return json({ error: "Each bundle slot must have a country selected." }, 400);
+        }
+      }
+      const origin = new URL(request.url).origin;
+      const cardName = String(bundlePayload.cardName || "wall card").slice(0, 80);
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `${cardName} — Multi-City Bundle`,
+              description: `Post in ${cities.length} cities for 90 days`,
+            },
+            unit_amount: 1999,
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          kind: "bundle",
+          pendingCardId: bundlePayload.pendingCardId,
+          bundleCities: JSON.stringify(cities),
+          paidAmount: "19.99",
+        },
+        success_url: `${origin}/?checkout=success&kind=bundle&pending_card_id=${encodeURIComponent(bundlePayload.pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+      });
       return json({ url: session.url, sessionId: session.id });
     }
 

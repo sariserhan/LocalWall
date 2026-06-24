@@ -36,9 +36,11 @@ interface ComposerForm {
   telegram: string;
   theme: CardTheme;
   imageMode: CardImageMode;
-  paymentOption: "free" | "2.99" | "7.99" | "24.99";
+  paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   featuredTier: "none" | "bronze" | "silver" | "gold";
 }
+
+interface BundleCity { country: string; state: string; city: string; }
 
 const countries = Country.getAllCountries();
 const defaultCountry = countries[0]?.isoCode ?? "US";
@@ -89,11 +91,12 @@ const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description
   { theme: "blueprint", label: "Blueprint", description: "Technical grid" },
 ];
 
-const paymentOptions: ReadonlyArray<{ value: ComposerForm["paymentOption"]; price: string; duration: string; description: string; featured?: boolean }> = [
+const paymentOptions: ReadonlyArray<{ value: ComposerForm["paymentOption"]; price: string; duration: string; description: string; featured?: boolean; badge?: string }> = [
   { value: "free", price: "Free", duration: "1 day", description: "Try the wall with no commitment." },
   { value: "2.99", price: "$2.99", duration: "30 days", description: "Great for a quick local offer." },
   { value: "7.99", price: "$7.99", duration: "90 days", description: "Best for regular neighborhood services.", featured: true },
   { value: "24.99", price: "$24.99", duration: "365 days", description: "A full year on your local wall." },
+  { value: "bundle", price: "$19.99", duration: "90 days × 3 cities", description: "Post in 3 cities for the price of one.", badge: "Best value" },
 ];
 
 const featuredTierOptions: ReadonlyArray<{ value: ComposerForm["featuredTier"]; price: string; label: string; perks: string[] }> = [
@@ -217,6 +220,13 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [autoRenew, setAutoRenew] = useState(false);
+  const [bundleCities, setBundleCities] = useState<BundleCity[]>(() => {
+    const base: BundleCity = initialLocation
+      ? { country: initialLocation.country, state: initialLocation.state, city: initialLocation.city }
+      : { country: "", state: "", city: "" };
+    return [base, { country: "", state: "", city: "" }, { country: "", state: "", city: "" }];
+  });
+  const [bundleCityError, setBundleCityError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [draftBanner, setDraftBanner] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -415,11 +425,22 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
     setForm((value) => ({ ...value, imageMode }));
   };
 
+  useEffect(() => {
+    if (form.paymentOption !== "bundle") setBundleCityError(null);
+  }, [form.paymentOption]);
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (step < 3) {
       await goToStep(step + 1);
       return;
+    }
+    if (form.paymentOption === "bundle") {
+      const allHaveCountry = bundleCities.every((c) => c.country);
+      if (!allHaveCountry) {
+        setBundleCityError("Select at least a country for all 3 slots before continuing.");
+        return;
+      }
     }
     onReady({
       ...form,
@@ -440,7 +461,8 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
       whatsapp: form.whatsapp.trim() || undefined,
       telegram: form.telegram.trim() || undefined,
       featuredTier: form.featuredTier,
-      autoRenew: autoRenew && form.paymentOption !== "free",
+      autoRenew: autoRenew && form.paymentOption !== "free" && form.paymentOption !== "bundle",
+      bundleCities: form.paymentOption === "bundle" ? bundleCities : undefined,
       files,
       previews,
     });
@@ -612,10 +634,11 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
                     type="button"
                     role="radio"
                     aria-checked={form.paymentOption === option.value}
-                    className={`payment-option ${form.paymentOption === option.value ? "selected" : ""} ${option.featured ? "featured" : ""}`}
+                    className={`payment-option ${form.paymentOption === option.value ? "selected" : ""} ${option.featured ? "featured" : ""} ${option.value === "bundle" ? "bundle" : ""}`}
                     onClick={() => setForm((value) => ({ ...value, paymentOption: option.value }))}
                   >
                     {option.featured ? <span className="payment-popular">Most popular</span> : null}
+                    {option.badge ? <span className="payment-badge">{option.badge}</span> : null}
                     <span className="payment-price">{option.price}</span>
                     <span className="payment-duration"><Clock3 /> {option.duration}</span>
                     <small>{option.description}</small>
@@ -624,13 +647,67 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
                 ))}
               </div>
             </fieldset>
-            {form.paymentOption !== "free" ? (
+            {form.paymentOption === "bundle" ? (
+              <div className="bundle-picker">
+                <div className="bundle-picker-header">
+                  <h4>Choose 3 cities</h4>
+                  <p>Your card will appear on each wall for 90 days. Country is required; state and city are optional.</p>
+                </div>
+                {bundleCities.map((slot, slotIndex) => {
+                  const slotStates = slot.country ? State.getStatesOfCountry(slot.country) : [];
+                  const slotCities = slot.country && slot.state ? City.getCitiesOfState(slot.country, slot.state) : [];
+                  return (
+                    <div key={slotIndex} className="bundle-city-slot">
+                      <span className="bundle-slot-label">City {slotIndex + 1}</span>
+                      <div className="bundle-slot-selects">
+                        <select
+                          value={slot.country}
+                          onChange={(e) => {
+                            const country = e.target.value;
+                            setBundleCities((prev) => prev.map((c, i) => i === slotIndex ? { country, state: "", city: "" } : c));
+                            setBundleCityError(null);
+                          }}
+                        >
+                          <option value="">Country</option>
+                          {countries.map((c) => <option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}
+                        </select>
+                        <select
+                          value={slot.state}
+                          disabled={!slotStates.length}
+                          onChange={(e) => {
+                            const state = e.target.value;
+                            setBundleCities((prev) => prev.map((c, i) => i === slotIndex ? { ...c, state, city: "" } : c));
+                            setBundleCityError(null);
+                          }}
+                        >
+                          <option value="">State / Region</option>
+                          {slotStates.map((s) => <option key={s.isoCode} value={s.isoCode}>{s.name}</option>)}
+                        </select>
+                        <select
+                          value={slot.city}
+                          disabled={!slotCities.length}
+                          onChange={(e) => {
+                            setBundleCities((prev) => prev.map((c, i) => i === slotIndex ? { ...c, city: e.target.value } : c));
+                            setBundleCityError(null);
+                          }}
+                        >
+                          <option value="">City</option>
+                          {slotCities.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+                {bundleCityError ? <small className="field-error" role="alert">{bundleCityError}</small> : null}
+              </div>
+            ) : null}
+            {form.paymentOption !== "free" && form.paymentOption !== "bundle" ? (
               <label className="composer-auto-renew-row">
                 <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} />
                 <span>Auto-renew when it expires</span>
               </label>
             ) : null}
-            <fieldset className="featured-tier-fieldset">
+            <fieldset className="featured-tier-fieldset" style={form.paymentOption === "bundle" ? { display: "none" } : undefined}>
               <legend>Boost your listing <span>(optional)</span></legend>
               <div className="featured-tier-options" role="radiogroup" aria-label="Choose a featured tier">
                 {featuredTierOptions.map((option) => (

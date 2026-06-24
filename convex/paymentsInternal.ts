@@ -1,10 +1,12 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 const packageDurations: Record<number, number> = {
   2.99: 30 * 24 * 60 * 60 * 1000,
   7.99: 90 * 24 * 60 * 60 * 1000,
+  19.99: 90 * 24 * 60 * 60 * 1000,
   24.99: 365 * 24 * 60 * 60 * 1000,
 };
 
@@ -204,6 +206,158 @@ export const cancelAutoRenewOnCard = internalMutation({
     const subscriptionId = card.stripeSubscriptionId;
     await ctx.db.patch(card._id, { autoRenew: false, stripeSubscriptionId: undefined });
     return { subscriptionId };
+  },
+});
+
+export const completeBundlePosting = internalMutation({
+  args: {
+    pendingCardId: v.id("pendingCards"),
+    sessionId: v.string(),
+    paidAmount: v.number(),
+    tokenIdentifier: v.string(),
+    bundleCities: v.array(v.object({ country: v.string(), state: v.string(), city: v.string() })),
+  },
+  handler: async (ctx, args) => {
+    const existingReceipt = await ctx.db
+      .query("paymentReceipts")
+      .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
+      .unique();
+    if (existingReceipt) {
+      const card = await ctx.db.get(existingReceipt.cardId);
+      if (!card) throw new Error("Bundle card not found.");
+      const urls = await Promise.all(card.imageIds.map((id) => ctx.storage.getUrl(id)));
+      return [{ id: card._id, ...card, images: urls.filter((u): u is string => u !== null) }];
+    }
+
+    const pending = await ctx.db.get(args.pendingCardId);
+    if (!pending || pending.status !== "pending" || pending.expiresAt <= Date.now()) {
+      throw new Error("This pending card is no longer available.");
+    }
+    const owner = await ctx.db.get(pending.ownerId);
+    if (!owner || owner.tokenIdentifier !== args.tokenIdentifier) throw new Error("You can only complete your own card.");
+    if (owner.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
+    if (pending.paidAmount !== args.paidAmount) throw new Error("The verified payment does not match this card.");
+
+    const duration = packageDurations[19.99];
+    const payload = pending.payload;
+    const featuredTier = payload.featuredTier as "bronze" | "silver" | "gold" | undefined;
+    const imageIds = payload.imageIds as Id<"_storage">[];
+    const thumbnailImageIds = (payload.thumbnailImageIds ?? []) as Id<"_storage">[];
+    const [urls, thumbUrls] = await Promise.all([
+      Promise.all(imageIds.map((id) => ctx.storage.getUrl(id))),
+      Promise.all(thumbnailImageIds.map((id) => ctx.storage.getUrl(id))),
+    ]);
+    const images = urls.filter((u): u is string => u !== null);
+    const thumbnailImages = thumbUrls.filter((u): u is string => u !== null);
+
+    const cities = args.bundleCities.slice(0, 3);
+    const createdCards: Array<{ id: Id<"cards"> }> = [];
+
+    for (const loc of cities) {
+      const createdAt = Date.now();
+      const cardId = await ctx.db.insert("cards", {
+        ownerId: pending.ownerId,
+        name: payload.name,
+        category: payload.category,
+        subcategory: payload.subcategory,
+        line: payload.line,
+        message: payload.message,
+        area: payload.area,
+        city: loc.city,
+        state: loc.state,
+        country: loc.country,
+        zipcode: payload.zipcode,
+        neighborhood: payload.neighborhood,
+        ownerName: owner.businessName || owner.username || undefined,
+        price: payload.price,
+        phone: payload.phone,
+        email: payload.email,
+        website: payload.website,
+        location: payload.location,
+        instagram: payload.instagram,
+        facebook: payload.facebook,
+        tiktok: payload.tiktok,
+        linkedin: payload.linkedin,
+        whatsapp: payload.whatsapp,
+        telegram: payload.telegram,
+        theme: payload.theme,
+        imageMode: payload.imageMode,
+        imageIds,
+        thumbnailImageIds,
+        x: payload.x,
+        y: payload.y,
+        rotation: -3 + Math.random() * 6,
+        width: payload.width,
+        zIndex: createdAt,
+        status: "published",
+        paidAmount: 19.99,
+        featuredTier,
+        reviewCount: 0,
+        expiresAt: createdAt + duration,
+        positionLockedAt: createdAt,
+        updatedAt: createdAt,
+        createdAt,
+        clicks: 0,
+      });
+      await ctx.db.insert("cardStats", { cardId, clicks: 0, websiteClicks: 0, phoneClicks: 0, emailClicks: 0, socialClicks: 0, saves: 0, shares: 0, updatedAt: Date.now() });
+      createdCards.push({ id: cardId });
+    }
+
+    await ctx.db.insert("paymentReceipts", {
+      sessionId: args.sessionId,
+      pendingCardId: pending._id,
+      cardId: createdCards[0].id,
+      paidAmount: args.paidAmount,
+      usedAt: Date.now(),
+    });
+    await ctx.db.patch(pending._id, { status: "completed" });
+
+    return createdCards.map(({ id }) => ({
+      id,
+      ...payload,
+      images,
+      thumbnailImages,
+      status: "published" as const,
+      paidAmount: 19.99,
+      featuredTier,
+      reviewCount: 0,
+      clicks: 0,
+      zIndex: Date.now(),
+    }));
+  },
+});
+
+export const handleStripeWebhook = internalAction({
+  args: { sig: v.string(), body: v.string() },
+  handler: async (ctx, args): Promise<void> => {
+    // Dynamic import keeps "use node" scoped to this action only
+    const Stripe = (await import("stripe")).default;
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!stripeKey || !webhookSecret) throw new Error("Stripe not configured.");
+    const stripe = new Stripe(stripeKey);
+    let event: import("stripe").Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(args.body, args.sig, webhookSecret);
+    } catch {
+      throw new Error("Invalid webhook signature");
+    }
+
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object as unknown as Record<string, unknown>;
+      if (invoice["billing_reason"] === "subscription_create") return;
+      const sub = invoice["subscription"];
+      const subscriptionId = typeof sub === "string" ? sub : (sub as { id: string } | null)?.id;
+      if (!subscriptionId) return;
+      const paidAmount = (invoice["amount_paid"] as number) / 100;
+      const invoiceId = invoice["id"] as string;
+      await ctx.runMutation(internal.paymentsInternal.processAutoRenewal, { subscriptionId, paidAmount, invoiceId });
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as import("stripe").Stripe.Subscription;
+      await ctx.runMutation(internal.paymentsInternal.clearAutoRenew, { subscriptionId: subscription.id });
+    }
   },
 });
 

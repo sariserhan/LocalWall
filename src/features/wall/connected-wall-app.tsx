@@ -182,6 +182,7 @@ export function ConnectedWallApp({
   }, [savedWallsList]);
   const subscribeDigest = useMutation(api.digest.subscribe);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
+  const finalizeBundlePosting = useAction(api.payments.finalizeBundlePosting);
   const finalizeSubscriptionPosting = useAction(api.payments.finalizeSubscriptionPosting);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
   const finalizeSubscriptionRenewal = useAction(api.payments.finalizeSubscriptionRenewal);
@@ -307,6 +308,12 @@ export function ConnectedWallApp({
         }
 
         if (!pendingCardId) throw new Error("Could not find the pending paid card.");
+        if (checkoutKind === "bundle") {
+          const createdCards = await finalizeBundlePosting({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard[];
+          createdCards.forEach((c) => addCardToLocalWall(c));
+          setCheckoutMessage(`Payment succeeded. Your card is now live in ${createdCards.length} cities.`);
+          return;
+        }
         if (checkoutKind === "subscription_posting") {
           const createdCard = await finalizeSubscriptionPosting({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard;
           addCardToLocalWall(createdCard);
@@ -355,11 +362,15 @@ export function ConnectedWallApp({
     const uploadedImages = await Promise.all(draft.files.slice(0, 2).map(uploadImageVariants));
     const imageIds = uploadedImages.map((image) => image.imageId);
     const thumbnailImageIds = uploadedImages.map((image) => image.thumbnailImageId);
-    const basePaidAmount = draft.paymentOption === "free" ? 0 : Number(draft.paymentOption);
+    const isBundle = draft.paymentOption === "bundle";
+    const basePaidAmount = isBundle ? 19.99 : draft.paymentOption === "free" ? 0 : Number(draft.paymentOption);
     const featuredPrices: Record<string, number> = { bronze: 2.99, silver: 4.99, gold: 9.99 };
-    const featuredPaidAmount = draft.featuredTier && draft.featuredTier !== "none" ? (featuredPrices[draft.featuredTier] ?? 0) : 0;
+    const featuredPaidAmount = !isBundle && draft.featuredTier && draft.featuredTier !== "none" ? (featuredPrices[draft.featuredTier] ?? 0) : 0;
     const totalPaidAmount = basePaidAmount + featuredPaidAmount;
-    const featuredTierArg = draft.featuredTier && draft.featuredTier !== "none" ? draft.featuredTier : undefined;
+    const featuredTierArg = !isBundle && draft.featuredTier && draft.featuredTier !== "none" ? draft.featuredTier : undefined;
+    const primaryCity = isBundle && draft.bundleCities?.[0]
+      ? draft.bundleCities[0]
+      : { city: draft.city || initialLocation?.city || "", state: draft.state || initialLocation?.state || "", country: draft.country || initialLocation?.country || "" };
     const cardPayload = {
       name: draft.name,
       category: draft.category,
@@ -367,9 +378,9 @@ export function ConnectedWallApp({
       line: draft.line,
       message: draft.message,
       area: draft.area,
-      city: draft.city || initialLocation?.city || "",
-      state: draft.state || initialLocation?.state || "",
-      country: draft.country || initialLocation?.country || "",
+      city: primaryCity.city,
+      state: primaryCity.state,
+      country: primaryCity.country,
       zipcode: draft.zipcode,
       neighborhood: draft.neighborhood,
       price: draft.price,
@@ -397,10 +408,13 @@ export function ConnectedWallApp({
     const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> };
     if (totalPaidAmount > 0) {
       if (!("pendingCardId" in result)) throw new Error("The paid card could not be prepared.");
+      const checkoutBody = isBundle
+        ? { bundlePayload: { pendingCardId: result.pendingCardId, bundleCities: draft.bundleCities, cardName: draft.name } }
+        : { pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name, autoRenew: draft.autoRenew };
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name, autoRenew: draft.autoRenew }),
+        body: JSON.stringify(checkoutBody),
       });
       const checkoutResult = await response.json() as { url?: string; sessionId?: string; error?: string };
       if (!response.ok || !checkoutResult.url || !checkoutResult.sessionId) throw new Error(checkoutResult.error || "Could not start card checkout.");
