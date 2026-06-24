@@ -58,6 +58,35 @@ export const adminIdentity = {
 
 export const adminEnv = { ADMIN_EMAILS: "admin@wall.test" };
 
+type TestIdentity = { tokenIdentifier: string; subject: string; email?: string; name?: string };
+
+/**
+ * Insert a user record so mutations that look up by tokenIdentifier can find
+ * the user. Call before any mutation that requires an existing user record.
+ */
+export async function seedUser(t: ReturnType<typeof makeT>, identity: TestIdentity) {
+  await t.run(async (ctx) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+    if (!existing) {
+      await ctx.db.insert("users", {
+        authProvider: "clerk" as const,
+        externalUserId: identity.subject,
+        tokenIdentifier: identity.tokenIdentifier,
+        email: identity.email,
+        createdAt: Date.now(),
+      });
+    }
+  });
+}
+
+/** Convenience wrapper for the admin identity. */
+export async function seedAdminUser(t: ReturnType<typeof makeT>) {
+  return seedUser(t, adminIdentity);
+}
+
 /** Set process.env keys for the duration of a test suite. Returns a cleanup fn. */
 export function applyEnv(env: Record<string, string>) {
   const prev: Record<string, string | undefined> = {};

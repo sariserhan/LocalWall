@@ -481,7 +481,7 @@ export const playgroundDeleteAllMyCards = mutation({
   handler: async (ctx) => {
     const identity = await requireAdmin(ctx);
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
-    if (!user) throw new Error("Admin user not found.");
+    if (!user) return { deleted: 0 };
     const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect();
     let deleted = 0;
     for (const card of cards) {
