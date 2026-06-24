@@ -459,6 +459,8 @@ button { color: inherit; }
 .checkout-card-mark.card-mark-kraft { background: #c8a97a; color: #2a1a06; }
 .checkout-card-mark.card-mark-blueprint { background-color: #0d2340; color: #9ec8f0; background-image: linear-gradient(#37678a40 1px, transparent 1px), linear-gradient(90deg, #37678a40 1px, transparent 1px); background-size: 11px 11px; }
 .payment-note { margin: -7px 0 0; color: #666; font: 600 10px/1.45 var(--font-inter); }
+.composer-auto-renew-row { display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; margin: 2px 0 0; background: #eef4ff; border: 1px solid #b3cef7; border-radius: 6px; font: 500 12px/1.45 var(--font-inter); cursor: pointer; color: #1a3a6e; }
+.composer-auto-renew-row input[type="checkbox"] { width: 15px; height: 15px; margin-top: 1px; accent-color: #1a6fd4; cursor: pointer; flex-shrink: 0; }
 /* Featured tier composer */
 .featured-tier-fieldset { border: 1px solid #bbb; padding: 16px; background: #f6f4ef; }
 .featured-tier-fieldset legend { font: 800 10px var(--font-inter); letter-spacing: .7px; text-transform: uppercase; padding: 0 6px; color: #333; }
@@ -771,6 +773,12 @@ button { color: inherit; }
 .renewal-option span { font: 700 9px var(--font-inter); text-transform: uppercase; }
 .renewal-option svg { position: absolute; top: 5px; right: 5px; width: 14px; }
 .renewal-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.renewal-auto-renew-row { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; font: 500 12px var(--font-inter); cursor: pointer; }
+.renewal-auto-renew-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a6fd4; cursor: pointer; flex-shrink: 0; }
+.auto-renew-cancel-btn { display: inline-flex !important; align-items: center !important; gap: 5px !important; font-size: 11px !important; padding: 4px 10px !important; color: #1a6fd4 !important; border-color: #b3cef7 !important; background: #eef4ff !important; white-space: nowrap; }
+.auto-renew-cancel-btn:hover { background: #dce9fb !important; border-color: #1a6fd4 !important; }
+.auto-renew-icon { animation: spin 2s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .edit-card-modal { width: min(760px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; border: 1px solid #111; background: #ebe9e3; box-shadow: 14px 18px 0 #111; }
 .edit-card-modal > header { min-height: 78px; display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 2px solid #111; }
 .edit-card-modal > header > div { display: grid; }

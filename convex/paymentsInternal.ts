@@ -14,6 +14,9 @@ export const completePaidCard = internalMutation({
     sessionId: v.string(),
     paidAmount: v.number(),
     tokenIdentifier: v.string(),
+    stripeSubscriptionId: v.optional(v.string()),
+    stripeCustomerId: v.optional(v.string()),
+    autoRenew: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const existingReceipt = await ctx.db.query("paymentReceipts").withIndex("by_session", (q) => q.eq("sessionId", args.sessionId)).unique();
@@ -80,10 +83,13 @@ export const completePaidCard = internalMutation({
       updatedAt: createdAt,
       createdAt,
       clicks: 0,
+      autoRenew: args.autoRenew,
+      stripeSubscriptionId: args.stripeSubscriptionId,
     });
     await ctx.db.insert("cardStats", { cardId, clicks: 0, websiteClicks: 0, phoneClicks: 0, emailClicks: 0, socialClicks: 0, saves: 0, shares: 0, updatedAt: createdAt });
     await ctx.db.insert("paymentReceipts", { sessionId: args.sessionId, pendingCardId: pending._id, cardId, paidAmount: args.paidAmount, usedAt: createdAt });
     await ctx.db.patch(pending._id, { status: "completed" });
+    if (args.stripeCustomerId) await ctx.db.patch(owner._id, { stripeCustomerId: args.stripeCustomerId });
     const imageIds = payload.imageIds as Id<"_storage">[];
     const thumbnailImageIds = (payload.thumbnailImageIds ?? []) as Id<"_storage">[];
     const [urls, thumbnailUrls] = await Promise.all([
@@ -123,6 +129,81 @@ export const completePaidRenewal = internalMutation({
     await ctx.db.patch(card._id, { status, paidAmount: args.paidAmount, expiresAt, updatedAt: now });
     await ctx.db.insert("renewalReceipts", { sessionId: args.sessionId, cardId: card._id, paidAmount: args.paidAmount, usedAt: now });
     return { success: true, status, expiresAt };
+  },
+});
+
+export const completeSubscriptionRenewal = internalMutation({
+  args: {
+    cardId: v.id("cards"),
+    sessionId: v.string(),
+    paidAmount: v.number(),
+    stripeSubscriptionId: v.string(),
+    stripeCustomerId: v.string(),
+    tokenIdentifier: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("renewalReceipts").withIndex("by_session", (q) => q.eq("sessionId", args.sessionId)).unique();
+    if (existing) {
+      if (existing.cardId !== args.cardId) throw new Error("This payment has already been used.");
+      const card = await ctx.db.get(args.cardId);
+      if (!card) throw new Error("The renewed card could not be found.");
+      return { success: true, status: card.status, expiresAt: card.expiresAt };
+    }
+    const owner = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier)).unique();
+    const card = await ctx.db.get(args.cardId);
+    if (!owner || !card || card.ownerId !== owner._id) throw new Error("You can only renew your own cards.");
+    if (owner.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
+    const duration = packageDurations[args.paidAmount];
+    if (!duration) throw new Error("The verified payment amount is invalid.");
+    const now = Date.now();
+    const status = card.status === "hidden" ? "hidden" as const : "published" as const;
+    const expiresAt = Math.max(now, card.expiresAt) + duration;
+    await ctx.db.patch(card._id, { status, paidAmount: args.paidAmount, expiresAt, updatedAt: now, autoRenew: true, stripeSubscriptionId: args.stripeSubscriptionId });
+    await ctx.db.patch(owner._id, { stripeCustomerId: args.stripeCustomerId });
+    await ctx.db.insert("renewalReceipts", { sessionId: args.sessionId, cardId: card._id, paidAmount: args.paidAmount, usedAt: now });
+    return { success: true, status, expiresAt };
+  },
+});
+
+export const processAutoRenewal = internalMutation({
+  args: {
+    subscriptionId: v.string(),
+    paidAmount: v.number(),
+    invoiceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("renewalReceipts").withIndex("by_session", (q) => q.eq("sessionId", args.invoiceId)).unique();
+    if (existing) return;
+    const card = await ctx.db.query("cards").filter((q) => q.eq(q.field("stripeSubscriptionId"), args.subscriptionId)).first();
+    if (!card) return;
+    const duration = packageDurations[args.paidAmount];
+    if (!duration) return;
+    const now = Date.now();
+    const status = card.status === "hidden" ? "hidden" as const : "published" as const;
+    const expiresAt = Math.max(now, card.expiresAt) + duration;
+    await ctx.db.patch(card._id, { status, expiresAt, updatedAt: now });
+    await ctx.db.insert("renewalReceipts", { sessionId: args.invoiceId, cardId: card._id, paidAmount: args.paidAmount, usedAt: now });
+  },
+});
+
+export const clearAutoRenew = internalMutation({
+  args: { subscriptionId: v.string() },
+  handler: async (ctx, args) => {
+    const card = await ctx.db.query("cards").filter((q) => q.eq(q.field("stripeSubscriptionId"), args.subscriptionId)).first();
+    if (!card) return;
+    await ctx.db.patch(card._id, { autoRenew: false, stripeSubscriptionId: undefined });
+  },
+});
+
+export const cancelAutoRenewOnCard = internalMutation({
+  args: { cardId: v.id("cards"), tokenIdentifier: v.string() },
+  handler: async (ctx, args) => {
+    const owner = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier)).unique();
+    const card = await ctx.db.get(args.cardId);
+    if (!owner || !card || card.ownerId !== owner._id) throw new Error("You can only manage your own cards.");
+    const subscriptionId = card.stripeSubscriptionId;
+    await ctx.db.patch(card._id, { autoRenew: false, stripeSubscriptionId: undefined });
+    return { subscriptionId };
   },
 });
 

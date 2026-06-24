@@ -128,6 +128,8 @@ export interface OwnerCard extends WallCard {
   socialClicks?: number;
   saves?: number;
   shares?: number;
+  autoRenew?: boolean;
+  stripeSubscriptionId?: string;
 }
 
 export type RenewalAmount = 0 | 2.99 | 7.99 | 24.99;
@@ -161,6 +163,7 @@ export interface CardDraft {
   imageMode: CardImageMode;
   paymentOption: "free" | "2.99" | "7.99" | "24.99";
   featuredTier: "none" | "bronze" | "silver" | "gold";
+  autoRenew?: boolean;
   files: File[];
   previews: string[];
 }

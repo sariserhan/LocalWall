@@ -15,6 +15,7 @@ export default defineSchema({
     blockedReason: v.optional(v.string()),
     verified: v.optional(v.boolean()),
     verifiedAt: v.optional(v.number()),
+    stripeCustomerId: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_token", ["tokenIdentifier"])
@@ -86,6 +87,8 @@ export default defineSchema({
     reviewCount: v.optional(v.number()),
     reminder3dSentAt: v.optional(v.number()),
     reminder1dSentAt: v.optional(v.number()),
+    autoRenew: v.optional(v.boolean()),
+    stripeSubscriptionId: v.optional(v.string()),
   })
     .index("by_status_created", ["status", "createdAt"])
     .index("by_status_and_country_and_state_and_city_and_createdAt", ["status", "country", "state", "city", "createdAt"])

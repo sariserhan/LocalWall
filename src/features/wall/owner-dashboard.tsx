@@ -36,7 +36,8 @@ interface OwnerDashboardProps {
   onSetVisibility: (card: OwnerCard, status: "published" | "hidden") => Promise<void>;
   onUpdate: (card: OwnerCard, update: CardUpdate) => Promise<void>;
   onDelete: (card: OwnerCard) => Promise<void>;
-  onRenew: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
+  onRenew: (card: OwnerCard, paidAmount: RenewalAmount, autoRenew: boolean) => Promise<void>;
+  onCancelAutoRenew?: (card: OwnerCard) => Promise<void>;
   profile: { displayName: string | null; username: string | null; businessName: string | null; verified?: boolean; verificationStatus?: "pending" | "approved" | "rejected" | null } | null;
   onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
   onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
@@ -58,7 +59,7 @@ function expiryLabel(expiresAt: number) {
   return `${days} days left`;
 }
 
-export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, profile, onUpdateProfile, onRequestVerification, cardDailyStats }: OwnerDashboardProps) {
+export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, onCancelAutoRenew, profile, onUpdateProfile, onRequestVerification, cardDailyStats }: OwnerDashboardProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
@@ -73,6 +74,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
   const [verificationBusy, setVerificationBusy] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [selectedVerificationPlan, setSelectedVerificationPlan] = useState<"monthly" | "annual" | null>("annual");
+  const [renewAutoRenew, setRenewAutoRenew] = useState(false);
   const [embedTarget, setEmbedTarget] = useState<OwnerCard | null>(null);
   const [embedCopied, setEmbedCopied] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<OwnerCard | null>(null);
@@ -154,10 +156,23 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setBusyId(String(renewTarget.id));
     setError(null);
     try {
-      await onRenew(renewTarget, renewalAmount);
+      await onRenew(renewTarget, renewalAmount, renewAutoRenew && renewalAmount !== 0);
       setRenewTarget(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The card could not be renewed.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const cancelAutoRenew = async (card: OwnerCard) => {
+    if (!onCancelAutoRenew) return;
+    setBusyId(String(card.id));
+    setError(null);
+    try {
+      await onCancelAutoRenew(card);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not cancel auto-renew.");
     } finally {
       setBusyId(null);
     }
@@ -372,7 +387,8 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
                   <div className="dashboard-card-actions">
                     <button className="secondary" disabled={expired} onClick={() => setPreviewTarget(card)}><Eye size={13} /> Preview</button>
                     <button className="secondary" disabled={busy} onClick={() => setEditingCard(card)}><Pencil /> Edit</button>
-                    <button className="secondary" disabled={busy} onClick={() => { setRenewTarget(card); setRenewalAmount(7.99); }}><RefreshCw /> Renew</button>
+                    <button className="secondary" disabled={busy} onClick={() => { setRenewTarget(card); setRenewalAmount(7.99); setRenewAutoRenew(false); }}><RefreshCw /> Renew</button>
+                    {card.autoRenew ? <button className="secondary auto-renew-cancel-btn" disabled={busy} onClick={() => cancelAutoRenew(card)} title="Cancel auto-renew"><RefreshCw size={12} className="auto-renew-icon" /> Auto-renewing</button> : null}
                     <button className="secondary" disabled={expired || busy} onClick={() => changeVisibility(card)}>
                       {card.status === "published" ? <><EyeOff /> Hide</> : <><Eye /> {expired ? "Expired" : "Publish"}</>}
                     </button>
@@ -385,7 +401,32 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
           </div>
         </div>
         {deleteTarget ? <div className="dashboard-confirm-backdrop"><div className="dashboard-confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-card-title"><AlertTriangle /><h3 id="delete-card-title">Delete {deleteTarget.name}?</h3><p>This permanently removes the card and its uploaded images. This cannot be undone.</p><div><button className="secondary" onClick={() => setDeleteTarget(null)} disabled={busyId !== null}>Cancel</button><button className="primary danger-confirm" onClick={deleteCard} disabled={busyId !== null}>{busyId ? "Deleting…" : "Delete permanently"}</button></div></div></div> : null}
-        {renewTarget ? <div className="dashboard-confirm-backdrop"><div className="dashboard-confirm renewal-dialog" role="dialog" aria-modal="true" aria-labelledby="renew-card-title"><RefreshCw /><h3 id="renew-card-title">Renew {renewTarget.name}</h3><p>Choose how much time to add. Time is added after the current expiration date when the card is still active.</p><div className="renewal-options" role="radiogroup" aria-label="Renewal duration">{renewalOptions.map((option) => <button key={option.amount} type="button" role="radio" aria-checked={renewalAmount === option.amount} className={`renewal-option ${renewalAmount === option.amount ? "selected" : ""}`} onClick={() => setRenewalAmount(option.amount)}><strong>{option.price}</strong><span>{option.duration}</span>{renewalAmount === option.amount ? <Check /> : null}</button>)}</div><div className="renewal-actions"><button className="secondary" onClick={() => setRenewTarget(null)} disabled={busyId !== null}>Cancel</button><button className="primary" onClick={renewCard} disabled={busyId !== null}>{busyId ? "Starting…" : renewalAmount === 0 ? "Renew free" : `Continue for $${renewalAmount}`}</button></div></div></div> : null}
+        {renewTarget ? (
+          <div className="dashboard-confirm-backdrop">
+            <div className="dashboard-confirm renewal-dialog" role="dialog" aria-modal="true" aria-labelledby="renew-card-title">
+              <RefreshCw />
+              <h3 id="renew-card-title">Renew {renewTarget.name}</h3>
+              <p>Choose how much time to add. Time is added after the current expiration date when the card is still active.</p>
+              <div className="renewal-options" role="radiogroup" aria-label="Renewal duration">
+                {renewalOptions.map((option) => (
+                  <button key={option.amount} type="button" role="radio" aria-checked={renewalAmount === option.amount} className={`renewal-option ${renewalAmount === option.amount ? "selected" : ""}`} onClick={() => setRenewalAmount(option.amount)}>
+                    <strong>{option.price}</strong><span>{option.duration}</span>{renewalAmount === option.amount ? <Check /> : null}
+                  </button>
+                ))}
+              </div>
+              {renewalAmount !== 0 ? (
+                <label className="renewal-auto-renew-row">
+                  <input type="checkbox" checked={renewAutoRenew} onChange={(e) => setRenewAutoRenew(e.target.checked)} />
+                  <span>Auto-renew when it expires</span>
+                </label>
+              ) : null}
+              <div className="renewal-actions">
+                <button className="secondary" onClick={() => setRenewTarget(null)} disabled={busyId !== null}>Cancel</button>
+                <button className="primary" onClick={renewCard} disabled={busyId !== null}>{busyId ? "Starting…" : renewalAmount === 0 ? "Renew free" : `Continue for $${renewalAmount}`}</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
         {editingCard ? <EditCardModal card={editingCard} onClose={() => setEditingCard(null)} onSave={onUpdate} /> : null}
         {previewTarget ? (() => {
           const card = previewTarget;

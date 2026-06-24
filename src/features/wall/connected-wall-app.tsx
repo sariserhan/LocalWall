@@ -181,7 +181,10 @@ export function ConnectedWallApp({
     return savedWallsList.map((item) => ({ path: item.path, label: item.label, createdAt: item.createdAt }));
   }, [savedWallsList]);
   const finalizePaidCard = useAction(api.payments.finalizePaidCard);
+  const finalizeSubscriptionPosting = useAction(api.payments.finalizeSubscriptionPosting);
   const finalizePaidRenewal = useAction(api.payments.finalizePaidRenewal);
+  const finalizeSubscriptionRenewal = useAction(api.payments.finalizeSubscriptionRenewal);
+  const cancelAutoRenewAction = useAction(api.payments.cancelAutoRenew);
   const finalizeVerification = useAction(api.payments.finalizeVerification);
   const adminApproveVerification = useMutation(api.admin.approveVerification);
   const adminRejectVerification = useMutation(api.admin.rejectVerification);
@@ -289,6 +292,13 @@ export function ConnectedWallApp({
           setCheckoutMessage("Payment succeeded and your card has been renewed.");
           return;
         }
+        if (checkoutKind === "subscription_renewal") {
+          const cardId = searchParams.get("card_id");
+          if (!cardId) throw new Error("The renewal card is missing.");
+          await finalizeSubscriptionRenewal({ sessionId, cardId: cardId as Id<"cards"> });
+          setCheckoutMessage("Payment succeeded. Your card will now auto-renew.");
+          return;
+        }
         if (checkoutKind === "verification") {
           await finalizeVerification({ sessionId });
           setCheckoutMessage("Payment succeeded. Your verification request is under review — we'll approve within 24 hours.");
@@ -296,6 +306,12 @@ export function ConnectedWallApp({
         }
 
         if (!pendingCardId) throw new Error("Could not find the pending paid card.");
+        if (checkoutKind === "subscription_posting") {
+          const createdCard = await finalizeSubscriptionPosting({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard;
+          addCardToLocalWall(createdCard);
+          setCheckoutMessage("Payment succeeded. Your card is on the wall and will auto-renew.");
+          return;
+        }
         const createdCard = await finalizePaidCard({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard;
         addCardToLocalWall(createdCard);
         setCheckoutMessage("Payment succeeded and your card is now on the wall.");
@@ -383,7 +399,7 @@ export function ConnectedWallApp({
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name }),
+        body: JSON.stringify({ pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name, autoRenew: draft.autoRenew }),
       });
       const checkoutResult = await response.json() as { url?: string; sessionId?: string; error?: string };
       if (!response.ok || !checkoutResult.url || !checkoutResult.sessionId) throw new Error(checkoutResult.error || "Could not start card checkout.");
@@ -395,7 +411,7 @@ export function ConnectedWallApp({
     return card;
   };
 
-  const handleRenew = async (card: OwnerCard, paidAmount: RenewalAmount) => {
+  const handleRenew = async (card: OwnerCard, paidAmount: RenewalAmount, autoRenew: boolean = false) => {
     if (paidAmount === 0) {
       await renewCard({ cardId: card.id as Id<"cards">, paidAmount });
       setCheckoutMessage(`${card.name} was renewed for 1 day.`);
@@ -405,11 +421,16 @@ export function ConnectedWallApp({
     const response = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount } }),
+      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount, autoRenew } }),
     });
     const result = await response.json() as { url?: string; error?: string };
     if (!response.ok || !result.url) throw new Error(result.error || "Could not start renewal checkout.");
     window.location.assign(result.url);
+  };
+
+  const handleCancelAutoRenew = async (card: OwnerCard) => {
+    await cancelAutoRenewAction({ cardId: card.id as Id<"cards"> });
+    setCheckoutMessage(`Auto-renew canceled for ${card.name}.`);
   };
 
   return (
@@ -503,6 +524,7 @@ export function ConnectedWallApp({
         setLayoutCards((current) => current?.filter((item) => String(item.id) !== String(card.id)) ?? current);
       }}
       onRenewCard={handleRenew}
+      onCancelAutoRenewCard={handleCancelAutoRenew}
       onMoveCard={async (card, placement) => {
         await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y });
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);

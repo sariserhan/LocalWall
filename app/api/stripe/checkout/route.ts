@@ -79,13 +79,49 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
       }
 
       const origin = new URL(request.url).origin;
+      const cardName = String(renewalPayload.cardName || "wall card").slice(0, 80);
+
+      if (renewalPayload.autoRenew) {
+        const interval: "month" | "year" = paidAmount === 24.99 ? "year" : "month";
+        const intervalCount = paidAmount === 7.99 ? 3 : 1;
+        const session = await stripe.checkout.sessions.create({
+          mode: "subscription",
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              recurring: { interval, interval_count: intervalCount },
+              product_data: {
+                name: `${cardName} — Auto-renew`,
+                description: "Automatically renews your listing on the wall",
+              },
+              unit_amount: Math.round(paidAmount * 100),
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            kind: "subscription_renewal",
+            cardId: renewalPayload.cardId,
+            paidAmount: String(paidAmount),
+          },
+          subscription_data: {
+            metadata: {
+              cardId: renewalPayload.cardId,
+              paidAmount: String(paidAmount),
+            },
+          },
+          success_url: `${origin}/?checkout=success&kind=subscription_renewal&card_id=${encodeURIComponent(renewalPayload.cardId)}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+        });
+        return json({ url: session.url, sessionId: session.id });
+      }
+
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: [{
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Renew ${String(renewalPayload.cardName || "wall card").slice(0, 80)}`,
+              name: `Renew ${cardName}`,
               description: "Extend this card's time on the wall",
             },
             unit_amount: Math.round(paidAmount * 100),
@@ -111,13 +147,46 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
     }
 
     const origin = new URL(request.url).origin;
+    const cardName = `Post ${String(body?.cardName || "wall card").slice(0, 80)}`;
+
+    if (body?.autoRenew && paidAmount > 0) {
+      const interval: "month" | "year" = paidAmount === 24.99 ? "year" : "month";
+      const intervalCount = paidAmount === 7.99 ? 3 : 1;
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            recurring: { interval, interval_count: intervalCount },
+            product_data: {
+              name: `${cardName} — Auto-renew`,
+              description: "Your card stays on the wall and renews automatically",
+            },
+            unit_amount: Math.round(paidAmount * 100),
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          kind: "subscription_posting",
+          pendingCardId,
+          paidAmount: String(paidAmount),
+        },
+        subscription_data: {
+          metadata: { pendingCardId, paidAmount: String(paidAmount) },
+        },
+        success_url: `${origin}/?checkout=success&kind=subscription_posting&pending_card_id=${encodeURIComponent(pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+      });
+      return json({ url: session.url, sessionId: session.id });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{
         price_data: {
           currency: "usd",
           product_data: {
-          name: `Post ${String(body?.cardName || "wall card").slice(0, 80)}`,
+            name: cardName,
             description: "Publish this card on the local wall",
           },
           unit_amount: Math.round(paidAmount * 100),

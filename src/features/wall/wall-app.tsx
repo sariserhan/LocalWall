@@ -60,7 +60,8 @@ interface WallAppProps {
   onSetCardStatus?: (card: OwnerCard, status: "published" | "hidden") => Promise<void>;
   onUpdateCard?: (card: OwnerCard, update: CardUpdate) => Promise<void>;
   onDeleteCard?: (card: OwnerCard) => Promise<void>;
-  onRenewCard?: (card: OwnerCard, paidAmount: RenewalAmount) => Promise<void>;
+  onRenewCard?: (card: OwnerCard, paidAmount: RenewalAmount, autoRenew: boolean) => Promise<void>;
+  onCancelAutoRenewCard?: (card: OwnerCard) => Promise<void>;
   onMoveCard?: (card: WallCardModel, placement: Placement) => Promise<void>;
   ownedCardIds?: ReadonlySet<string>;
   likedCardIds?: ReadonlySet<string>;
@@ -132,7 +133,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1426,6 +1427,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             setSelected((current) => current && String(current.id) === String(card.id) ? null : current);
           }}
           onRenew={onRenewCard}
+          onCancelAutoRenew={onCancelAutoRenewCard}
           profile={profile ?? null}
           onUpdateProfile={onUpdateProfile}
           onRequestVerification={onRequestVerification}

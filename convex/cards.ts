@@ -430,6 +430,8 @@ export const listMine = query({
         socialClicks: stats?.socialClicks ?? 0,
         saves: stats?.saves ?? 0,
         shares: stats?.shares ?? 0,
+        autoRenew: card.autoRenew,
+        stripeSubscriptionId: card.stripeSubscriptionId,
       };
     }));
   },

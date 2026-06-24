@@ -216,6 +216,7 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
   });
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [autoRenew, setAutoRenew] = useState(false);
   const [step, setStep] = useState(1);
   const [draftBanner, setDraftBanner] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -439,6 +440,7 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
       whatsapp: form.whatsapp.trim() || undefined,
       telegram: form.telegram.trim() || undefined,
       featuredTier: form.featuredTier,
+      autoRenew: autoRenew && form.paymentOption !== "free",
       files,
       previews,
     });
@@ -622,6 +624,12 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
                 ))}
               </div>
             </fieldset>
+            {form.paymentOption !== "free" ? (
+              <label className="composer-auto-renew-row">
+                <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} />
+                <span>Auto-renew when it expires</span>
+              </label>
+            ) : null}
             <fieldset className="featured-tier-fieldset">
               <legend>Boost your listing <span>(optional)</span></legend>
               <div className="featured-tier-options" role="radiogroup" aria-label="Choose a featured tier">
