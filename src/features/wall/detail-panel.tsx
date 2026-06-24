@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Copy, ExternalLink, Flag, Heart, Mail, Phone, Share2, X } from "lucide-react";
+import { Bookmark, Copy, ExternalLink, Flag, Heart, Mail, Phone, QrCode, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { WallCard } from "./types";
@@ -31,7 +31,7 @@ const REPORT_REASONS: { value: ReportReason; label: string; description: string 
   { value: "other", label: "Other", description: "Something else not listed above" },
 ];
 
-export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn, liked = false, canLike = true, onToggleLike }: {
+export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn, liked = false, canLike = true, onToggleLike, similarCards = [], onCardOpen }: {
   card: WallCard;
   onClose: () => void;
   viewCount: number;
@@ -44,6 +44,8 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   liked?: boolean;
   canLike?: boolean;
   onToggleLike?: () => Promise<void>;
+  similarCards?: WallCard[];
+  onCardOpen?: (card: WallCard) => void;
 }) {
   const [optimisticSaved, setOptimisticSaved] = useState(saved);
   const [saving, setSaving] = useState(false);
@@ -54,6 +56,8 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+  const [qrOpen, setQrOpen] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState<ReportReason>("spam");
   const [reportDetails, setReportDetails] = useState("");
@@ -162,6 +166,15 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     setShareMenuOpen(false);
   };
 
+  const openQr = async () => {
+    setQrOpen(true);
+    setQrDataUrl(null);
+    const url = buildCardUrl();
+    const QRCode = (await import("qrcode")).default;
+    const dataUrl = await QRCode.toDataURL(url, { width: 280, margin: 2, color: { dark: "#111111", light: "#f5f1e8" } });
+    setQrDataUrl(dataUrl);
+  };
+
   const openReport = () => {
     setReportReason("spam");
     setReportDetails("");
@@ -227,10 +240,45 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
             </div>
           ) : null}
         </div>
+        <button type="button" className="secondary" onClick={() => void openQr()}><QrCode size={15} /> QR Code</button>
         {onReport ? <button type="button" className="secondary" onClick={openReport}><Flag /> Report</button> : null}
       </div>
       <div className="sheet-meta"><span>{viewCount > 0 ? `${viewCount} views` : "No views yet"}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
       <ReviewsSection cardId={card.id} onRequestSignIn={onRequestSignIn} />
+      {similarCards.length > 0 ? (
+        <div className="similar-cards">
+          <h4 className="similar-cards-heading">Similar listings</h4>
+          <div className="similar-cards-list">
+            {similarCards.map((sc) => (
+              <button key={String(sc.id)} type="button" className={`similar-card theme-${sc.imageMode === "business-card" ? "biz" : sc.theme}`} onClick={() => onCardOpen?.(sc)}>
+                {sc.thumbnailImages?.[0] && <img src={sc.thumbnailImages[0]} alt="" aria-hidden="true" />}
+                <span className="similar-card-category">{sc.category}</span>
+                <strong>{sc.name}</strong>
+                {sc.line ? <span className="similar-card-line">{sc.line}</span> : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {qrOpen ? createPortal(
+        <div className="dashboard-confirm-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setQrOpen(false)}>
+          <div className="qr-modal" role="dialog" aria-modal="true" aria-label="QR code for this card">
+            <button className="icon-btn qr-modal-close" type="button" onClick={() => setQrOpen(false)} aria-label="Close"><X /></button>
+            <h3 className="qr-modal-title">Scan to view card</h3>
+            <p className="qr-modal-name">{card.name}</p>
+            {qrDataUrl ? (
+              <>
+                <img src={qrDataUrl} alt={`QR code for ${card.name}`} className="qr-modal-image" width={220} height={220} />
+                <a href={qrDataUrl} download={`${card.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-qr.png`} className="primary qr-download-btn">Download PNG</a>
+              </>
+            ) : (
+              <div className="qr-modal-loading">Generating…</div>
+            )}
+            <button type="button" className="secondary" onClick={() => setQrOpen(false)}>Close</button>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
       {expandedImage ? createPortal(
         <div className="image-lightbox" role="dialog" aria-modal="true" aria-label={`${card.name} image preview`} onMouseDown={(event) => event.target === event.currentTarget && setExpandedImage(null)}>
           <button className="image-lightbox-close" type="button" onClick={() => setExpandedImage(null)} aria-label="Close full-screen image" autoFocus><X /></button>

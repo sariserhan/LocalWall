@@ -642,6 +642,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     });
   }, [cards, category, subcategory, deferredQuery, fresh, sortBy, filterHasWebsite, filterHasPhotos, filterFeaturedOnly, selectedCountry, selectedState, selectedCity, selectedNeighborhood, locationReady]);
 
+  const similarCards = useMemo(() => {
+    if (!selected) return [];
+    return visible.filter((c) => String(c.id) !== String(selected.id) && c.category === selected.category).slice(0, 3);
+  }, [selected, visible]);
+
   const pendingCardsOnSelectedWall = useMemo(() => {
     if (!locationReady) return 0;
     return pendingCreatedCards.filter((card) => {
@@ -1240,8 +1245,14 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   />
                 ))}
               </div>
+            ) : cards.length === 0 ? (
+              <div className="empty-note empty-note-first">
+                <strong>Be the first in {selectedCity || locationLabel()}!</strong>
+                <span>Get 10× more visibility as the first listing on this wall.</span>
+                <button className="primary" onClick={openComposer}>Post your card</button>
+              </div>
             ) : (
-              <div className="empty-note"><strong>Nothing stuck here yet.</strong><span>Try another corner of the wall.</span><button onClick={resetFilters}>Reset filters</button></div>
+              <div className="empty-note"><strong>Nothing matched your filters.</strong><span>Try broadening your search or reset filters.</span><button onClick={resetFilters}>Reset filters</button></div>
             )
           ) : (
             visible.length ? (
@@ -1265,8 +1276,14 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   />
                 );
               })
+            ) : cards.length === 0 ? (
+              <div className="empty-note empty-note-first">
+                <strong>Be the first in {selectedCity || locationLabel()}!</strong>
+                <span>Get 10× more visibility as the first listing on this wall.</span>
+                <button className="primary" onClick={openComposer}>Post your card</button>
+              </div>
             ) : (
-              <div className="empty-note"><strong>Nothing stuck here yet.</strong><span>Try another corner of the wall.</span><button onClick={resetFilters}>Reset filters</button></div>
+              <div className="empty-note"><strong>Nothing matched your filters.</strong><span>Try broadening your search or reset filters.</span><button onClick={resetFilters}>Reset filters</button></div>
             )
           )
         ) : null}
@@ -1340,7 +1357,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           </div>
         </div>
       ) : null}
-      {selected ? (() => { const isOwnedCard = ownedCardIds?.has(String(selected.id)) ?? false; return <DetailPanel key={String(selected.id)} card={selected} onClose={closeCard} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} canSaveCard={isSignedIn && !isOwnedCard} saved={savedCardIds.has(String(selected.id))} onSetSaved={onSetSavedCard ? (saved) => onSetSavedCard(selected, saved) : undefined} onRequestSignIn={onRequestSignIn} liked={likedCardIds?.has(String(selected.id)) ?? false} canLike={!isOwnedCard} onToggleLike={onToggleLike ? () => onToggleLike(selected) : undefined} />; })() : null}
+      {selected ? (() => { const isOwnedCard = ownedCardIds?.has(String(selected.id)) ?? false; return <DetailPanel key={String(selected.id)} card={selected} onClose={closeCard} viewCount={viewCounts[String(selected.id)] ?? selected.clicks ?? 0} onEvent={(event) => onCardEvent?.(selected, event)} onReport={onReportCard ? (reason, details) => onReportCard(selected, reason, details) : undefined} canSaveCard={isSignedIn && !isOwnedCard} saved={savedCardIds.has(String(selected.id))} onSetSaved={onSetSavedCard ? (saved) => onSetSavedCard(selected, saved) : undefined} onRequestSignIn={onRequestSignIn} liked={likedCardIds?.has(String(selected.id)) ?? false} canLike={!isOwnedCard} onToggleLike={onToggleLike ? () => onToggleLike(selected) : undefined} similarCards={similarCards} onCardOpen={openCard} />; })() : null}
       {dashboard && ownerCards && onSetCardStatus && onUpdateCard && onDeleteCard && onRenewCard ? (
         <OwnerDashboard
           cards={ownerCards}

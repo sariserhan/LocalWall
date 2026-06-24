@@ -273,7 +273,7 @@ button { color: inherit; }
 .detail-socials svg { width: 17px; height: 17px; }
 .detail-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .detail-card-actions .secondary { min-height: 54px; }
-.detail-secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.detail-secondary-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; margin-top: 8px; }
 .detail-secondary-actions button { justify-content: center; }
 .share-menu-wrap { position: relative; display: flex; flex-direction: column; }
 .share-menu-wrap > button { flex: 1; }
@@ -535,6 +535,10 @@ button { color: inherit; }
 .empty-note strong { font: 800 28px var(--font-caveat); }
 .empty-note span { font: 700 13px var(--font-barlow-condensed); }
 .empty-note button { margin-top: 20px; border: 0; border-bottom: 2px solid; background: transparent; text-transform: uppercase; font: 800 12px var(--font-inter); cursor: pointer; }
+.empty-note-first { background: #111; color: #f5f1e8; }
+.empty-note-first strong { font: 900 24px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; }
+.empty-note-first span { font: 500 12px var(--font-inter); opacity: .75; text-transform: none; letter-spacing: 0; }
+.empty-note-first .primary { margin-top: 16px; background: #edcf35; color: #111; border: none; width: 100%; min-height: 44px; }
 .wall.is-placing .wall-card:not(.placement-card) { filter: brightness(.72) saturate(.72); }
 .placement-mode { position: absolute; inset: 0; z-index: 3000; background: #1113; cursor: crosshair; }
 .placement-banner { position: fixed; top: 82px; left: 50%; z-index: 3100; width: min(760px, calc(100vw - 32px)); min-height: 68px; display: flex; align-items: center; gap: 13px; padding: 10px 12px 10px 18px; transform: translateX(-50%); background: #efede7; border: 1px solid #111; box-shadow: 7px 8px 0 #111; }
@@ -1290,3 +1294,23 @@ button { color: inherit; }
   .home-footer-copy { margin-left: 0; width: 100%; margin-top: 4px; }
   .home-footer-links { margin-left: 0; }
 }
+/* QR Code modal */
+.qr-modal { position: relative; background: #f5f1e8; border: 2px solid #111; border-radius: 0; padding: 32px 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 300px; width: calc(100vw - 32px); box-shadow: 8px 10px 0 #111; }
+.qr-modal-close { position: absolute; top: 10px; right: 10px; }
+.qr-modal-title { font: 900 22px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; margin: 0; color: #111; }
+.qr-modal-name { font: 600 13px var(--font-inter); color: #555; margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qr-modal-image { display: block; border: 3px solid #111; border-radius: 0; }
+.qr-modal-loading { width: 220px; height: 220px; background: #e8e4da; display: flex; align-items: center; justify-content: center; font: 600 13px var(--font-inter); color: #888; }
+.qr-download-btn { text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; }
+/* Similar cards */
+.similar-cards { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e0dbd0; }
+.similar-cards-heading { font: 800 10px var(--font-inter); letter-spacing: 1.3px; text-transform: uppercase; color: #888; margin: 0 0 10px; }
+.similar-cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+.similar-card { position: relative; padding: 10px 10px 12px; border: none; cursor: pointer; overflow: hidden; min-height: 78px; display: flex; flex-direction: column; gap: 3px; text-align: left; transition: transform .15s, box-shadow .15s; border-radius: 0; }
+.similar-card:hover { transform: translateY(-2px); box-shadow: 3px 5px 0 #0006; }
+.similar-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .22; pointer-events: none; }
+.similar-card-category { position: relative; font: 800 8px var(--font-inter); letter-spacing: 1px; text-transform: uppercase; opacity: .65; }
+.similar-card strong { position: relative; font: 800 13px/1.15 var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.similar-card-line { position: relative; font: 500 10px/1.3 var(--font-inter); opacity: .65; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+/* SEO utility */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

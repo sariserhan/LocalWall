@@ -23,9 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (city) {
     const loc = `${city}, ${stateName}`;
     return {
-      title: `${loc} Wall — Local Ads`,
-      description: `Browse local ads and services in ${loc}, ${countryName}. Find plumbers, restaurants, tutors and more.`,
-      openGraph: { title: `${loc} Wall`, description: `Local ads in ${loc}` },
+      title: `${loc} Local Bulletin Board — Services, Jobs & Events | LocalWall`,
+      description: `Browse local ads in ${loc}. Find services, repairs, jobs, events, real estate and more on the ${loc} community wall. Free to browse, easy to post.`,
+      openGraph: { title: `${loc} Local Bulletin Board`, description: `Local ads, services and events in ${loc}, ${countryName}.` },
     };
   }
 
@@ -54,13 +54,19 @@ export default async function CityPage({ params, searchParams }: Props) {
   const city = parseCityFromSlug(country, state, citySlug);
   if (city) {
     const initialCards = await fetchInitialCards({ country, state, city });
+    const countryName = Country.getAllCountries().find((c) => c.isoCode === country)?.name ?? country;
+    const stateName = State.getStatesOfCountry(country).find((s) => s.isoCode === state)?.name ?? state;
+    const h1 = `${city}, ${stateName} local bulletin board — browse ${initialCards.length > 0 ? `${initialCards.length}+` : ""} ads for services, jobs, events and more in ${countryName}.`;
     return (
-      <WallPageShell
-        initialLocation={{ country, state, city }}
-        initialCards={initialCards}
-        initialCardId={sp.card}
-        initialKeyword={sp.keyword}
-      />
+      <>
+        <h1 className="sr-only">{h1}</h1>
+        <WallPageShell
+          initialLocation={{ country, state, city }}
+          initialCards={initialCards}
+          initialCardId={sp.card}
+          initialKeyword={sp.keyword}
+        />
+      </>
     );
   }
 
