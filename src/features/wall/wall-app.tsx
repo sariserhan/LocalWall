@@ -11,6 +11,7 @@ import {
   MapPin,
   Menu,
   Plus,
+  QrCode,
   RefreshCw,
   RotateCcw,
   Search,
@@ -969,18 +970,109 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     }
   };
 
-  const [shareNotice, setShareNotice] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [inlineQR, setInlineQR] = useState<string | null>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
 
-  const shareWall = async () => {
+  useEffect(() => {
+    if (!shareOpen) { setInlineQR(null); return; }
+    const url = window.location.origin + window.location.pathname;
+    import("qrcode").then(({ default: QRCode }) => {
+      void QRCode.toDataURL(url, { width: 256, margin: 2, color: { dark: "#141414", light: "#ffffff" } }).then(setInlineQR);
+    });
+  }, [shareOpen]);
+
+
+  const copyWallLink = async () => {
     const url = window.location.href;
     try {
       await navigator.clipboard.writeText(url);
-      setShareNotice(true);
-      window.setTimeout(() => setShareNotice(false), 2500);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
       toast("Wall link copied", "info");
     } catch {
       window.prompt("Copy this link:", url);
     }
+  };
+
+  const printWallQR = async () => {
+    const url = window.location.origin + window.location.pathname;
+    const appUrl = window.location.origin;
+    const QRCode = (await import("qrcode")).default;
+    const qrDataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2, color: { dark: "#1a1a18", light: "#ffffff" } });
+    const countryName = csc?.Country?.getCountryByCode(selectedCountry.toUpperCase())?.name ?? selectedCountry.toUpperCase();
+    const stateName = selectedState ? getStateName(selectedCountry, selectedState) : "";
+    const neighborhood = selectedNeighborhood || "";
+    // primary = most specific level; meta = everything above it (no repeats)
+    const city = selectedCity || stateName || countryName || "Local";
+    const metaParts = selectedCity
+      ? [stateName, countryName].filter(Boolean)
+      : selectedState
+        ? [countryName].filter(Boolean)
+        : [];
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const win = window.open("", "_blank");
+    if (!win) { toast("Allow popups to print the QR poster", "error"); return; }
+    win.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>LOCALWALL · ${esc(city)}</title>
+  <style>
+    @page { size: A4 portrait; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { width: 210mm; min-height: 297mm; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 60px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .bg-fill { position: fixed; inset: 0; z-index: -1; background-color: #747672; background-image: url('${appUrl}/assets/wall-texture.png'); background-size: cover; background-position: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E"); opacity: .08; mix-blend-mode: overlay; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .ghost { position: fixed; border-radius: 1px; background: #0002; box-shadow: 1px 3px 8px #0003; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .g1 { width: 200px; height: 240px; top: 8%; left: 5%; transform: rotate(3.5deg); opacity: .55; }
+    .g2 { width: 160px; height: 200px; top: 15%; right: 7%; transform: rotate(-2.5deg); opacity: .4; }
+    .g3 { width: 180px; height: 160px; bottom: 12%; left: 12%; transform: rotate(1.2deg); opacity: .35; }
+    .g4 { width: 140px; height: 120px; bottom: 10%; right: 10%; transform: rotate(-3deg); opacity: .3; }
+    .card { position: relative; z-index: 1; width: min(360px, calc(100% - 40px)); background: #edede8; padding: 42px 36px 28px; box-shadow: 3px 6px 2px #0006, 14px 22px 28px #0004; transform: rotate(-1.8deg); }
+    .card::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .14; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='.35'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+    .card::after { content: ''; position: absolute; inset: auto 0 -1px 0; height: 7px; background: #edede8; clip-path: polygon(0 0,8% 35%,17% 0,27% 48%,38% 4%,48% 35%,58% 0,70% 43%,81% 7%,91% 38%,100% 0,100% 60%,0 60%); }
+    .tape { position: absolute; top: -13px; left: 50%; width: 88px; height: 26px; transform: translateX(-50%) rotate(-1.5deg); background: #d9d2b7a8; box-shadow: 0 1px #fff5; opacity: .86; }
+    .eyebrow { margin: 0 0 10px; font: 800 9px sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #aaa; }
+    .card { container-type: inline-size; container-name: card; }
+    .logo { font: 900 clamp(40px, 16cqi, 72px)/.82 'Arial Black', 'Helvetica Neue', sans-serif; text-transform: uppercase; letter-spacing: -.01em; color: #1a1a18; margin-bottom: 4px; word-break: break-word; }
+    .tagline { font: 700 clamp(8px, 2.5cqi, 11px) sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #aaa; margin-bottom: 20px; }
+    .divider { width: 44px; height: 3px; background: #f43d38; margin: 0 0 18px; }
+    .city { font: 900 clamp(18px, 11cqi, 42px)/1.05 'Arial Black', 'Helvetica Neue', sans-serif; text-transform: uppercase; letter-spacing: .01em; color: #1a1a18; margin-bottom: 4px; word-break: break-word; overflow-wrap: anywhere; }
+    .location-meta { font: 600 clamp(9px, 2.8cqi, 12px) sans-serif; text-transform: uppercase; letter-spacing: .08em; color: #888; margin-bottom: 6px; word-break: break-word; }
+    .subtitle { font: 400 clamp(10px, 3cqi, 13px)/1.6 sans-serif; color: #666; margin-bottom: 20px; }
+    .qr { width: min(200px, 55cqi); height: min(200px, 55cqi); display: block; margin: 0 auto 14px; border: 2px solid #1a1a18; padding: 4px; background: #fff; }
+    .url-text { font: 400 clamp(8px, 2.5cqi, 11px) monospace; color: #aaa; text-align: center; margin-bottom: 22px; word-break: break-all; }
+    .card-footer { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid #d4d0c8; font: 700 clamp(7px, 2cqi, 9px) sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #bbb; }
+    .brand { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font: 900 11px sans-serif; letter-spacing: .22em; color: #fff3; text-transform: uppercase; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <div class="bg-fill"></div>
+  <div class="grain"></div>
+  <div class="ghost g1"></div><div class="ghost g2"></div><div class="ghost g3"></div><div class="ghost g4"></div>
+  <div class="card">
+    <div class="tape"></div>
+    <p class="eyebrow">LocalWall · ${esc(city)}</p>
+    <div class="logo">WALL</div>
+    <div class="tagline">local bulletin board</div>
+    <div class="divider"></div>
+    <div class="city">${esc(city)}</div>
+    ${neighborhood ? `<p class="location-meta">${esc(neighborhood)}</p>` : ""}
+    ${metaParts.length ? `<p class="location-meta">${metaParts.map(esc).join(" · ")}</p>` : ""}
+    <p class="subtitle">Scan to see what's on the wall</p>
+    <img class="qr" src="${qrDataUrl}" alt="QR code" />
+    <p class="url-text">${esc(url)}</p>
+    <div class="card-footer"><span>LocalWall</span><span>your local bulletin board</span></div>
+  </div>
+  <div class="brand">WALL</div>
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`);
+    win.document.close();
   };
 
   const handleWallKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -1204,7 +1296,30 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
             )}
           </div>
-          <button onClick={() => { void shareWall(); setMobileMenuOpen(false); }}><Link2 />{shareNotice ? "Copied!" : "Share Wall"}</button>
+          {shareOpen && <div className="share-backdrop" onClick={() => setShareOpen(false)} />}
+          <div className="share-wall-wrap" ref={shareRef}>
+            <button onClick={() => { setShareOpen((p) => !p); setMobileMenuOpen(false); }}><Link2 />Share Wall</button>
+            {shareOpen && (
+              <div className="share-popover">
+                <div className="share-popover-header">
+                  <strong>Share</strong>
+                  <button className="share-popover-close" onClick={() => setShareOpen(false)}><X size={14} /></button>
+                </div>
+                <button className="share-option" onClick={() => { void copyWallLink(); }}>
+                  <Link2 size={14} /><span>{copied ? "Copied!" : "Copy link"}</span>
+                </button>
+                <button className="share-option" onClick={() => { void printWallQR(); setShareOpen(false); }}>
+                  <QrCode size={14} /><span>QR — print A4 poster</span>
+                </button>
+                <div className="share-option-qr-row">
+                  <div className="share-option-qr-header"><QrCode size={14} /><span>QR — scan from screen</span></div>
+                  {inlineQR
+                    ? <img src={inlineQR} alt="QR code" className="share-qr-img" />
+                    : <div className="share-qr-placeholder" />}
+                </div>
+              </div>
+            )}
+          </div>
           {pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}

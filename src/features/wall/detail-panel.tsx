@@ -272,8 +272,9 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         </div>
       ) : null}
       {qrOpen ? createPortal(
-        <div className="dashboard-confirm-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setQrOpen(false)}>
+        <div className="dashboard-confirm-backdrop qr-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setQrOpen(false)}>
           <div className="qr-modal" role="dialog" aria-modal="true" aria-label="QR code for this card">
+            <div className="qr-modal-tape" />
             <button className="icon-btn qr-modal-close" type="button" onClick={() => setQrOpen(false)} aria-label="Close"><X /></button>
             <h3 className="qr-modal-title">Scan to view card</h3>
             <p className="qr-modal-name">{card.name}</p>

@@ -256,6 +256,22 @@ button { color: inherit; }
 .footer-digest-btn:hover:not(:disabled) { opacity: .85; }
 .footer-digest-btn:disabled { opacity: .45; cursor: not-allowed; }
 .footer-digest-success { font: 500 13px var(--font-inter); color: #8ecfa1; margin: 0; text-align: right; }
+.share-backdrop { position: fixed; inset: 0; z-index: 5500; }
+.share-wall-wrap { position: relative; display: flex; align-items: stretch; }
+.share-wall-wrap > button { display: flex; align-items: center; justify-content: center; min-width: 102px; border: 0; border-left: 1px solid #c4c1bb; background: transparent; text-transform: uppercase; font: 800 14px var(--font-barlow-condensed); cursor: pointer; padding: 0 14px; gap: 7px; }
+.share-wall-wrap > button svg { width: 16px; }
+.share-popover { position: absolute; top: calc(100% + 1px); right: 0; z-index: 5600; width: 240px; background: var(--ui-bg); box-shadow: 6px 10px 32px #0008; border-top: 2px solid #f43d38; overflow: hidden; }
+.share-popover-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid #d4d1cb; }
+.share-popover-header strong { font: 800 13px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; }
+.share-popover-close { display: flex; align-items: center; justify-content: center; border: 0; background: none; cursor: pointer; color: #888; padding: 2px; }
+.share-popover-close:hover { color: #111; }
+.share-option { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 16px; background: none; border: none; border-bottom: 1px solid #d4d1cb; color: #141414; font: 600 12px var(--font-inter); cursor: pointer; text-align: left; transition: background .1s; }
+.share-option:hover { background: var(--ui-bg-hover); }
+.share-option-qr-row { padding: 12px 16px; }
+.share-option-qr-header { display: flex; align-items: center; gap: 9px; font: 600 12px var(--font-inter); color: #141414; margin-bottom: 10px; }
+.share-qr-img { width: 140px; height: 140px; display: block; margin: 0 auto; border: 2px solid #141414; }
+.share-qr-placeholder { width: 140px; height: 140px; background: var(--ui-bg-hover); margin: 0 auto; animation: share-pulse .8s ease-in-out infinite alternate; }
+@keyframes share-pulse { from { opacity: 1; } to { opacity: .45; } }
 .footer-legal { display: flex; gap: 20px; align-items: center; }
 .footer-legal a { font: 700 10px var(--font-inter); letter-spacing: .08em; text-transform: uppercase; color: #4a4a48; text-decoration: none; transition: color .15s; white-space: nowrap; }
 .footer-legal a:hover, .footer-legal a:focus-visible { color: #f5f1e8; }
@@ -1516,12 +1532,16 @@ button { color: inherit; }
 }
 
 /* QR Code modal */
-.qr-modal { position: relative; background: var(--ui-bg); border: 2px solid #111; border-radius: 0; padding: 32px 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 300px; width: calc(100vw - 32px); box-shadow: 8px 10px 0 #111; }
+.qr-backdrop { background: #0005 !important; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.qr-modal { position: relative; background: #edede8; padding: 38px 28px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 300px; width: calc(100vw - 32px); box-shadow: 3px 6px 2px #0006, 14px 22px 28px #0004; transform: rotate(-1.8deg); animation: nf-slap .55s both cubic-bezier(.16,.75,.32,1.25); overflow: visible; }
+.qr-modal::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .14; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='.35'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+.qr-modal::after { content: ''; position: absolute; inset: auto 0 -1px 0; height: 7px; background: #edede8; clip-path: polygon(0 0,8% 35%,17% 0,27% 48%,38% 4%,48% 35%,58% 0,70% 43%,81% 7%,91% 38%,100% 0,100% 60%,0 60%); }
+.qr-modal-tape { position: absolute; top: -13px; left: 50%; width: 88px; height: 26px; transform: translateX(-50%) rotate(-1.5deg); background: #d9d2b7a8; box-shadow: 0 1px #fff5; opacity: .86; }
 .qr-modal-close { position: absolute; top: 10px; right: 10px; }
-.qr-modal-title { font: 900 22px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; margin: 0; color: #111; }
+.qr-modal-title { font: 900 22px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .5px; margin: 0; color: #1a1a18; }
 .qr-modal-name { font: 600 13px var(--font-inter); color: #555; margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qr-modal-image { display: block; border: 3px solid #111; border-radius: 0; }
-.qr-modal-loading { width: 220px; height: 220px; background: #e8e4da; display: flex; align-items: center; justify-content: center; font: 600 13px var(--font-inter); color: #888; }
+.qr-modal-image { display: block; border: 2px solid #1a1a18; }
+.qr-modal-loading { width: 220px; height: 220px; background: #d4d0c8; display: flex; align-items: center; justify-content: center; font: 600 13px var(--font-inter); color: #888; }
 .qr-download-btn { text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; }
 /* Similar cards */
 .similar-cards { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e0dbd0; }
@@ -2041,10 +2061,6 @@ html[data-theme="dark"] .report-details-label span { color: #888; }
 html[data-theme="dark"] .report-details-textarea { background: var(--ui-bg-2); border-color: #3a3835; color: #ede9e3; }
 
 /* ── QR modal / card preview ── */
-html[data-theme="dark"] .qr-modal { border-color: #3a3835; box-shadow: 8px 10px 0 #333; }
-html[data-theme="dark"] .qr-modal-title { color: #ede9e3; }
-html[data-theme="dark"] .qr-modal-name { color: #888; }
-html[data-theme="dark"] .qr-modal-loading { background: #252220; color: #666; }
 html[data-theme="dark"] .card-preview-name { color: #ede9e3; }
 html[data-theme="dark"] .card-preview-line { color: #aaa; }
 html[data-theme="dark"] .card-preview-category { color: #777; }
