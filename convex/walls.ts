@@ -49,9 +49,18 @@ export const getTopWalls = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const walls = await ctx.db.query("walls").collect();
+    const seen = new Set<string>();
     return walls
-      .filter((w) => w.viewCount > 0)
+      .filter((w) => {
+        const parts = w.path.split("/").filter(Boolean);
+        return w.viewCount > 0 && parts.length === 3;
+      })
       .sort((a, b) => b.viewCount - a.viewCount)
+      .filter((w) => {
+        if (seen.has(w.path)) return false;
+        seen.add(w.path);
+        return true;
+      })
       .slice(0, args.limit ?? 20)
       .map((w) => ({ path: w.path, viewCount: w.viewCount }));
   },

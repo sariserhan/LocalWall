@@ -339,7 +339,7 @@ export function HomeSearch() {
           <span className="home-hero-stats-sep">·</span>
           <span>{stats.totalBusinesses.toLocaleString()} {stats.totalBusinesses === 1 ? "BUSINESS" : "BUSINESSES"}</span>
           <span className="home-hero-stats-sep">·</span>
-          <span>{stats.totalCities.toLocaleString()} CITIES</span>
+          <span>{stats.totalCities.toLocaleString()} {stats.totalCities === 1 ? "CITY" : "CITIES"}</span>
         </div>
       ) : null}
     </div>
