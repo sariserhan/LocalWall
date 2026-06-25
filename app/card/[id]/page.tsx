@@ -16,6 +16,8 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
   const locationParts = [card.city, card.state].filter(Boolean).join(", ");
   const title = [card.name, card.category, locationParts].filter(Boolean).join(" · ") + " | LocalWall";
   const description = card.message?.slice(0, 160) || card.line.slice(0, 160);
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
+  const ogImage = `${appUrl}/api/og/card/${id}`;
   return {
     title,
     description,
@@ -24,11 +26,13 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
       title,
       description,
       type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImage],
     },
   };
 }
