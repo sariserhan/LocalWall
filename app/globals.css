@@ -152,7 +152,7 @@ button { color: inherit; }
 .theme-biz { height: var(--h, 180px); min-height: var(--h, 180px); background: #fff; color: #111; border: none; border-top: 7px solid #111; box-shadow: 0 1px 3px #0003, 0 6px 18px #0002; overflow: hidden; }
 .theme-biz::before { background-image: none; opacity: 0; }
 .theme-biz::after { display: none; }
-.theme-biz .card-tape { display: none; }
+.theme-biz:not(.image-business-card) .card-tape { display: none; }
 .theme-biz .card-copy { padding-top: 4px; }
 .theme-biz:has(> img) .card-copy { padding-right: 108px; }
 .theme-biz .card-category { color: #888; font: 600 9px var(--font-inter); letter-spacing: 1.6px; text-transform: uppercase; margin-bottom: 8px; }
@@ -161,8 +161,9 @@ button { color: inherit; }
 .theme-biz img { position: absolute; top: 43px; right: 15px; width: 92px; height: 82px; margin: 0; border: 1px solid #ddd; filter: none; object-fit: cover; }
 .theme-biz footer { border-top: 1px solid #ececec; padding-top: 8px; font: 500 9px var(--font-inter); color: #888; letter-spacing: .04em; }
 .theme-biz footer strong { font: 600 12px var(--font-inter); color: #111; }
-.wall-card.image-business-card { width: 300px; height: 180px; min-height: 180px; padding: 0; border: 0; background: #fff; overflow: hidden; }
-.wall-card.image-business-card .card-copy, .wall-card.image-business-card .card-tape, .wall-card.image-business-card footer { display: none; }
+.wall-card.image-business-card { width: 300px; height: 180px; min-height: 180px; padding: 0; border: 0; background: #fff; overflow: visible; }
+.wall-card.image-business-card .card-copy, .wall-card.image-business-card footer { display: none; }
+.wall-card-biz-wrap { position: absolute; inset: 0; overflow: hidden; }
 .wall-card-biz-photo { object-fit: contain !important; background: #fff; filter: none !important; }
 .card-biz-verified { position: absolute; bottom: 8px; left: 8px; z-index: 3; font-size: 8px !important; padding: 3px 6px !important; }
 

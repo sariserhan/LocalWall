@@ -490,8 +490,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
-    "mtime": 1782421020.2031028,
-    "ast_hash": "ba3c04a09edf47be0f8fc971b9b01fa1",
+    "mtime": 1782422122.1042926,
+    "ast_hash": "6fd84cc478ed0a1c48b6126a71566758",
     "semantic_hash": ""
   },
   "src/features/wall/edit-card-modal.tsx": {

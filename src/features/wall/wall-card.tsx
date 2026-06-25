@@ -120,7 +120,7 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
       </div>
       {cardImage ? (
         card.imageMode === "business-card" ? (
-          <Image src={cardImage} alt="" fill sizes="280px" className="wall-card-biz-photo" priority={false} placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+          <div className="wall-card-biz-wrap"><Image src={cardImage} alt="" fill sizes="280px" className="wall-card-biz-photo" priority={false} placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} /></div>
         ) : (
           <div className="wall-card-img-wrap">
             <Image src={cardImage} alt="" fill sizes="280px" className="wall-card-photo" priority={false} placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
