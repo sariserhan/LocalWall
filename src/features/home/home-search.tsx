@@ -71,12 +71,21 @@ export function HomeSearch() {
   const [isLocating, setIsLocating] = useState(false);
   const [isPreciseLocating, setIsPreciseLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showForm, setShowForm] = useState(true);
 
   const locationDisplayLabel = useMemo(() => {
     if (selectedCity) return selectedCity;
     if (selectedState) return State.getStatesOfCountry(selectedCountry).find((s) => s.isoCode === selectedState)?.name ?? selectedState;
     return Country.getAllCountries().find((c) => c.isoCode === selectedCountry)?.name ?? selectedCountry;
   }, [selectedCountry, selectedState, selectedCity]);
+
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      setIsMobile(true);
+      setShowForm(false);
+    }
+  }, []);
 
   useEffect(() => {
     resolveIpLocation()
@@ -173,14 +182,25 @@ export function HomeSearch() {
   return (
     <div className="home-search">
       <div className="home-hero-actions">
-        <button
-          className="primary home-hero-btn"
-          onClick={() => void handleFindNearMe()}
-          disabled={isLocating || detectingOnLoad}
-        >
-          {isLocating ? <Loader2 size={18} className="locate-spin" /> : <MapPin size={18} />}
-          Find ads near me
-        </button>
+        {isMobile && detectedLoc && !detectingOnLoad ? (
+          <button
+            className="primary home-hero-btn"
+            onClick={() => void handleFindNearMe()}
+            disabled={isLocating}
+          >
+            {isLocating ? <Loader2 size={18} className="locate-spin" /> : <MapPin size={18} />}
+            Open {detectedLoc.label} Wall
+          </button>
+        ) : (
+          <button
+            className="primary home-hero-btn"
+            onClick={() => void handleFindNearMe()}
+            disabled={isLocating || detectingOnLoad}
+          >
+            {isLocating ? <Loader2 size={18} className="locate-spin" /> : <MapPin size={18} />}
+            {isMobile && detectingOnLoad ? "Detecting location…" : "Find ads near me"}
+          </button>
+        )}
         <button
           className="home-hero-btn-outline"
           onClick={() => {
@@ -193,7 +213,17 @@ export function HomeSearch() {
         </button>
       </div>
 
-      <form className="home-search-form" onSubmit={(e) => void handleSearch(e)}>
+      {isMobile && !showForm && (
+        <button
+          type="button"
+          className="home-customize-search-btn"
+          onClick={() => setShowForm(true)}
+        >
+          Customize search ↓
+        </button>
+      )}
+
+      {showForm && <form className="home-search-form" onSubmit={(e) => void handleSearch(e)}>
         <div className="home-search-field">
           <span className="home-search-label">Keyword</span>
           <input
@@ -248,7 +278,7 @@ export function HomeSearch() {
           <Search size={15} />
           Search
         </button>
-      </form>
+      </form>}
 
       {/* {nearbyCards && nearbyCards.length > 0 ? (
         <div className="home-hero-nearby">
@@ -270,7 +300,7 @@ export function HomeSearch() {
         </div>
       ) : null} */}
 
-      <div className="home-location-hint">
+      {(!isMobile || showForm) && <div className="home-location-hint">
         {locationError ? (
           <span className="home-search-error">{locationError}</span>
         ) : !detectingOnLoad && detectedLoc && !detectedLoc.precise ? (
@@ -301,7 +331,7 @@ export function HomeSearch() {
             </button>
           </span>
         ) : null}
-      </div>
+      </div>}
 
       {stats ? (
         <div className="home-hero-stats">
