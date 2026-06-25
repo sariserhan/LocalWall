@@ -1,13 +1,18 @@
-# Graph Report - .  (2026-06-25)
+# Graph Report - local-wall  (2026-06-25)
 
 ## Corpus Check
-- 206 files · ~420,339 words
+- 193 files · ~422,317 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 840 nodes · 1361 edges · 81 communities (61 shown, 20 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 79 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `1943b617`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Rate Limiting & API Utilities|Rate Limiting & API Utilities]]
@@ -289,7 +294,7 @@ Cohesion: 0.67
 Nodes (4): LocalWall Logo Big (Full Branding with Tagline and Category Icons), LocalWall Logo Small (Compact Horizontal Logo), Wall Concept Mockup (Bulletin Board UI with Cards and Detail Panel), Wall Texture (Weathered Urban Bulletin Board Background Texture)
 
 ## Knowledge Gaps
-- **348 isolated node(s):** `npx`, `Props`, `Props`, `Props`, `Props` (+343 more)
+- **348 isolated node(s):** `CardEvent`, `ReportReason`, `REPORT_REASONS`, `Composer`, `DetailPanel` (+343 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -306,7 +311,7 @@ _Questions this graph is uniquely positioned to answer:_
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `fetchInitialCards()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`fetchInitialCards()` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `npx`, `Props`, `Props` to the rest of the system?**
+- **What connects `CardEvent`, `ReportReason`, `REPORT_REASONS` to the rest of the system?**
   _349 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
   _Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected._

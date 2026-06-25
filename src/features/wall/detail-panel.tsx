@@ -59,6 +59,8 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+  const swipeX = useRef(0);
+  const swipeY = useRef(0);
   const [qrOpen, setQrOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
@@ -203,7 +205,18 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const hasContact = Boolean(card.phone || card.email || card.website);
 
   return (
-    <aside className="detail-sheet" aria-label={`${card.name} details`}>
+    <aside
+      className="detail-sheet"
+      aria-label={`${card.name} details`}
+      onTouchStart={(e) => { swipeX.current = e.touches[0].clientX; swipeY.current = e.touches[0].clientY; }}
+      onTouchEnd={(e) => {
+        const dx = e.changedTouches[0].clientX - swipeX.current;
+        const dy = e.changedTouches[0].clientY - swipeY.current;
+        if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 60) return;
+        if (dx > 0 && canSaveCard && !optimisticSaved) void toggleSaved();
+        else if (dx < 0) onClose();
+      }}
+    >
       <div className="sheet-pin" />
       <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
       <p className="sheet-category">{card.category} · {card.area}</p>

@@ -969,7 +969,7 @@ button { color: inherit; }
   .composer-step-2 { width: min(760px, 100%); }
   .details-step { grid-template-columns: 1fr; }
   .details-live-preview { position: relative; top: auto; grid-row: 1; }
-  .details-preview-canvas { height: 290px; }
+  .details-preview-canvas { height: 290px; order: -1; }
   .dashboard-card-row { grid-template-columns: 82px minmax(0, 1fr) minmax(190px, auto); }
   .dashboard-card-thumb { width: 82px; height: 82px; }
 }
@@ -1040,7 +1040,7 @@ button { color: inherit; }
   .composer { max-height: 100vh; height: 100vh; width: 100%; box-shadow: none; }
   .details-step { grid-template-columns: 1fr; }
   .details-live-preview { position: relative; top: auto; grid-row: 1; }
-  .details-preview-canvas { height: 280px; }
+  .details-preview-canvas { height: 240px; order: -1; }
   .details-preview-canvas .composer-live-card { scale: .76; }
   .composer > footer { position: sticky; bottom: 0; background: var(--ui-bg); }
   .style-options { grid-template-columns: 1fr; }
