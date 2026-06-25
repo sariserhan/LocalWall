@@ -20,7 +20,10 @@ const nextConfig: NextConfig = {
     "/api/moderate": ["./models/image-safety.onnx", "./models/eng.traineddata.gz"],
   },
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "*.convex.cloud" },
+    ],
   },
   async rewrites() {
     return [

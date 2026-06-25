@@ -3,6 +3,7 @@
 import { Bookmark, Copy, ExternalLink, Eye, Flag, Heart, Mail, Phone, QrCode, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import type { WallCard } from "./types";
 import { SocialLinks } from "./social-links";
 import { ReviewsSection } from "./reviews-section";
@@ -215,7 +216,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         <div className={card.images.length > 1 ? "sheet-images sheet-images-double" : "sheet-images"}>
           {card.images.map((image, index) => (
             <button className="sheet-image-button" type="button" onClick={() => setExpandedImage(image)} aria-label={`View ${card.name} image ${index + 1} full screen`} key={image}>
-              <img className="sheet-image" src={card.thumbnailImages?.[index] ?? image} alt={`${card.name} service ${index + 1}`} loading="lazy" decoding="async" />
+              <Image className="sheet-image" src={card.thumbnailImages?.[index] ?? image} alt={`${card.name} service ${index + 1}`} fill sizes="(max-width: 600px) calc(100vw - 48px), 380px" />
               <span>View full screen</span>
             </button>
           ))}
@@ -257,7 +258,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
           <div className="similar-cards-list">
             {similarCards.map((sc) => (
               <button key={String(sc.id)} type="button" className={`similar-card theme-${sc.imageMode === "business-card" ? "biz" : sc.theme}`} onClick={() => onCardOpen?.(sc)}>
-                {sc.thumbnailImages?.[0] && <img src={sc.thumbnailImages[0]} alt="" aria-hidden="true" />}
+                {sc.thumbnailImages?.[0] && <Image src={sc.thumbnailImages[0]} alt="" aria-hidden fill sizes="90px" />}
                 <span className="similar-card-category">{sc.category}</span>
                 <strong>{sc.name}</strong>
                 {sc.line ? <span className="similar-card-line">{sc.line}</span> : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import Image from "next/image";
 import { getCardFormat, type WallCard as WallCardModel } from "./types";
 
 interface WallCardProps {
@@ -116,7 +117,15 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
         <p className="card-line">{card.line}</p>
         {card.ownerName ? <span className="card-owner-inline">by {card.ownerName}</span> : null}
       </div>
-      {cardImage ? <img src={cardImage} alt="" draggable="false" loading="lazy" decoding="async" /> : null}
+      {cardImage ? (
+        card.imageMode === "business-card" ? (
+          <Image src={cardImage} alt="" fill sizes="280px" className="wall-card-biz-photo" priority={false} />
+        ) : (
+          <div className="wall-card-img-wrap">
+            <Image src={cardImage} alt="" fill sizes="280px" className="wall-card-photo" priority={false} />
+          </div>
+        )
+      ) : null}
       {card.imageMode === "business-card" ? <span className="verified-badge card-biz-verified" aria-label="Verified business">✓ Verified</span> : null}
       <footer>
         <span>{card.area}</span>

@@ -10,6 +10,8 @@ interface Props {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { country: cSlug, state: sSlug, city: citySlug } = await params;
   const country = parseCountrySlug(cSlug);
