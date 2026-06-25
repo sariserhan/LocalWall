@@ -81,6 +81,16 @@ export function parseLocationSlug(slug: string): { country: string; state: strin
   return { country: "US", state: "", city };
 }
 
+export function formatWallPath(path: string): string {
+  const parts = path.replace(/^\//, "").split("/").filter(Boolean);
+  if (parts.length === 0) return "Global";
+  const cap = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const [country, state, city] = parts;
+  if (city && state) return `${cap(city)}, ${state.toUpperCase()}`;
+  if (state) return `${state.toUpperCase()}, ${country.toUpperCase()}`;
+  return country.toUpperCase();
+}
+
 export function toCategorySlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }

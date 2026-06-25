@@ -30,9 +30,9 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { HomeNav } from "./home-nav";
 import { HomeSearch } from "./home-search";
-import { fetchInitialCards } from "@/lib/server-cards";
+import { fetchInitialCards, fetchTopWalls } from "@/lib/server-cards";
 import { categories } from "@/features/wall/types";
-import { toCategorySlug, buildWallPath } from "@/lib/wall-slug";
+import { toCategorySlug, formatWallPath } from "@/lib/wall-slug";
 import type { WallCard } from "@/features/wall/types";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -58,28 +58,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Vehicles": Truck,
 };
 
-const POPULAR_LOCATIONS = [
-  { label: "New York, NY",      path: "/us/ny/new-york" },
-  { label: "Brooklyn, NY",      path: "/us/ny/brooklyn" },
-  { label: "Philadelphia, PA",  path: "/us/pa/philadelphia" },
-  { label: "Boston, MA",        path: "/us/ma/boston" },
-  { label: "Washington, DC",    path: "/us/dc/washington" },
-  { label: "Miami, FL",         path: "/us/fl/miami" },
-  { label: "Atlanta, GA",       path: "/us/ga/atlanta" },
-  { label: "Charlotte, NC",     path: "/us/nc/charlotte" },
-  { label: "Chicago, IL",       path: "/us/il/chicago" },
-  { label: "Houston, TX",       path: "/us/tx/houston" },
-  { label: "Dallas, TX",        path: "/us/tx/dallas" },
-  { label: "Austin, TX",        path: "/us/tx/austin" },
-  { label: "Phoenix, AZ",       path: "/us/az/phoenix" },
-  { label: "San Antonio, TX",   path: "/us/tx/san-antonio" },
-  { label: "Las Vegas, NV",     path: "/us/nv/las-vegas" },
-  { label: "Denver, CO",        path: "/us/co/denver" },
-  { label: "Los Angeles, CA",   path: "/us/ca/los-angeles" },
-  { label: "San Francisco, CA", path: "/us/ca/san-francisco" },
-  { label: "Seattle, WA",       path: "/us/wa/seattle" },
-  { label: "Portland, OR",      path: "/us/or/portland" },
-];
 
 const HOW_IT_WORKS = [
   {
@@ -179,7 +157,10 @@ function RecentCard({ card }: { card: WallCard }) {
 }
 
 export async function HomePage() {
-  const recentCards = await fetchInitialCards({});
+  const [recentCards, topWalls] = await Promise.all([
+    fetchInitialCards({}),
+    fetchTopWalls(20),
+  ]);
 
   return (
     <>
@@ -231,20 +212,26 @@ export async function HomePage() {
           </section>
         ) : null}
 
-        {/* ── Popular Locations ────────────────────────────────────────── */}
-        <section className="home-section home-section-dark">
-          <div className="home-container">
-            <h2 className="home-section-title">Popular locations</h2>
-            <div className="home-walls-grid">
-              {POPULAR_LOCATIONS.map((loc) => (
-                <Link key={loc.path} href={loc.path} className="home-wall-item">
-                  <MapPin size={13} />
-                  {loc.label}
-                </Link>
-              ))}
+        {/* ── Trending Walls ───────────────────────────────────────────── */}
+        {topWalls.length > 0 ? (
+          <section className="home-section home-section-dark">
+            <div className="home-container">
+              <div className="home-section-header">
+                <h2 className="home-section-title">Trending walls</h2>
+                <Link href="/trending" className="home-section-see-all">See all →</Link>
+              </div>
+              <div className="home-walls-grid">
+                {topWalls.map((wall) => (
+                  <Link key={wall.path} href={wall.path} className="home-wall-item">
+                    <MapPin size={13} />
+                    <span className="home-wall-label">{formatWallPath(wall.path)}</span>
+                    <span className="home-wall-views">{wall.viewCount.toLocaleString()}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         {/* ── How It Works ─────────────────────────────────────────────── */}
         <section className="home-section home-section-alt">

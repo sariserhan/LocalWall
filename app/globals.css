@@ -1245,6 +1245,31 @@ button { color: inherit; }
 .home-wall-item:hover { background: #f43d38; color: #fff; border-color: #f43d38; }
 .home-wall-item svg { flex-shrink: 0; color: #f43d38; }
 .home-wall-item:hover svg { color: #fff; }
+.home-wall-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-wall-views { margin-left: auto; font: 600 11px var(--font-inter); letter-spacing: .3px; text-transform: none; color: #7a7672; flex-shrink: 0; }
+.home-wall-item:hover .home-wall-views { color: rgba(255,255,255,.7); }
+.home-section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 36px; }
+.home-section-header .home-section-title { margin-bottom: 0; }
+.home-section-see-all { font: 700 12px var(--font-inter); letter-spacing: .5px; text-transform: uppercase; color: #f43d38; text-decoration: none; transition: opacity .15s; }
+.home-section-see-all:hover { opacity: .75; }
+
+/* Trending page */
+.trending-page { padding: 60px 24px 80px; min-height: calc(100vh - 56px); background: #fff; }
+.trending-header { margin-bottom: 48px; }
+.trending-title { margin: 0 0 8px; font: 900 52px/.9 var(--font-barlow-condensed); text-transform: uppercase; color: #141414; }
+.trending-sub { margin: 0; font: 400 15px/1.5 var(--font-inter); color: #666; }
+.trending-empty { font: 400 15px var(--font-inter); color: #999; }
+.trending-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.trending-item { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border: 1px solid #e8e4dc; background: #fafaf8; transition: border-color .15s, background .15s; }
+.trending-item:hover { background: #fff; border-color: #d0ccc4; }
+.trending-rank { width: 28px; flex-shrink: 0; font: 800 13px var(--font-barlow-condensed); color: #bbb; text-align: right; }
+.trending-list li:nth-child(-n+3) .trending-rank { color: #f43d38; }
+.trending-link { flex: 1; display: flex; align-items: center; gap: 8px; font: 700 15px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .4px; color: #1a1a1a; text-decoration: none; transition: color .15s; }
+.trending-link:hover { color: #f43d38; }
+.trending-pin { flex-shrink: 0; color: #bbb; }
+.trending-link:hover .trending-pin { color: #f43d38; }
+.trending-views { font: 600 12px var(--font-inter); color: #999; letter-spacing: .3px; flex-shrink: 0; }
+.trending-views span { font-weight: 400; }
 
 /* Recent ads */
 .home-recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
@@ -1365,6 +1390,11 @@ button { color: inherit; }
   .home-footer-inner { flex-wrap: wrap; gap: 8px; }
   .home-footer-copy { margin-left: 0; width: 100%; margin-top: 4px; }
   .home-footer-links { margin-left: 0; }
+  .home-section-header { flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .trending-page { padding: 40px 16px 60px; }
+  .trending-title { font-size: 38px; }
+  .trending-item { gap: 10px; padding: 12px 14px; }
+  .trending-views span { display: none; }
 }
 /* QR Code modal */
 .qr-modal { position: relative; background: var(--ui-bg); border: 2px solid #111; border-radius: 0; padding: 32px 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 300px; width: calc(100vw - 32px); box-shadow: 8px 10px 0 #111; }
@@ -1956,6 +1986,15 @@ html[data-theme="dark"] .home-footer-brand { color: #ede9e3; }
 html[data-theme="dark"] .home-footer-links a { color: #555; }
 html[data-theme="dark"] .home-footer-links a:hover { color: #f43d38; }
 html[data-theme="dark"] .home-footer-copy { color: #444; }
+html[data-theme="dark"] .home-section-see-all { color: #f07070; }
+html[data-theme="dark"] .home-wall-views { color: #555; }
+html[data-theme="dark"] .trending-page { background: #1a1918; }
+html[data-theme="dark"] .trending-title { color: #ede9e3; }
+html[data-theme="dark"] .trending-sub { color: #777; }
+html[data-theme="dark"] .trending-item { background: #222120; border-color: #2e2c2a; }
+html[data-theme="dark"] .trending-item:hover { background: #272523; border-color: #3a3835; }
+html[data-theme="dark"] .trending-link { color: #ede9e3; }
+html[data-theme="dark"] .trending-views { color: #555; }
 
 /* ── App footer (wall) ── */
 html[data-theme="dark"] .footer-digest-input { background: #1a1918; border-color: #333; }
