@@ -112,7 +112,31 @@ export function ConnectedWallApp({
   const liveViewCounts = useQuery(api.cards.getLiveViewCounts, liveCardIds.length === 0 ? "skip" : { cardIds: liveCardIds }) as Array<{ id: Id<"cards">; clicks: number; likes: number }> | undefined;
   const likedCardData = useQuery(api.cards.getLikedCards, isAuthenticated ? {} : "skip") as Id<"cards">[] | undefined;
   const likedCardIds = useMemo(() => new Set((likedCardData ?? []).map((id) => String(id))), [likedCardData]);
-  const toggleLike = useMutation(api.cards.toggleLike);
+  const toggleLike = useMutation(api.cards.toggleLike).withOptimisticUpdate((localStore, args) => {
+    const likedCards = localStore.getQuery(api.cards.getLikedCards, {});
+    if (likedCards !== undefined) {
+      const isLiked = likedCards.some((id) => id === args.cardId);
+      localStore.setQuery(
+        api.cards.getLikedCards,
+        {},
+        isLiked
+          ? likedCards.filter((id) => id !== args.cardId)
+          : [...likedCards, args.cardId],
+      );
+      const counts = localStore.getQuery(api.cards.getLiveViewCounts, { cardIds: liveCardIds });
+      if (counts !== undefined) {
+        localStore.setQuery(
+          api.cards.getLiveViewCounts,
+          { cardIds: liveCardIds },
+          counts.map((item) =>
+            item.id === args.cardId
+              ? { ...item, likes: Math.max(0, item.likes + (isLiked ? -1 : 1)) }
+              : item,
+          ),
+        );
+      }
+    }
+  });
   const cards = useMemo(() => {
     if (renderCards.length === 0 && publishedCards === undefined && layoutCards === null && !initialCards?.length) return undefined;
     const statsMap = new Map((liveViewCounts ?? []).map((item) => [String(item.id), item]));
@@ -526,7 +550,7 @@ export function ConnectedWallApp({
       }}
       ownedCardIds={ownedCardIds}
       likedCardIds={likedCardIds}
-      onToggleLike={isAuthenticated ? async (card) => { await toggleLike({ cardId: card.id as Id<"cards"> }); } : undefined}
+      onToggleLike={isAuthenticated ? async (card) => { void toggleLike({ cardId: card.id as Id<"cards"> }); } : undefined}
       isAdmin={adminAccess?.isAdmin ?? false}
       onOpenAdmin={() => setAdminOpen(true)}
       profile={profile ?? null}
