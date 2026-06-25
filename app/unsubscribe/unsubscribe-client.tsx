@@ -34,7 +34,7 @@ export function UnsubscribeClient({ token }: { token: string }) {
             <p className="unsubscribe-body">
               You&apos;ve been removed from the weekly digest. You won&apos;t receive any more emails from us.
             </p>
-            <a href="/" className="unsubscribe-home-link">Back to Wall →</a>
+            <a href="/" className="unsubscribe-home-link">Back to LocalWall →</a>
           </>
         )}
         {status === "error" && (
@@ -43,7 +43,7 @@ export function UnsubscribeClient({ token }: { token: string }) {
             <p className="unsubscribe-body">
               This unsubscribe link is invalid or has already been used.
             </p>
-            <a href="/" className="unsubscribe-home-link">Back to Wall →</a>
+            <a href="/" className="unsubscribe-home-link">Back to LocalWall →</a>
           </>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
+import { CreditCard, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
@@ -41,6 +41,11 @@ export function HomeNav() {
                 label="Trending"
                 labelIcon={<TrendingUp size={16} />}
                 onClick={() => router.push("/trending")}
+              />
+              <UserButton.Action
+                label="Manage billing"
+                labelIcon={<CreditCard size={16} />}
+                onClick={() => router.push("/billing")}
               />
               <UserButton.Action label="manageAccount" />
               <UserButton.Action

@@ -34,7 +34,7 @@ export default async function NotFound() {
         </p>
 
         <div className="nf-actions">
-          <Link href="/" className="nf-btn-primary">Back to Wall</Link>
+          <Link href="/" className="nf-btn-primary">Back to LocalWall</Link>
           <Link href={browseHref} className="nf-btn-secondary">Browse listings</Link>
         </div>
 

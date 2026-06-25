@@ -16,7 +16,7 @@ export default function TermsAndConditionsPage() {
           These terms govern access to and use of WALL, including browsing local ads, posting cards, and interacting with content on the platform.
         </p>
         <div className="legal-page__actions">
-          <Link href="/">Back to wall</Link>
+          <Link href="/">Back to localwall</Link>
           <Link href="/privacy-policy">Privacy Policy</Link>
         </div>
       </div>

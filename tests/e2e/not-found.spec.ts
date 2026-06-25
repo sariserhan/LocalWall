@@ -21,7 +21,7 @@ test.describe("404 not-found page", () => {
     await expect(page.locator(".nf-stamp")).toBeVisible();
   });
 
-  test("Back to Wall button links to home", async ({ page }) => {
+  test("Back to LocalWall button links to home", async ({ page }) => {
     const btn = page.locator(".nf-btn-primary");
     await expect(btn).toBeVisible();
     await expect(btn).toHaveAttribute("href", "/");

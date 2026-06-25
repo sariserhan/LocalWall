@@ -3,7 +3,7 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
+import { CreditCard, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
 import { clerkUserButtonAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -552,6 +552,11 @@ export function ConnectedWallApp({
               label="Trending"
               labelIcon={<TrendingUp size={16} />}
               onClick={() => router.push("/trending")}
+            />
+            <UserButton.Action
+              label="Manage billing"
+              labelIcon={<CreditCard size={16} />}
+              onClick={() => router.push("/billing")}
             />
             <UserButton.Action label="manageAccount" />
             <UserButton.Action

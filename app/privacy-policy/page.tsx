@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           This policy explains what information WALL may collect, how it may be used, and the choices available to people who browse or post on the platform.
         </p>
         <div className="legal-page__actions">
-          <Link href="/">Back to wall</Link>
+          <Link href="/">Back to localwall</Link>
           <Link href="/terms-and-conditions">Terms & Conditions</Link>
         </div>
       </div>
