@@ -14,7 +14,7 @@ export const subscribe = mutation({
   },
   handler: async (ctx, args) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.email)) throw new Error("Invalid email address.");
-    if (!args.city.trim()) throw new Error("City is required to subscribe.");
+    if (!args.country.trim()) throw new Error("Country is required to subscribe.");
     const normalized = args.email.toLowerCase().trim();
     const existing = await ctx.db
       .query("digestSubscriptions")
@@ -80,16 +80,37 @@ export const findCitiesWithSubscribers = internalQuery({
   },
 });
 
-export const findNewCardsForCity = internalQuery({
+export const findNewCardsForLocation = internalQuery({
   args: { country: v.string(), state: v.string(), city: v.string(), since: v.number() },
   handler: async (ctx, args) => {
-    const cards = await ctx.db
-      .query("cards")
-      .withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) =>
-        q.eq("status", "published").eq("country", args.country).eq("state", args.state).eq("city", args.city).gte("createdAt", args.since),
-      )
-      .order("desc")
-      .take(12);
+    let cards;
+    if (args.city) {
+      cards = await ctx.db
+        .query("cards")
+        .withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) =>
+          q.eq("status", "published").eq("country", args.country).eq("state", args.state).eq("city", args.city).gte("createdAt", args.since),
+        )
+        .order("desc")
+        .take(12);
+    } else if (args.state) {
+      const batch = await ctx.db
+        .query("cards")
+        .withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) =>
+          q.eq("status", "published").eq("country", args.country).eq("state", args.state),
+        )
+        .order("desc")
+        .take(300);
+      cards = batch.filter((c) => c.createdAt >= args.since).slice(0, 12);
+    } else {
+      const batch = await ctx.db
+        .query("cards")
+        .withIndex("by_status_and_country_and_state_and_city_and_createdAt", (q) =>
+          q.eq("status", "published").eq("country", args.country),
+        )
+        .order("desc")
+        .take(300);
+      cards = batch.filter((c) => c.createdAt >= args.since).slice(0, 12);
+    }
     return cards.map((card) => ({
       id: String(card._id),
       name: card.name,
@@ -98,6 +119,8 @@ export const findNewCardsForCity = internalQuery({
       message: card.message,
       price: card.price,
       area: card.area,
+      city: card.city,
+      state: card.state,
       featuredTier: card.featuredTier,
     }));
   },
@@ -115,15 +138,15 @@ export const sendWeeklyDigests = internalAction({
       return;
     }
 
-    const cities = await ctx.runQuery(internal.digest.findCitiesWithSubscribers, {});
+    const locations = await ctx.runQuery(internal.digest.findCitiesWithSubscribers, {});
     const since = Date.now() - WEEK_MS;
     const now = Date.now();
 
-    for (const cityGroup of cities) {
-      const cards = await ctx.runQuery(internal.digest.findNewCardsForCity, {
-        country: cityGroup.country,
-        state: cityGroup.state,
-        city: cityGroup.city,
+    for (const group of locations) {
+      const cards = await ctx.runQuery(internal.digest.findNewCardsForLocation, {
+        country: group.country,
+        state: group.state,
+        city: group.city,
         since,
       });
 
@@ -132,14 +155,24 @@ export const sendWeeklyDigests = internalAction({
       const promoted = cards.filter((c: DigestCard) => c.featuredTier === "gold" || c.featuredTier === "silver").slice(0, 2);
       const organic = cards.filter((c: DigestCard) => c.featuredTier !== "gold" && c.featuredTier !== "silver").slice(0, 6);
 
-      for (const sub of cityGroup.subscribers) {
+      // Build a human-readable location label and wall URL for each scope level
+      const citySlug = group.city ? group.city.toLowerCase().replace(/\s+/g, "-") : "";
+      const wallUrl = group.city
+        ? `${appUrl}/${group.country.toLowerCase()}/${group.state.toLowerCase()}/${citySlug}`
+        : group.state
+          ? `${appUrl}/${group.country.toLowerCase()}/${group.state.toLowerCase()}`
+          : `${appUrl}/${group.country.toLowerCase()}`;
+      const locationLabel = group.city
+        ? `${group.city}${group.state ? `, ${group.state}` : ""}`
+        : group.state
+          ? group.state
+          : group.country;
+
+      for (const sub of group.subscribers) {
         const unsubscribeUrl = `${appUrl}/unsubscribe?token=${sub.token}`;
-        const citySlug = cityGroup.city.toLowerCase().replace(/\s+/g, "-");
-        const wallUrl = `${appUrl}/${cityGroup.country.toLowerCase()}/${cityGroup.state.toLowerCase()}/${citySlug}`;
 
         const html = buildDigestEmail({
-          city: cityGroup.city,
-          state: cityGroup.state,
+          locationLabel,
           promoted,
           organic,
           wallUrl,
@@ -154,7 +187,7 @@ export const sendWeeklyDigests = internalAction({
             body: JSON.stringify({
               from: fromEmail,
               to: [sub.email],
-              subject: `New on ${cityGroup.city} Wall this week — ${cards.length} listing${cards.length === 1 ? "" : "s"}`,
+              subject: `New on ${locationLabel} Wall this week — ${cards.length} listing${cards.length === 1 ? "" : "s"}`,
               html,
             }),
           });
@@ -176,7 +209,7 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-type DigestCard = { id: string; name: string; category: string; line: string; message?: string; price?: string; area: string; featuredTier?: string };
+type DigestCard = { id: string; name: string; category: string; line: string; message?: string; price?: string; area: string; city?: string; state?: string; featuredTier?: string };
 
 function buildCardRow(card: DigestCard, appUrl: string, promoted = false): string {
   const cardUrl = `${appUrl}/card/${card.id}`;
@@ -196,8 +229,8 @@ function buildCardRow(card: DigestCard, appUrl: string, promoted = false): strin
   </td></tr>`;
 }
 
-function buildDigestEmail({ city, state, promoted, organic, wallUrl, unsubscribeUrl, appUrl }: {
-  city: string; state: string;
+function buildDigestEmail({ locationLabel, promoted, organic, wallUrl, unsubscribeUrl, appUrl }: {
+  locationLabel: string;
   promoted: DigestCard[]; organic: DigestCard[];
   wallUrl: string; unsubscribeUrl: string; appUrl: string;
 }): string {
@@ -217,16 +250,16 @@ function buildDigestEmail({ city, state, promoted, organic, wallUrl, unsubscribe
     </div>
     <div style="padding:28px 24px 8px;">
       <p style="color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px;">${weekStr} · Weekly Digest</p>
-      <h2 style="margin:0 0 4px;font-size:22px;color:#1a1a18;">New on ${escapeHtml(city)} Wall</h2>
-      <p style="color:#666;margin:0 0 22px;font-size:14px;">${totalNew} new listing${totalNew === 1 ? "" : "s"} this week in ${escapeHtml(city)}${state ? `, ${escapeHtml(state)}` : ""}.</p>
+      <h2 style="margin:0 0 4px;font-size:22px;color:#1a1a18;">New on ${escapeHtml(locationLabel)} Wall</h2>
+      <p style="color:#666;margin:0 0 22px;font-size:14px;">${totalNew} new listing${totalNew === 1 ? "" : "s"} this week in ${escapeHtml(locationLabel)}.</p>
       ${promoted.length > 0 ? `<p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;">Promoted</p><table style="width:100%;border-collapse:collapse;">${promotedRows}</table><p style="margin:18px 0 6px;font-size:11px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;">New this week</p>` : `<p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;">New this week</p>`}
       <table style="width:100%;border-collapse:collapse;">${organicRows}</table>
       <div style="text-align:center;padding:24px 0 10px;">
-        <a href="${wallUrl}" style="display:inline-block;background:#edcf35;color:#1a1a18;font-weight:800;font-size:14px;padding:13px 28px;border-radius:7px;text-decoration:none;letter-spacing:.04em;">View ${escapeHtml(city)} Wall →</a>
+        <a href="${wallUrl}" style="display:inline-block;background:#edcf35;color:#1a1a18;font-weight:800;font-size:14px;padding:13px 28px;border-radius:7px;text-decoration:none;letter-spacing:.04em;">View ${escapeHtml(locationLabel)} Wall →</a>
       </div>
     </div>
     <div style="padding:16px 24px 24px;text-align:center;border-top:1px solid #f0ede6;">
-      <p style="margin:0;font-size:11px;color:#bbb;">You're subscribed to the ${escapeHtml(city)} weekly digest.<br><a href="${unsubscribeUrl}" style="color:#bbb;">Unsubscribe</a></p>
+      <p style="margin:0;font-size:11px;color:#bbb;">You're subscribed to the ${escapeHtml(locationLabel)} weekly digest.<br><a href="${unsubscribeUrl}" style="color:#bbb;">Unsubscribe</a></p>
     </div>
   </div>
 </body>

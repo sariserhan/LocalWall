@@ -1425,14 +1425,14 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
 
           {/* right — digest widget */}
           <div className="footer-col footer-col-right">
-            {mode === "connected" && locationReady && selectedCity && onSubscribeDigest ? (
+            {mode === "connected" && locationReady && selectedCountry && onSubscribeDigest ? (
               digestStatus === "done" ? (
                 <p className="footer-digest-success">{digestMessage}</p>
               ) : (
                 <div className="footer-digest-widget">
                   <div className="footer-digest-copy">
                     <p className="footer-digest-eyebrow">Weekly Digest</p>
-                    <h3 className="footer-digest-headline">New in {selectedCity}, every Monday.</h3>
+                    <h3 className="footer-digest-headline">New in {locationLabel()}, every Monday.</h3>
                   </div>
                   <form
                     className="footer-digest-form"
@@ -1443,8 +1443,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                       try {
                         const result = await onSubscribeDigest(digestEmail.trim(), selectedCountry, selectedState, selectedCity);
                         setDigestMessage(result.alreadySubscribed
-                          ? `Already subscribed for ${selectedCity}.`
-                          : `You're in! Digest for ${selectedCity} lands every Monday.`);
+                          ? `Already subscribed for ${locationLabel()}.`
+                          : `You're in! Digest for ${locationLabel()} lands every Monday.`);
                         setDigestStatus("done");
                         setDigestEmail("");
                       } catch {
