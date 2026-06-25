@@ -38,6 +38,7 @@ const PlacementMode = dynamic(() => import("./placement-mode").then((m) => ({ de
 const OwnerDashboard = dynamic(() => import("./owner-dashboard").then((m) => ({ default: m.OwnerDashboard })), { ssr: false, loading: () => null });
 import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
+import { WallMinimap } from "./wall-minimap";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
 import type { SavedWall } from "./types";
@@ -1408,6 +1409,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             : "LOCATING..."}
         </div>
         {pendingCard ? <PlacementMode card={pendingCard} position={placement} dragging={dragging} onDragStart={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }} onMove={movePlacement} onDragEnd={() => setDragging(false)} onCancel={() => { setPendingCard(null); setDragging(false); }} onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })} onConfirm={post} isSaving={isSaving} /> : null}
+        {!listView ? <WallMinimap cards={visible} wallRef={wallRef} /> : null}
       </section>
       {notice ? <div className="notice-toast" role="status">{notice}</div> : null}
       <footer className={`app-footer${mode === "connected" && pendingCardsOnSelectedWall > 0 && onRefreshWall ? " has-refresh-notice" : ""}`}>
