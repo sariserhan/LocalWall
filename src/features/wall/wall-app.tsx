@@ -42,6 +42,7 @@ import { WallMinimap } from "./wall-minimap";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
 import type { SavedWall } from "./types";
+import posthog from "posthog-js";
 
 interface WallAppProps {
   mode: "demo" | "connected";
@@ -886,6 +887,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     }
     if (selected) closeCard();
     setComposer(true);
+    posthog.capture("card_composer_opened", {
+      location_country: selectedCountry,
+      location_state: selectedState,
+      location_city: selectedCity,
+    });
   };
 
   const createFromDashboard = () => {
@@ -1447,6 +1453,13 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                           : `You're in! Digest for ${locationLabel()} lands every Monday.`);
                         setDigestStatus("done");
                         setDigestEmail("");
+                        if (!result.alreadySubscribed) {
+                          posthog.capture("digest_subscribed", {
+                            location_country: selectedCountry,
+                            location_state: selectedState,
+                            location_city: selectedCity,
+                          });
+                        }
                       } catch {
                         setDigestMessage("Could not subscribe. Try again.");
                         setDigestStatus("error");

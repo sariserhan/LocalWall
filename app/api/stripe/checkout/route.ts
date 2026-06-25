@@ -5,6 +5,7 @@ import { durableUserRateLimit } from "../../_distributed-rate-limit";
 import { isSameOriginRequest, rateLimit } from "../../_rate-limit";
 import { log } from "@/lib/logger";
 import { observe } from "../../_observe";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
@@ -69,6 +70,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         success_url: `${origin}/?checkout=success&kind=verification&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
       });
+      const phVerif = getPostHogClient();
+      phVerif.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "verification", plan, amount: unitAmount / 100 } });
+      await phVerif.shutdown();
       return json({ url: session.url, sessionId: session.id });
     }
 
@@ -113,6 +117,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
           success_url: `${origin}/?checkout=success&kind=subscription_renewal&card_id=${encodeURIComponent(renewalPayload.cardId)}&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
         });
+        const phSubRenewal = getPostHogClient();
+        phSubRenewal.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "subscription_renewal", amount: paidAmount } });
+        await phSubRenewal.shutdown();
         return json({ url: session.url, sessionId: session.id });
       }
 
@@ -138,6 +145,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
       });
 
+      const phRenewal = getPostHogClient();
+      phRenewal.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "renewal", amount: paidAmount } });
+      await phRenewal.shutdown();
       return json({ url: session.url, sessionId: session.id });
     }
 
@@ -175,6 +185,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         success_url: `${origin}/?checkout=success&kind=bundle&pending_card_id=${encodeURIComponent(bundlePayload.pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
       });
+      const phBundle = getPostHogClient();
+      phBundle.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "bundle", amount: 19.99, city_count: cities.length } });
+      await phBundle.shutdown();
       return json({ url: session.url, sessionId: session.id });
     }
 
@@ -215,6 +228,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         success_url: `${origin}/?checkout=success&kind=subscription_posting&pending_card_id=${encodeURIComponent(pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
       });
+      const phSubPosting = getPostHogClient();
+      phSubPosting.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "subscription_posting", amount: paidAmount } });
+      await phSubPosting.shutdown();
       return json({ url: session.url, sessionId: session.id });
     }
 
@@ -240,6 +256,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
       cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
     });
 
+    const phPosting = getPostHogClient();
+    phPosting.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "posting", amount: paidAmount } });
+    await phPosting.shutdown();
     return json({ url: session.url, sessionId: session.id });
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : "Stripe checkout could not be started.";
@@ -250,6 +269,9 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
       stripeCode: cause instanceof Stripe.errors.StripeError ? cause.code : undefined,
       type: cause instanceof Stripe.errors.StripeError ? cause.type : undefined,
     });
+    const phFail = getPostHogClient();
+    phFail.capture({ distinctId: userId ?? "anonymous", event: "checkout_failed", properties: { error: message } });
+    await phFail.shutdown();
     return json({ error: message }, 500);
   }
 }

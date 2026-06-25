@@ -30,6 +30,8 @@
     "lucide-react": "latest",
     "next": "^16.2.9",
     "onnxruntime-node": "^1.27.0",
+    "posthog-js": "^1.393.4",
+    "posthog-node": "^5.38.5",
     "qrcode": "^1.5.4",
     "react": "latest",
     "react-dom": "latest",

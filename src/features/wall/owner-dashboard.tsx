@@ -4,6 +4,7 @@ import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Code2, Copy, Eye, Ey
 import { useEffect, useMemo, useState } from "react";
 import { EditCardModal } from "./edit-card-modal";
 import type { CardUpdate, OwnerCard, RenewalAmount, SavedWall, WallCard } from "./types";
+import posthog from "posthog-js";
 
 function Sparkline({ data }: { data: number[] }) {
   const max = Math.max(...data, 1);
@@ -93,6 +94,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setVerificationError(null);
     try {
       await onRequestVerification(plan);
+      posthog.capture("verification_checkout_started", { plan });
     } catch (cause) {
       setVerificationError(cause instanceof Error ? cause.message : "Verification could not be started.");
     } finally {
@@ -143,6 +145,10 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setError(null);
     try {
       await onDelete(deleteTarget);
+      posthog.capture("card_deleted", {
+        card_name: deleteTarget.name,
+        category: deleteTarget.category,
+      });
       setDeleteTarget(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The card could not be deleted.");
@@ -157,6 +163,12 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setError(null);
     try {
       await onRenew(renewTarget, renewalAmount, renewAutoRenew && renewalAmount !== 0);
+      posthog.capture("card_renewed", {
+        card_name: renewTarget.name,
+        category: renewTarget.category,
+        renewal_amount: renewalAmount,
+        auto_renew: renewAutoRenew && renewalAmount !== 0,
+      });
       setRenewTarget(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The card could not be renewed.");

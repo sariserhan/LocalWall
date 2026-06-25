@@ -16,6 +16,7 @@ import { WallApp } from "./wall-app";
 const AdminPanel = dynamic(() => import("./admin-panel").then((m) => ({ default: m.AdminPanel })), { ssr: false, loading: () => null });
 import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 import { buildWallPath } from "@/lib/wall-slug";
+import posthog from "posthog-js";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -77,7 +78,7 @@ export function ConnectedWallApp({
     return sub ? `${pathname}?subcategory=${encodeURIComponent(sub)}` : pathname;
   }, [pathname, searchParams]);
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
-  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
+  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, userId } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const openDashboardRef = useRef<(() => void) | null>(null);
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
@@ -244,6 +245,14 @@ export function ConnectedWallApp({
     };
     void merge();
   }, [isAuthenticated, mergeLocalSavedCards, savedCards]);
+
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      posthog.identify(userId);
+    } else if (!isAuthenticated && !isConvexAuthLoading) {
+      posthog.reset();
+    }
+  }, [isAuthenticated, isConvexAuthLoading, userId]);
 
   const hasRecordedCardWallRef = useRef(false);
 
@@ -446,11 +455,31 @@ export function ConnectedWallApp({
       });
       const checkoutResult = await response.json() as { url?: string; sessionId?: string; error?: string };
       if (!response.ok || !checkoutResult.url || !checkoutResult.sessionId) throw new Error(checkoutResult.error || "Could not start card checkout.");
+      posthog.capture("card_checkout_started", {
+        card_name: draft.name,
+        category: draft.category,
+        payment_option: draft.paymentOption,
+        featured_tier: draft.featuredTier,
+        amount: totalPaidAmount,
+        is_bundle: isBundle,
+        auto_renew: draft.autoRenew ?? false,
+        location_country: draft.country,
+        location_state: draft.state,
+        location_city: draft.city,
+      });
       window.location.assign(checkoutResult.url);
       return;
     }
     const card = result as WallCard;
     addCardToLocalWall(card);
+    posthog.capture("card_created", {
+      card_name: draft.name,
+      category: draft.category,
+      theme: draft.theme,
+      location_country: draft.country,
+      location_state: draft.state,
+      location_city: draft.city,
+    });
     return card;
   };
 
@@ -538,11 +567,20 @@ export function ConnectedWallApp({
       onCategoryChange={(cat) => setActiveCategory(cat === "All" ? undefined : cat)}
       onSetSavedCard={async (card, saved) => {
         await setSavedCard({ cardId: card.id as Id<"cards">, saved });
+        posthog.capture("card_saved", {
+          card_name: card.name,
+          category: card.category,
+          saved,
+          location_country: card.country,
+          location_state: card.state,
+          location_city: card.city,
+        });
       }}
       savedWall={savedWallData ?? false}
       onSetSavedWall={async (label, saved) => {
         if (!wallPath) return;
         await setSavedWall({ path: wallPath, label, saved });
+        posthog.capture("wall_saved", { wall_label: label, wall_path: wallPath, saved });
       }}
       savedWalls={savedWalls}
       onRemoveSavedWall={async (wall) => {
@@ -550,7 +588,18 @@ export function ConnectedWallApp({
       }}
       ownedCardIds={ownedCardIds}
       likedCardIds={likedCardIds}
-      onToggleLike={isAuthenticated ? async (card) => { void toggleLike({ cardId: card.id as Id<"cards"> }); } : undefined}
+      onToggleLike={isAuthenticated ? async (card) => {
+        const isLiked = likedCardIds.has(String(card.id));
+        void toggleLike({ cardId: card.id as Id<"cards"> });
+        posthog.capture("card_liked", {
+          card_name: card.name,
+          category: card.category,
+          liked: !isLiked,
+          location_country: card.country,
+          location_state: card.state,
+          location_city: card.city,
+        });
+      } : undefined}
       isAdmin={adminAccess?.isAdmin ?? false}
       onOpenAdmin={() => setAdminOpen(true)}
       profile={profile ?? null}
