@@ -13,7 +13,12 @@
       "Bash(curl -sI http://localhost:3000/)",
       "Bash(curl -sI http://localhost:3000/embed/card/test)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "Bash(/Users/serhansari/.local/pipx/venvs/graphifyy/bin/python -c 'import graphify; print\\('\\\\''graphify version:'\\\\'', graphify.__version__\\)')",
+      "Bash(/Users/serhansari/.local/pipx/venvs/graphifyy/bin/python -c 'import sys; open\\('\\\\''/Users/serhansari/Documents/local-wall/graphify-out/.graphify_python'\\\\'', '\\\\''w'\\\\'', encoding='\\\\''utf-8'\\\\''\\).write\\(sys.executable\\)')",
+      "Read(//Users/serhansari/.claude/skills/graphify/references/**)",
+      "Bash(graphify export *)",
+      "Bash(graphify query *)"
     ]
   }
 }
