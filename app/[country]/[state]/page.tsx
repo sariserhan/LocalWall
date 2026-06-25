@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${loc} Wall — Local Ads`,
       description: `Browse local ads and services in ${loc}.`,
       openGraph: { title: `${loc} Wall`, description: `Local ads in ${loc}` },
+      alternates: { types: { "application/rss+xml": `/${cSlug}/${sSlug}/feed.xml` } },
     };
   }
 
