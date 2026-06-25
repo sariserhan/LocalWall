@@ -817,6 +817,13 @@ button { color: inherit; }
 .dashboard-confirm h3 { margin: 12px 0 7px; font: 900 30px/.95 var(--font-barlow-condensed); text-transform: uppercase; }
 .dashboard-confirm p { margin: 0 auto 20px; max-width: 340px; color: #666; font: 600 12px/1.5 var(--font-inter); }
 .dashboard-confirm > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.clerk-custom-page { padding: 4px 2px; }
+.clerk-custom-page-title { margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: #111; }
+.clerk-custom-page-desc { margin: 0 0 22px; color: #616161; font-size: 13px; line-height: 1.6; max-width: 360px; }
+.clerk-custom-page-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fff; border: 1px solid #d4d4d4; border-radius: 6px; font-size: 13px; font-weight: 500; color: #111; cursor: pointer; transition: background .12s, border-color .12s; }
+.clerk-custom-page-btn:hover:not(:disabled) { background: #f5f5f5; border-color: #aaa; }
+.clerk-custom-page-btn:disabled { opacity: .55; cursor: not-allowed; }
+.clerk-custom-page-error { margin: 12px 0 0; color: #b42318; font-size: 12px; font-weight: 500; }
 .danger-confirm { background: #a51d16; box-shadow: 3px 3px 0 #64100c; }
 .renewal-dialog { width: min(560px, 100%); }
 .renewal-dialog > svg { color: #2a9d58; }

@@ -3,7 +3,8 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CreditCard, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
+import { CreditCard, Download, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
+import { ClerkMyDataPage } from "./clerk-my-data-page";
 import { useTheme } from "@/lib/use-theme";
 import { clerkUserButtonAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -542,6 +543,9 @@ export function ConnectedWallApp({
       }}
       authControl={isClerkSignedIn ? (
         <UserButton appearance={clerkUserButtonAppearance}>
+          <UserButton.UserProfilePage label="My data" url="my-data" labelIcon={<Download size={16} />}>
+            <ClerkMyDataPage />
+          </UserButton.UserProfilePage>
           <UserButton.MenuItems>
             <UserButton.Action
               label="My board"

@@ -11,7 +11,9 @@
       "Read(//var/folders/fq/152jbfw16276cgngg15zvh780000gn/T/chrome-devtools-mcp-Hw3nub/**)",
       "Read(//private/var/folders/fq/152jbfw16276cgngg15zvh780000gn/T/chrome-devtools-mcp-Hw3nub/**)",
       "Bash(curl -sI http://localhost:3000/)",
-      "Bash(curl -sI http://localhost:3000/embed/card/test)"
+      "Bash(curl -sI http://localhost:3000/embed/card/test)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
     ]
   }
 }

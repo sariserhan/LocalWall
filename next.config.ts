@@ -3,10 +3,17 @@ import type { NextConfig } from "next";
 
 // Hosts that need runtime network access beyond 'self'.
 // PostHog is proxied through /ingest/ rewrites so no external connect-src needed.
+const isDev = process.env.NODE_ENV === "development";
+
+// 'unsafe-eval' is required in dev for Next.js Fast Refresh (eval-based HMR).
+// It is intentionally excluded from the production CSP.
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com"
+  : "script-src 'self' 'unsafe-inline' https://clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com";
+
 const CSP = [
   "default-src 'self'",
-  // Next.js needs 'unsafe-inline' for its bootstrapping scripts; remove if using nonce-based CSP.
-  "script-src 'self' 'unsafe-inline' https://clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+  scriptSrc,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.convex.cloud https://images.unsplash.com https://img.clerk.com",
   "font-src 'self'",
