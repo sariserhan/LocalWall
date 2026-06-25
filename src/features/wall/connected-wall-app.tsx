@@ -223,7 +223,7 @@ export function ConnectedWallApp({
   const adminRejectVerification = useMutation(api.admin.rejectVerification);
   const { openSignUp } = useClerk();
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+  const isProcessingCheckoutRef = useRef(false);
   const ownedCardIds = useMemo(() => new Set((ownerCards ?? []).map((card) => String(card.id))), [ownerCards]);
   const hasMergedLocalSavedCardsRef = useRef(false);
 
@@ -320,9 +320,10 @@ export function ConnectedWallApp({
       }
 
       if (checkoutStatus !== "success") return;
-      if (isProcessingCheckout) return;
+      if (isProcessingCheckoutRef.current) return;
 
-      setIsProcessingCheckout(true);
+      isProcessingCheckoutRef.current = true;
+      let failed = false;
       try {
         const pendingCardId = searchParams.get("pending_card_id");
         const checkoutKind = searchParams.get("kind");
@@ -363,15 +364,16 @@ export function ConnectedWallApp({
         addCardToLocalWall(createdCard);
         setCheckoutMessage("Payment succeeded and your card is now on the wall.");
       } catch (cause) {
-        setCheckoutMessage(cause instanceof Error ? cause.message : "Payment could not be finalized.");
+        failed = true;
+        setCheckoutMessage(cause instanceof Error ? cause.message : "Payment could not be finalized. Refresh the page to try again.");
       } finally {
-        setIsProcessingCheckout(false);
-        window.history.replaceState({}, document.title, window.location.pathname);
+        isProcessingCheckoutRef.current = false;
+        if (!failed) window.history.replaceState({}, document.title, window.location.pathname);
       }
     };
 
     processCheckout();
-  }, [searchParams, isProcessingCheckout, finalizePaidCard, finalizePaidRenewal, addCardToLocalWall]);
+  }, [searchParams, finalizePaidCard, finalizePaidRenewal, addCardToLocalWall]);
 
   const uploadVariant = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateUploadUrl({});
