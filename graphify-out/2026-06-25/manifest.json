@@ -1,8 +1,8 @@
 {
   ".claude/settings.json": {
-    "mtime": 1782405659.5081046,
-    "ast_hash": "682ce40a6dbce93d11677ed2ebdde997",
-    "semantic_hash": ""
+    "mtime": 1782403966.558061,
+    "ast_hash": "cc14787c460a5eb2be142410149654e8",
+    "semantic_hash": "cc14787c460a5eb2be142410149654e8"
   },
   ".claude/settings.local.json": {
     "mtime": 1782350619.3498511,
@@ -125,9 +125,9 @@
     "semantic_hash": "07157202132c4b3f8565b72b63f6af82"
   },
   "app/card/[id]/page.tsx": {
-    "mtime": 1782406395.6891558,
-    "ast_hash": "cd87157d05556d728b00887129da5139",
-    "semantic_hash": ""
+    "mtime": 1782377266.240628,
+    "ast_hash": "19ef1bd4f7948c1913626e508a6a0403",
+    "semantic_hash": "19ef1bd4f7948c1913626e508a6a0403"
   },
   "app/embed/card/[id]/page.tsx": {
     "mtime": 1782279390.8440917,
@@ -215,7 +215,7 @@
     "semantic_hash": "a4c59760d62f1e48bbefbecef7c8ecc3"
   },
   "convex/_generated/api.d.ts": {
-    "mtime": 1782409167.655491,
+    "mtime": 1782378305.5246952,
     "ast_hash": "ec87ce8d3fd716e90f82d3e33649c89d",
     "semantic_hash": "ec87ce8d3fd716e90f82d3e33649c89d"
   },
@@ -250,7 +250,7 @@
     "semantic_hash": "a145223d896f453b4dc621991872e16b"
   },
   "convex/cards.ts": {
-    "mtime": 1782408616.9077685,
+    "mtime": 1782377245.670648,
     "ast_hash": "3d8a0308ebf000d4a67c19a4c49d1a64",
     "semantic_hash": "3d8a0308ebf000d4a67c19a4c49d1a64"
   },
@@ -260,7 +260,7 @@
     "semantic_hash": "6f34dd7bda87227bac90481eb6559814"
   },
   "convex/crons.ts": {
-    "mtime": 1782409166.0488253,
+    "mtime": 1782291302.8030736,
     "ast_hash": "c84d7595c23e761eab007c40abe13551",
     "semantic_hash": "c84d7595c23e761eab007c40abe13551"
   },
@@ -285,7 +285,7 @@
     "semantic_hash": "982de6878bd892d854b4ce62ccae1787"
   },
   "convex/paymentsInternal.ts": {
-    "mtime": 1782408616.9084423,
+    "mtime": 1782316508.6139214,
     "ast_hash": "1abf83351c1705b0a9e08012f471a601",
     "semantic_hash": "1abf83351c1705b0a9e08012f471a601"
   },
@@ -315,7 +315,7 @@
     "semantic_hash": "e6fb19f83af33e69f1137cf7e384b590"
   },
   "convex/schema.ts": {
-    "mtime": 1782409159.874043,
+    "mtime": 1782291189.7876031,
     "ast_hash": "6222906c78da68e7911f460353b87e04",
     "semantic_hash": "6222906c78da68e7911f460353b87e04"
   },
@@ -485,14 +485,14 @@
     "semantic_hash": "6d8271ce00a928a758df326f7759de2b"
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782409212.5429094,
-    "ast_hash": "b4d3d804f43afb57ae8692f09cc37992",
-    "semantic_hash": ""
+    "mtime": 1782402265.3854527,
+    "ast_hash": "5864215b5323b83df49f6a7abc8d8ebf",
+    "semantic_hash": "5864215b5323b83df49f6a7abc8d8ebf"
   },
   "src/features/wall/detail-panel.tsx": {
-    "mtime": 1782421020.2031028,
-    "ast_hash": "ba3c04a09edf47be0f8fc971b9b01fa1",
-    "semantic_hash": ""
+    "mtime": 1782375860.2360423,
+    "ast_hash": "6769a32d39c009843fd9fc6a8fd1bb9d",
+    "semantic_hash": "6769a32d39c009843fd9fc6a8fd1bb9d"
   },
   "src/features/wall/edit-card-modal.tsx": {
     "mtime": 1782270363.6462393,
@@ -535,9 +535,9 @@
     "semantic_hash": "784d7e6485888ae64c627d19b3b814ee"
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782420909.5228746,
-    "ast_hash": "b850d1d296095fe55dd04b7e40e43044",
-    "semantic_hash": ""
+    "mtime": 1782401559.6159837,
+    "ast_hash": "d5d0912a5505b42b93db5627eec063be",
+    "semantic_hash": "d5d0912a5505b42b93db5627eec063be"
   },
   "src/features/wall/wall-card.tsx": {
     "mtime": 1782375872.20324,
@@ -965,9 +965,9 @@
     "semantic_hash": "282789b82259f32d3599acb4b3526e91"
   },
   "AGENTS.md": {
-    "mtime": 1782405773.345594,
-    "ast_hash": "9936cada7f8b0fd7fd5fc10325636465",
-    "semantic_hash": ""
+    "mtime": 1781892284.0765536,
+    "ast_hash": "34281e9ffd842238948717ac9c01f392",
+    "semantic_hash": "34281e9ffd842238948717ac9c01f392"
   },
   "README.md": {
     "mtime": 1782374136.1813428,
@@ -1028,20 +1028,5 @@
     "mtime": 1781882685.9183402,
     "ast_hash": "c6a07541aca1a2c12cf7230a5083de37",
     "semantic_hash": "c6a07541aca1a2c12cf7230a5083de37"
-  },
-  ".codex/hooks.json": {
-    "mtime": 1782405773.3463016,
-    "ast_hash": "84fe5391aeafff4cd71052f5e4f2e5ff",
-    "semantic_hash": ""
-  },
-  "app/api/og/card/[id]/route.tsx": {
-    "mtime": 1782406417.5898755,
-    "ast_hash": "aa21e7387355e07ec699d9830188fbfa",
-    "semantic_hash": ""
-  },
-  "CLAUDE.md": {
-    "mtime": 1782405659.5077384,
-    "ast_hash": "82efb97a359f5c7290bf2513d14686be",
-    "semantic_hash": ""
   }
 }

@@ -973,6 +973,13 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineQR, setInlineQR] = useState<string | null>(null);
+  const [showTip, setShowTip] = useState(false);
+  useEffect(() => {
+    if (!localStorage.getItem("wall_onboarded")) {
+      localStorage.setItem("wall_onboarded", "1");
+      setShowTip(true);
+    }
+  }, []);
   const shareRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1741,6 +1748,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         />
       ) : null}
       {composer ? <Composer onClose={() => setComposer(false)} onReady={beginPlacement} initialLocation={{ country: selectedCountry, state: selectedState, city: selectedCity }} /> : null}
+      {showTip && <div className="onboard-tip" onAnimationEnd={() => setShowTip(false)}>Tap a card to open it · Drag to move it</div>}
     </main>
   );
 }

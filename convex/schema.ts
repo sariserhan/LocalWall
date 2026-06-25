@@ -211,6 +211,14 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_createdAt", ["createdAt"]),
 
+  adminAuditLog: defineTable({
+    adminEmail: v.string(),
+    action: v.string(),
+    targetId: v.string(),
+    details: v.optional(v.any()),
+    createdAt: v.number(),
+  }).index("by_createdAt", ["createdAt"]),
+
   walls: defineTable({
     path: v.string(),
     viewCount: v.number(),

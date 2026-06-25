@@ -272,6 +272,8 @@ button { color: inherit; }
 .share-qr-img { width: 140px; height: 140px; display: block; margin: 0 auto; border: 2px solid #141414; }
 .share-qr-placeholder { width: 140px; height: 140px; background: var(--ui-bg-hover); margin: 0 auto; animation: share-pulse .8s ease-in-out infinite alternate; }
 @keyframes share-pulse { from { opacity: 1; } to { opacity: .45; } }
+.onboard-tip { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 9000; background: #1a1a18cc; color: #f5f1e8; font: 700 13px var(--font-barlow-condensed); text-transform: uppercase; letter-spacing: .08em; padding: 10px 20px; white-space: nowrap; pointer-events: none; animation: onboard-tip 4.5s forwards; }
+@keyframes onboard-tip { 0% { opacity: 0; transform: translateX(-50%) translateY(8px); } 12% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
 .footer-legal { display: flex; gap: 20px; align-items: center; }
 .footer-legal a { font: 700 10px var(--font-inter); letter-spacing: .08em; text-transform: uppercase; color: #4a4a48; text-decoration: none; transition: color .15s; white-space: nowrap; }
 .footer-legal a:hover, .footer-legal a:focus-visible { color: #f5f1e8; }

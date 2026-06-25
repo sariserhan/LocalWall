@@ -25,6 +25,16 @@ async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   return identity;
 }
 
+async function audit(ctx: MutationCtx, identity: { email?: string | null }, action: string, targetId: string, details?: Record<string, unknown>) {
+  await ctx.db.insert("adminAuditLog", {
+    adminEmail: identity.email ?? "unknown",
+    action,
+    targetId,
+    details,
+    createdAt: Date.now(),
+  });
+}
+
 export const getAccess = query({
   args: {},
   handler: async (ctx) => ({ isAdmin: Boolean(await getAdminIdentity(ctx)) }),
@@ -244,11 +254,12 @@ export const setCardStatus = mutation({
     status: v.union(v.literal("published"), v.literal("hidden")),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card) throw new Error("That card no longer exists.");
     if (args.status === "published" && card.expiresAt <= Date.now()) throw new Error("Expired cards cannot be restored without renewal.");
     await ctx.db.patch(card._id, { status: args.status, updatedAt: Date.now() });
+    await audit(ctx, identity, "setCardStatus", args.cardId, { from: card.status, to: args.status });
     return { success: true };
   },
 });
@@ -256,9 +267,10 @@ export const setCardStatus = mutation({
 export const removeCard = mutation({
   args: { cardId: v.id("cards") },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
     const card = await ctx.db.get(args.cardId);
     if (!card) throw new Error("That card no longer exists.");
+    await audit(ctx, identity, "removeCard", args.cardId, { name: card.name, ownerId: card.ownerId });
     const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
     await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
     await ctx.db.delete(card._id);
@@ -269,7 +281,7 @@ export const removeCard = mutation({
 export const blockUser = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("That user no longer exists.");
 
@@ -278,6 +290,7 @@ export const blockUser = mutation({
       blockedAt: now,
       blockedReason: "Blocked by admin moderation",
     });
+    await audit(ctx, identity, "blockUser", args.userId, { email: user.email, displayName: user.displayName });
 
     const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", args.userId)).take(500);
     await Promise.all(cards.map(async (card) => {
@@ -298,9 +311,10 @@ export const unblockUser = mutation({
     restoreCards: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const identity = await requireAdmin(ctx);
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("That user no longer exists.");
+    await audit(ctx, identity, "unblockUser", args.userId, { email: user.email, restoreCards: args.restoreCards ?? false });
 
     await ctx.db.patch(user._id, {
       blockedAt: undefined,
@@ -324,6 +338,14 @@ export const unblockUser = mutation({
     }));
 
     return { success: true, restoredCards };
+  },
+});
+
+export const getAuditLog = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    return ctx.db.query("adminAuditLog").withIndex("by_createdAt").order("desc").take(args.limit ?? 100);
   },
 });
 
