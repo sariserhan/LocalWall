@@ -3,7 +3,6 @@
 import {
   Bookmark,
   ChevronDown,
-  LayoutDashboard,
   LayoutGrid,
   LayoutList,
   Layers3,
@@ -21,7 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { startTransition, useCallback, useDeferredValue, useMemo, useRef, useState, useEffect, type PointerEvent, type ReactNode } from "react";
+import { startTransition, useCallback, useDeferredValue, useMemo, useRef, useState, useEffect, type MutableRefObject, type PointerEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 // Lazy-loaded to keep ~1MB country-state-city out of the initial bundle.
 // All call sites await loadCSC() (async paths) or read `csc` state (render paths).
@@ -87,6 +86,7 @@ interface WallAppProps {
   wallViewCount?: number;
   onCategoryChange?: (category: string) => void;
   onSubscribeDigest?: (email: string, country: string, state: string, city: string) => Promise<{ alreadySubscribed: boolean }>;
+  openDashboardRef?: MutableRefObject<(() => void) | null>;
 }
 
 const MAX_CARD_Y = 1500;
@@ -134,7 +134,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange, onSubscribeDigest }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange, onSubscribeDigest, openDashboardRef }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -143,6 +143,11 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [selected, setSelected] = useState<WallCardModel | null>(null);
   const [composer, setComposer] = useState(false);
   const [dashboard, setDashboard] = useState(false);
+
+  useEffect(() => {
+    if (openDashboardRef) openDashboardRef.current = () => setDashboard(true);
+    return () => { if (openDashboardRef) openDashboardRef.current = null; };
+  }, [openDashboardRef]);
 
   useEffect(() => {
     const locked = !!selected || dashboard || composer;
@@ -1149,7 +1154,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               <Bookmark />{savedWall ? "Wall saved" : "Save wall"}
             </button>
           ) : null}
-          {ownerCards ? <button onClick={() => { setDashboard(true); setMobileMenuOpen(false); }}><LayoutDashboard /> My Board</button> : null}
+
           {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}><ShieldCheck /> Admin</button> : null}
           <button className="mobile-nav-post" onClick={() => { openComposer(); setMobileMenuOpen(false); }}><Plus />Post your card</button>
         </nav>

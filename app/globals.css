@@ -1990,3 +1990,32 @@ html[data-theme="dark"] .embed-location { color: #666; }
 html[data-theme="dark"] .embed-cta { border-color: #3a3835; color: #888; }
 html[data-theme="dark"] .embed-cta:hover { border-color: #888; color: #ede9e3; }
 
+/* ── Clerk UserButton dropdown — uniform bold font ── */
+/* Built-in items (manageAccount, signOut) and custom items use DIFFERENT class names.
+   Both are targeted here so font and alignment stay consistent. */
+[class*="cl-userButtonPopoverActionButton"],
+[class*="cl-userButtonPopoverActionButton"] *,
+[class*="cl-userButtonPopoverCustomItemButton"],
+[class*="cl-userButtonPopoverCustomItemButton"] * {
+  font-family: 'Barlow Condensed', var(--font-barlow-condensed, 'Barlow Condensed'), sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+/* Identical icon box width for both built-in and custom items */
+[class*="cl-userButtonPopoverActionButtonIconBox"],
+[class*="cl-userButtonPopoverCustomItemButtonIconBox"] {
+  width: 20px !important;
+  min-width: 20px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+[class*="cl-userButtonPopoverActionButtonIconBox"] svg,
+[class*="cl-userButtonPopoverCustomItemButtonIconBox"] svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+

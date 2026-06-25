@@ -1,13 +1,16 @@
 "use client";
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Moon, Sun } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
+import { clerkUserButtonAppearance } from "@/lib/clerk-appearance";
 
 export function HomeNav() {
   const { isSignedIn } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const router = useRouter();
 
   return (
     <header className="home-nav">
@@ -16,15 +19,21 @@ export function HomeNav() {
         <small>your local bulletin board</small>
       </Link>
       <nav className="home-nav-right">
-        {/* <Link href="/us" className="home-nav-link">Browse ads</Link> */}
         {isSignedIn ? (
-          <UserButton>
+          <UserButton appearance={clerkUserButtonAppearance}>
             <UserButton.MenuItems>
               <UserButton.Action
-                label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                labelIcon={isDark ? <Sun size={14} /> : <Moon size={14} />}
+                label="My board"
+                labelIcon={<LayoutDashboard size={16} />}
+                onClick={() => router.push("/us")}
+              />
+              <UserButton.Action label="manageAccount" />
+              <UserButton.Action
+                label={isDark ? "Light mode" : "Dark mode"}
+                labelIcon={isDark ? <Sun size={16} /> : <Moon size={16} />}
                 onClick={toggleTheme}
               />
+              <UserButton.Action label="signOut" />
             </UserButton.MenuItems>
           </UserButton>
         ) : (

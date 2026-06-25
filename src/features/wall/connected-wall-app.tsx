@@ -3,8 +3,9 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
+import { clerkUserButtonAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -78,6 +79,7 @@ export function ConnectedWallApp({
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const openDashboardRef = useRef<(() => void) | null>(null);
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
   const hasAppliedInitialServerSnapshotRef = useRef(false);
   const queryCountry = initialLocation?.country || undefined;
@@ -485,13 +487,20 @@ export function ConnectedWallApp({
         await reportCard({ cardId: card.id as Id<"cards">, reason, details });
       }}
       authControl={isClerkSignedIn ? (
-        <UserButton>
+        <UserButton appearance={clerkUserButtonAppearance}>
           <UserButton.MenuItems>
             <UserButton.Action
-              label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              labelIcon={isDark ? <Sun size={14} /> : <Moon size={14} />}
+              label="My board"
+              labelIcon={<LayoutDashboard size={16} />}
+              onClick={() => openDashboardRef.current?.()}
+            />
+            <UserButton.Action label="manageAccount" />
+            <UserButton.Action
+              label={isDark ? "Light mode" : "Dark mode"}
+              labelIcon={isDark ? <Sun size={16} /> : <Moon size={16} />}
               onClick={toggleTheme}
             />
+            <UserButton.Action label="signOut" />
           </UserButton.MenuItems>
         </UserButton>
       ) : null}
@@ -557,6 +566,7 @@ export function ConnectedWallApp({
         await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y });
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
       }}
+      openDashboardRef={openDashboardRef}
       />
       {adminOpen && adminAccess?.isAdmin ? (
         <AdminPanel
