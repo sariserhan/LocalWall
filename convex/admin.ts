@@ -46,11 +46,12 @@ export const getDashboard = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const [cards, users, reports, bugReports, allCardStats, recentSearches, verificationRequests] = await Promise.all([
+    const [cards, users, reports, bugReports, contactMessages, allCardStats, recentSearches, verificationRequests] = await Promise.all([
       ctx.db.query("cards").order("desc").take(150),
       ctx.db.query("users").order("desc").take(150),
       ctx.db.query("reports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("bugReports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
+      ctx.db.query("contactMessages").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("cardStats").take(500),
       ctx.db.query("searchEvents").withIndex("by_createdAt", (q) => q.gte("createdAt", thirtyDaysAgo)).order("desc").take(1000),
       ctx.db.query("verificationRequests").order("desc").take(100),
@@ -86,6 +87,7 @@ export const getDashboard = query({
         users: users.length,
         reports: reports.length,
         bugs: bugReports.length,
+        messages: contactMessages.length,
         searches: recentSearches.length,
         pendingVerifications: verificationRequests.filter((r) => r.status === "pending").length,
       },
@@ -142,6 +144,21 @@ export const getDashboard = query({
           reporterName: reporter?.displayName,
           reporterEmail: reporter?.email,
           createdAt: bugReport.createdAt,
+        };
+      }),
+      contactMessages: contactMessages.map((contactMessage) => {
+        const reporter = contactMessage.reporterId ? userById.get(contactMessage.reporterId) : null;
+        return {
+          id: contactMessage._id,
+          page: contactMessage.page,
+          topic: contactMessage.topic,
+          message: contactMessage.message,
+          reporterName: contactMessage.reporterDisplayName ?? reporter?.displayName,
+          reporterUsername: contactMessage.reporterUsername ?? reporter?.username,
+          reporterEmail: contactMessage.reporterEmail ?? reporter?.email,
+          reporterBusinessName: contactMessage.reporterBusinessName ?? reporter?.businessName,
+          reporterPhone: contactMessage.reporterPhone ?? undefined,
+          createdAt: contactMessage.createdAt,
         };
       }),
       searchInsights: {
@@ -270,6 +287,17 @@ export const resolveBugReport = mutation({
     const bugReport = await ctx.db.get(args.bugReportId);
     if (!bugReport) throw new Error("That bug report no longer exists.");
     await ctx.db.patch(bugReport._id, { status: "resolved" });
+    return { success: true };
+  },
+});
+
+export const resolveContactMessage = mutation({
+  args: { contactMessageId: v.id("contactMessages") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const contactMessage = await ctx.db.get(args.contactMessageId);
+    if (!contactMessage) throw new Error("That contact message no longer exists.");
+    await ctx.db.patch(contactMessage._id, { status: "resolved" });
     return { success: true };
   },
 });

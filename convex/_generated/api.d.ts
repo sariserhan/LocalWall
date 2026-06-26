@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as bugReports from "../bugReports.js";
 import type * as cards from "../cards.js";
+import type * as contactMessages from "../contactMessages.js";
 import type * as crons from "../crons.js";
 import type * as digest from "../digest.js";
 import type * as gdpr from "../gdpr.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   bugReports: typeof bugReports;
   cards: typeof cards;
+  contactMessages: typeof contactMessages;
   crons: typeof crons;
   digest: typeof digest;
   gdpr: typeof gdpr;

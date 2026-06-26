@@ -15,7 +15,6 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -44,6 +43,7 @@ import { WallSkeletons } from "./wall-skeletons";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
 import { BugReportLink } from "@/components/bug-report-link";
+import { ContactLink } from "@/components/contact-link";
 import type { SavedWall } from "./types";
 import posthog from "posthog-js";
 import { toast } from "@/lib/toast";
@@ -72,8 +72,6 @@ interface WallAppProps {
   ownedCardIds?: ReadonlySet<string>;
   likedCardIds?: ReadonlySet<string>;
   onToggleLike?: (card: WallCardModel) => Promise<void>;
-  isAdmin?: boolean;
-  onOpenAdmin?: () => void;
   onCardEvent?: (card: WallCardModel, event: "website" | "phone" | "email" | "social" | "save" | "share") => void;
   onReportCard?: (card: WallCardModel, reason: "spam" | "scam" | "inappropriate" | "expired" | "other", details?: string) => Promise<void>;
   initialCardId?: string;
@@ -139,7 +137,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1347,7 +1345,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             </button>
           ) : null}
 
-          {isAdmin && onOpenAdmin ? <button className="admin-nav-button" onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}><ShieldCheck /> Admin</button> : null}
           <button className="mobile-nav-post" onClick={() => { openComposer(); setMobileMenuOpen(false); }}><Plus />Post your card</button>
         </nav>
         {authControl ? <div className="auth-control">{authControl}</div> : null}
@@ -1629,6 +1626,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             <Link href="/terms-and-conditions">Terms & Conditions</Link>
             <Link href="/privacy-policy">Privacy Policy</Link>
             <BugReportLink />
+            <ContactLink />
           </nav>
 
           {/* right — digest widget */}

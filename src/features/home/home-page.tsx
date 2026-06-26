@@ -4,6 +4,7 @@ import { HomeSearch } from "./home-search";
 import { HomeHowItWorksModal } from "./home-how-it-works-modal";
 import Link from "next/link";
 import { BugReportLink } from "@/components/bug-report-link";
+import { ContactLink } from "@/components/contact-link";
 
 export function HomePage() {
   return (
@@ -32,6 +33,9 @@ export function HomePage() {
               <Link href="/privacy-policy">Privacy Policy</Link>
               <Suspense fallback={null}>
                 <BugReportLink />
+              </Suspense>
+              <Suspense fallback={null}>
+                <ContactLink />
               </Suspense>
             </nav>
             <p className="home-footer-copy">© {new Date().getFullYear()} LocalWall. All rights reserved.</p>

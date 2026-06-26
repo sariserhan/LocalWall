@@ -903,6 +903,14 @@ button { color: inherit; }
 .report-details-label span { color: #777; text-transform: none; font-weight: 600; }
 .report-details-textarea { display: block; width: 100%; margin-top: 7px; padding: 10px 12px; border: 1px solid #aaa; background: var(--ui-bg-2); font: 600 13px var(--font-inter); resize: vertical; outline: 0; }
 .report-details-textarea:focus { border-color: #111; box-shadow: 0 0 0 2px #edcf35; }
+.contact-topic-input { display: block; width: 100%; margin-top: 7px; padding: 10px 12px; border: 1px solid #aaa; background: var(--ui-bg-2); font: 600 13px/1.35 var(--font-inter); outline: 0; }
+.contact-topic-input:focus { border-color: #111; box-shadow: 0 0 0 2px #edcf35; }
+.contact-details-summary { margin: 0 0 18px; padding: 12px 14px; border: 1px solid #d4d0c8; background: #f6f4ef; }
+.contact-details-summary strong { display: block; margin-bottom: 4px; font: 800 11px var(--font-inter); letter-spacing: .7px; text-transform: uppercase; }
+.contact-details-summary p { margin: 0 0 10px; color: #666; font: 600 12px/1.45 var(--font-inter); text-transform: none; }
+.contact-details-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.contact-details-list span { padding: 5px 8px; border: 1px solid #d4d0c8; background: #fff; font: 600 11px var(--font-inter); color: #444; text-transform: none; letter-spacing: 0; }
+.contact-message-textarea { min-height: 140px; }
 .renewal-options { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 8px !important; margin: 4px 0 22px; }
 .renewal-option { position: relative; min-height: 82px; display: grid; place-content: center; gap: 4px; border: 1px solid #999; background: #f8f6f1; cursor: pointer; }
 .renewal-option:hover, .renewal-option.selected { border-color: #111; background: #edcf35; box-shadow: 3px 3px 0 #111; }

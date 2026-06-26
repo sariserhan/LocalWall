@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Toaster } from "@/lib/toast";
 import { GlobalOwnerDashboard } from "./global-owner-dashboard";
 import { GlobalBugReportModal } from "./global-bug-report-modal";
+import { GlobalContactModal } from "./global-contact-modal";
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -46,6 +47,7 @@ function ConnectedProviders({ children, convexUrl }: { children: React.ReactNode
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       {children}
       <GlobalBugReportModal />
+      <GlobalContactModal />
       <GlobalOwnerDashboard />
       <Toaster />
     </ConvexProviderWithClerk>

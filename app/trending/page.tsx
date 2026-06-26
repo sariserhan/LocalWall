@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AppProviders } from "@/components/app-providers";
 import { BugReportLink } from "@/components/bug-report-link";
+import { ContactLink } from "@/components/contact-link";
 import { HomeNav } from "@/features/home/home-nav";
 import { TrendingTabs } from "@/features/home/trending-tabs";
 import { fetchTopWalls, fetchTopCards } from "@/lib/server-cards";
@@ -51,6 +52,9 @@ export default async function TrendingPage() {
             <Link href="/privacy-policy">Privacy Policy</Link>
             <Suspense fallback={null}>
               <BugReportLink />
+            </Suspense>
+            <Suspense fallback={null}>
+              <ContactLink />
             </Suspense>
           </nav>
           <p className="home-footer-copy">© {new Date().getFullYear()} LocalWall. All rights reserved.</p>

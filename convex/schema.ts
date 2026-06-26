@@ -203,6 +203,22 @@ export default defineSchema({
     .index("by_status_and_createdAt", ["status", "createdAt"])
     .index("by_page", ["page"]),
 
+  contactMessages: defineTable({
+    reporterId: v.optional(v.id("users")),
+    page: v.string(),
+    topic: v.string(),
+    message: v.string(),
+    reporterDisplayName: v.optional(v.string()),
+    reporterUsername: v.optional(v.string()),
+    reporterEmail: v.optional(v.string()),
+    reporterBusinessName: v.optional(v.string()),
+    reporterPhone: v.optional(v.string()),
+    status: v.union(v.literal("open"), v.literal("resolved")),
+    createdAt: v.number(),
+  })
+    .index("by_status_and_createdAt", ["status", "createdAt"])
+    .index("by_page", ["page"]),
+
   digestSubscriptions: defineTable({
     email: v.string(),
     country: v.string(),

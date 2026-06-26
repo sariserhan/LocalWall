@@ -3,7 +3,7 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CreditCard, Download, LayoutDashboard, TrendingUp } from "lucide-react";
+import { CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
 import { ClerkMyDataPage } from "./clerk-my-data-page";
 import { useTheme } from "@/lib/use-theme";
 import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
@@ -194,6 +194,7 @@ export function ConnectedWallApp({
   const adminVerifyUser = useMutation(api.admin.setUserVerified);
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const adminResolveBugReport = useMutation(api.admin.resolveBugReport);
+  const adminResolveContactMessage = useMutation(api.admin.resolveContactMessage);
   const recordWallVisit = useMutation(api.walls.recordVisit);
   const effectiveWallPath = isCardPage ? cardWallPath : (pathname && pathname !== "/" ? pathname : null);
   const wallData = useQuery(api.walls.getWall, effectiveWallPath ? { path: effectiveWallPath } : "skip");
@@ -552,6 +553,13 @@ export function ConnectedWallApp({
             <ClerkMyDataPage />
           </UserButton.UserProfilePage>
           <UserButton.MenuItems>
+            {adminAccess?.isAdmin ? (
+              <UserButton.Action
+                label="Admin"
+                labelIcon={<ShieldCheck size={16} />}
+                onClick={() => setAdminOpen(true)}
+              />
+            ) : null}
             <UserButton.Action
               label="My board"
               labelIcon={<LayoutDashboard size={16} />}
@@ -614,8 +622,6 @@ export function ConnectedWallApp({
           location_city: card.city,
         });
       } : undefined}
-      isAdmin={adminAccess?.isAdmin ?? false}
-      onOpenAdmin={() => setAdminOpen(true)}
       profile={profile ?? null}
       onUpdateProfile={async (username, businessName) => { await updateProfileMutation({ username, businessName }); }}
       cardDailyStats={cardDailyStats ?? null}
@@ -678,6 +684,7 @@ export function ConnectedWallApp({
           onVerifyUser={async (userId, verified) => { await adminVerifyUser({ userId, verified }); }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
           onResolveBugReport={async (bugReportId) => { await adminResolveBugReport({ bugReportId }); }}
+          onResolveContactMessage={async (contactMessageId) => { await adminResolveContactMessage({ contactMessageId }); }}
           onApproveVerification={async (requestId) => { await adminApproveVerification({ requestId }); }}
           onRejectVerification={async (requestId) => { await adminRejectVerification({ requestId }); }}
         />
