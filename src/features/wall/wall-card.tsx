@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import Image from "next/image";
 import { getCardFormat, type WallCard as WallCardModel } from "./types";
 import { BLUR_PLACEHOLDER } from "@/lib/blur-placeholder";
@@ -11,6 +12,7 @@ interface WallCardProps {
   onOpen: (card: WallCardModel) => void;
   onFront: (id: string) => void;
   ownerDraggable?: boolean;
+  onRotate?: (card: WallCardModel, rotation: number) => void;
   expiringSoon?: boolean;
   dragging?: boolean;
   onDragStart?: (event: PointerEvent<HTMLElement>, card: WallCardModel) => void;
@@ -30,9 +32,11 @@ function hashString(value: string): number {
   return Math.abs(hash);
 }
 
-export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false, expiringSoon = false, dragging = false, onDragStart, onDragMove, onDragEnd, zIndex }: WallCardProps) {
+export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false, onRotate, expiringSoon = false, dragging = false, onDragStart, onDragMove, onDragEnd, zIndex }: WallCardProps) {
   const pointerRef = useRef<{ id: number; x: number; y: number } | null>(null);
+  const tiltPointerRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
   const didDragRef = useRef(false);
+  const [rotationDraft, setRotationDraft] = useState(card.rotation);
   const seed = hashString(String(card.id));
   const tapeWidth = 42 + (seed % 45); // 42px to 86px
   const tapeRotate = -14 + ((seed >> 3) % 23); // -14deg to +8deg
@@ -41,10 +45,39 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
   const cardImage = card.thumbnailImages?.[0] ?? card.images[0];
   const format = getCardFormat(displayTheme);
 
+  useEffect(() => {
+    setRotationDraft(card.rotation);
+  }, [card.rotation]);
+
+  const handleTiltPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!onRotate || event.button !== 0) return;
+    event.stopPropagation();
+    event.preventDefault();
+    onFront(card.id);
+    tiltPointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, rotation: rotationDraft };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleTiltPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    const delta = (event.clientX - start.x) * 0.45 - (event.clientY - start.y) * 0.18;
+    const next = Math.max(-90, Math.min(90, Math.round(start.rotation + delta)));
+    if (next !== rotationDraft) setRotationDraft(next);
+  };
+
+  const handleTiltPointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    tiltPointerRef.current = null;
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
+    if (onRotate && rotationDraft !== card.rotation) onRotate(card, rotationDraft);
+  };
+
   const style: CardStyle = {
     "--x": `${card.x}%`,
     "--y": `${card.y}px`,
-    "--r": `${card.rotation}deg`,
+    "--r": `${rotationDraft}deg`,
     "--w": `${format.width}px`,
     "--h": `${format.minHeight}px`,
     "--tape-w": `${tapeWidth}px`,
@@ -111,6 +144,21 @@ export function WallCard({ card, active, onOpen, onFront, ownerDraggable = false
       {expiringSoon ? <span className="card-expiry-warn" aria-label="This card is expiring soon — open your dashboard to renew">⚠ Renew</span> : null}
       {card.featuredTier === "gold" ? <span className="featured-ribbon" aria-label="Featured Gold">⭐ Featured</span> : null}
       {card.featuredTier === "silver" || card.featuredTier === "bronze" ? <span className="featured-badge" aria-label={`Featured ${card.featuredTier}`}>⭐</span> : null}
+      {ownerDraggable && onRotate ? (
+        <button
+          type="button"
+          className="wall-card-tilt-handle"
+          onPointerDown={handleTiltPointerDown}
+          onPointerMove={handleTiltPointerMove}
+          onPointerUp={handleTiltPointerEnd}
+          onPointerCancel={handleTiltPointerEnd}
+          onClick={(event) => event.stopPropagation()}
+          aria-label={`Tilt ${card.name}`}
+          title="Hold and drag to tilt"
+        >
+          <RotateCcw size={12} />
+        </button>
+      ) : null}
       <div className="card-copy">
         <p className="card-category">{card.category}{card.subcategory ? <> · {card.subcategory}</> : null}</p>
         {card.verified ? <span className="verified-badge" aria-label="Verified business">✓ Verified</span> : null}

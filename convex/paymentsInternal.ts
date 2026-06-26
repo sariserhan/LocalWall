@@ -73,7 +73,7 @@ export const completePaidCard = internalMutation({
       thumbnailImageIds: payload.thumbnailImageIds,
       x: payload.x,
       y: payload.y,
-      rotation: payload.rotation,
+      rotation: payload.rotation ?? 0,
       width: payload.width,
       zIndex: createdAt,
       status: "published",
@@ -98,7 +98,7 @@ export const completePaidCard = internalMutation({
       Promise.all(imageIds.map((imageId) => ctx.storage.getUrl(imageId))),
       Promise.all(thumbnailImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
     ]);
-    return { id: cardId, ...payload, ownerId: pending.ownerId, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + packageDurations[basePaidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0 };
+    return { id: cardId, ...payload, rotation: payload.rotation ?? 0, ownerId: pending.ownerId, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + packageDurations[basePaidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0 };
   },
 });
 
@@ -286,7 +286,7 @@ export const completeBundlePosting = internalMutation({
         thumbnailImageIds,
         x: payload.x,
         y: payload.y,
-        rotation: -3 + Math.random() * 6,
+        rotation: payload.rotation ?? 0,
         width: payload.width,
         zIndex: createdAt,
         status: "published",

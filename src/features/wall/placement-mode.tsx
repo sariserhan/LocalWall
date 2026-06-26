@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Sparkles, X } from "lucide-react";
-import type { CSSProperties, PointerEvent } from "react";
+import { Check, RotateCcw, Sparkles, X } from "lucide-react";
+import { useRef, type CSSProperties, type PointerEvent } from "react";
 import { getCardFormat, type CardDraft, type Placement } from "./types";
 
 interface PlacementModeProps {
@@ -14,12 +14,36 @@ interface PlacementModeProps {
   onCancel: () => void;
   onRandom: () => void;
   onConfirm: () => void;
+  onRotate: (rotation: number) => void;
   isSaving: boolean;
 }
 
-export function PlacementMode({ card, position, dragging, onDragStart, onMove, onDragEnd, onCancel, onRandom, onConfirm, isSaving }: PlacementModeProps) {
+export function PlacementMode({ card, position, dragging, onDragStart, onMove, onDragEnd, onCancel, onRandom, onConfirm, onRotate, isSaving }: PlacementModeProps) {
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
   const format = getCardFormat(displayTheme);
+  const tiltPointerRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
+
+  const handleTiltPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    tiltPointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, rotation: card.rotation ?? 0 };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleTiltPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    const delta = (event.clientX - start.x) * 0.45 - (event.clientY - start.y) * 0.18;
+    const next = Math.max(-90, Math.min(90, Math.round(start.rotation + delta)));
+    if (next !== card.rotation) onRotate(next);
+  };
+
+  const handleTiltPointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    tiltPointerRef.current = null;
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
+  };
 
   return (
     <div className="placement-mode" onPointerMove={onMove} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
@@ -31,9 +55,21 @@ export function PlacementMode({ card, position, dragging, onDragStart, onMove, o
       </div>
       <article
         className={`wall-card placement-card theme-${displayTheme} ${card.imageMode === "business-card" && card.previews[0] ? "image-business-card" : ""} ${dragging ? "is-dragging" : ""}`}
-        style={{ left: `${position.x}%`, top: `${position.y}px`, "--w": `${format.width}px`, "--h": `${format.minHeight}px` } as CSSProperties}
+        style={{ left: `${position.x}%`, top: `${position.y}px`, "--w": `${format.width}px`, "--h": `${format.minHeight}px`, "--r": `${card.rotation ?? 0}deg` } as CSSProperties}
         onPointerDown={onDragStart}
       >
+        <button
+          type="button"
+          className="wall-card-tilt-handle"
+          onPointerDown={handleTiltPointerDown}
+          onPointerMove={handleTiltPointerMove}
+          onPointerUp={handleTiltPointerEnd}
+          onPointerCancel={handleTiltPointerEnd}
+          aria-label="Tilt while placing"
+          title="Hold and drag to tilt"
+        >
+          <RotateCcw size={12} />
+        </button>
         <span className="card-tape" aria-hidden="true" />
         <div className="card-copy"><p className="card-category">{card.category}</p><h2>{card.name}</h2><p className="card-line">{card.line}</p></div>
         {card.previews[0] ? <img src={card.previews[0]} alt="" draggable="false" /> : null}

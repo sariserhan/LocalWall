@@ -529,6 +529,7 @@ export const update = mutation({
     whatsapp: v.optional(v.string()),
     telegram: v.optional(v.string()),
     theme,
+    rotation: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireActiveUser(ctx);
@@ -574,6 +575,7 @@ export const update = mutation({
       whatsapp: args.whatsapp?.trim() || undefined,
       telegram: args.telegram?.trim() || undefined,
       theme: args.theme,
+      rotation: args.rotation ?? card.rotation,
       updatedAt: Date.now(),
     });
     return { success: true };
@@ -585,6 +587,7 @@ export const updatePosition = mutation({
     cardId: v.id("cards"),
     x: v.number(),
     y: v.number(),
+    rotation: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireActiveUser(ctx);
@@ -596,8 +599,9 @@ export const updatePosition = mutation({
 
     const x = Math.min(100, Math.max(0, args.x));
     const y = Math.min(MAX_CARD_Y, Math.max(0, args.y));
+    const rotation = args.rotation !== undefined ? args.rotation : card.rotation;
     const positionLockedAt = Date.now();
-    await ctx.db.patch(card._id, { x, y, positionLockedAt, updatedAt: positionLockedAt });
+    await ctx.db.patch(card._id, { x, y, rotation, positionLockedAt, updatedAt: positionLockedAt });
     return { success: true, x, y, positionLockedAt };
   },
 });
@@ -650,7 +654,7 @@ export const create = mutation({
     thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
     x: v.number(),
     y: v.number(),
-    rotation: v.number(),
+    rotation: v.optional(v.number()),
     width: v.number(),
   },
   handler: async (ctx, args) => {
@@ -702,6 +706,7 @@ export const create = mutation({
     if (user.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
 
     const createdAt = Date.now();
+    const rotation = args.rotation ?? 0;
     const cardWidth = args.imageMode === "business-card" ? 300 : args.width;
     const normalizedPayload = {
       ...args,
@@ -776,7 +781,7 @@ export const create = mutation({
       thumbnailImageIds: args.thumbnailImageIds,
       x: args.x,
       y: args.y,
-      rotation: args.rotation,
+      rotation,
       width: cardWidth,
       zIndex,
       status: "published",
@@ -829,7 +834,7 @@ export const create = mutation({
       thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
       x: args.x,
       y: args.y,
-      rotation: args.rotation,
+      rotation,
       width: cardWidth,
       zIndex,
       positionLockedAt: createdAt,

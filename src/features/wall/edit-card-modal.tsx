@@ -1,7 +1,7 @@
 "use client";
 
-import { Save, X } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { RotateCcw, Save, X } from "lucide-react";
+import { useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import { cardThemes, categories, SUBCATEGORY_OPTIONS, type CardTheme, type CardUpdate, type OwnerCard } from "./types";
 
 const themeLabels: Record<CardTheme, string> = {
@@ -30,11 +30,35 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
     whatsapp: card.whatsapp,
     telegram: card.telegram,
     theme: card.theme,
+    rotation: card.rotation,
   }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tiltPointerRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
 
   const setField = <Key extends keyof CardUpdate>(field: Key, value: CardUpdate[Key]) => setForm((current) => ({ ...current, [field]: value }));
+
+  const handleTiltPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    tiltPointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, rotation: form.rotation ?? 0 };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleTiltPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    const delta = (event.clientX - start.x) * 0.45 - (event.clientY - start.y) * 0.18;
+    const next = Math.max(-90, Math.min(90, Math.round(start.rotation + delta)));
+    setField("rotation", next);
+  };
+
+  const handleTiltPointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltPointerRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    tiltPointerRef.current = null;
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -67,6 +91,33 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
         <header><div><span>OWNER TOOLS</span><h2>Edit card</h2></div><button type="button" className="icon-btn" onClick={onClose} aria-label="Close editor"><X /></button></header>
         <div className="edit-card-body">
           {error ? <div className="dashboard-error" role="alert">{error}</div> : null}
+          <div className="edit-card-preview">
+            <article className={`wall-card edit-card-preview-card theme-${form.theme}`} style={{ "--w": "220px", "--h": "245px", "--r": `${form.rotation ?? 0}deg` } as CSSProperties}>
+              <button
+                type="button"
+                className="wall-card-tilt-handle"
+                onPointerDown={handleTiltPointerDown}
+                onPointerMove={handleTiltPointerMove}
+                onPointerUp={handleTiltPointerEnd}
+                onPointerCancel={handleTiltPointerEnd}
+                aria-label="Tilt preview card"
+                title="Hold and drag to tilt"
+              >
+                <RotateCcw size={12} />
+              </button>
+              <span className="card-tape" aria-hidden="true" />
+              <div className="card-copy">
+                <p className="card-category">{form.category}{form.subcategory ? <> · {form.subcategory}</> : null}</p>
+                <h2>{form.name || "Your card"}</h2>
+                <p className="card-line">{form.line || "Preview your card here."}</p>
+              </div>
+              <footer>
+                <span>{form.area || "Neighborhood"}</span>
+                {form.price ? <strong className="card-price-right">{form.price}</strong> : null}
+              </footer>
+            </article>
+            <small className="edit-card-preview-hint">Hold the corner icon and drag to tilt.</small>
+          </div>
           <div className="form-grid">
             <label>Business or service<input required minLength={2} maxLength={60} value={form.name} onChange={(event) => setField("name", event.target.value)} /></label>
             <label>Category<select value={form.category} onChange={(event) => { setField("category", event.target.value as CardUpdate["category"]); setField("subcategory", undefined); }}>{categories.slice(1).map((category) => <option key={category}>{category}</option>)}</select></label>

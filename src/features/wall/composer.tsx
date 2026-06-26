@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, MapPin, Sparkles, X } from "lucide-react";
-import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
+import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, MapPin, RotateCcw, Sparkles, X } from "lucide-react";
+import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import { Country, State, City } from "country-state-city";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 
@@ -39,6 +39,7 @@ interface ComposerForm {
   imageX: number;
   imageY: number;
   imageWidth: number;
+  rotation: number;
   paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   featuredTier: "none" | "bronze" | "silver" | "gold";
 }
@@ -80,6 +81,7 @@ const initialForm: ComposerForm = {
   imageX: 50,
   imageY: 35,
   imageWidth: 90,
+  rotation: 0,
   paymentOption: "free",
   featuredTier: "none",
 };
@@ -188,12 +190,35 @@ function validSocialProfile(value: string) {
   return /^@?[A-Za-z0-9._-]{2,100}$/.test(value) || /^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/.test(value);
 }
 
-function LiveCardPreview({ form, image, onImageChange }: { form: ComposerForm; image?: string; onImageChange?: (x: number, y: number, w: number) => void }) {
+function LiveCardPreview({ form, image, onImageChange, onRotate }: { form: ComposerForm; image?: string; onImageChange?: (x: number, y: number, w: number) => void; onRotate?: (rotation: number) => void }) {
   const dragRef = useRef<{ startX: number; startY: number; startIX: number; startIY: number } | null>(null);
   const resizeRef = useRef<{ startX: number; startY: number; startW: number } | null>(null);
+  const tiltRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
   const clipRef = useRef<HTMLDivElement>(null);
   const format = getCardFormat(form.theme);
   const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
+
+  const handleTiltPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!onRotate || event.button !== 0) return;
+    event.stopPropagation();
+    event.preventDefault();
+    tiltRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, rotation: form.rotation };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleTiltPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltRef.current;
+    if (!start || start.id !== event.pointerId || !onRotate) return;
+    const delta = (event.clientX - start.x) * 0.45 - (event.clientY - start.y) * 0.18;
+    onRotate(Math.max(-90, Math.min(90, Math.round(start.rotation + delta))));
+  };
+
+  const handleTiltPointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = tiltRef.current;
+    if (!start || start.id !== event.pointerId) return;
+    tiltRef.current = null;
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
+  };
 
   if (form.imageMode === "business-card" && image) {
     return (
@@ -204,9 +229,23 @@ function LiveCardPreview({ form, image, onImageChange }: { form: ComposerForm; i
     );
   }
 
-  const style = { "--w": `${format.width}px`, "--h": `${format.minHeight}px`, "--r": "-1deg", "--x": "0", "--y": "0" } as CSSProperties;
+  const style = { "--w": `${format.width}px`, "--h": `${format.minHeight}px`, "--r": `${form.rotation}deg`, "--x": "0", "--y": "0" } as CSSProperties;
   return (
     <article className={`wall-card composer-live-card theme-${form.theme}`} style={style} aria-label="Live card preview">
+      {onRotate ? (
+        <button
+          type="button"
+          className="wall-card-tilt-handle"
+          onPointerDown={handleTiltPointerDown}
+          onPointerMove={handleTiltPointerMove}
+          onPointerUp={handleTiltPointerEnd}
+          onPointerCancel={handleTiltPointerEnd}
+          aria-label="Tilt card preview"
+          title="Hold and drag to tilt"
+        >
+          <RotateCcw size={12} />
+        </button>
+      ) : null}
       <span className="card-tape" aria-hidden="true" />
       <div className="card-copy"><p className="card-category">{form.category}{form.subcategory ? <> · {form.subcategory}</> : null}</p><h2>{form.name || "Your business"}</h2><p className="card-line">{form.line || "Your offer goes here."}</p>{form.message.trim() ? <p className="composer-preview-message">{form.message}</p> : null}</div>
       {image ? (
@@ -501,6 +540,7 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
       whatsapp: form.whatsapp.trim() || undefined,
       telegram: form.telegram.trim() || undefined,
       featuredTier: form.featuredTier,
+      rotation: form.rotation,
       autoRenew: autoRenew && form.paymentOption !== "free" && form.paymentOption !== "bundle",
       bundleCities: form.paymentOption === "bundle" ? bundleCities : undefined,
       files,
@@ -652,9 +692,14 @@ export function Composer({ onClose, onReady, initialLocation }: ComposerProps) {
             <div className="preview-stage">
               <span>Live preview</span>
               <div className="preview-canvas">
-                <LiveCardPreview form={form} image={previews[0]} onImageChange={previews[0] && form.imageMode === "photo" ? (x, y, w) => setForm((f) => ({ ...f, imageX: x, imageY: y, imageWidth: w })) : undefined} />
+                <LiveCardPreview
+                  form={form}
+                  image={previews[0]}
+                  onImageChange={previews[0] && form.imageMode === "photo" ? (x, y, w) => setForm((f) => ({ ...f, imageX: x, imageY: y, imageWidth: w })) : undefined}
+                  onRotate={(rotation) => setForm((value) => ({ ...value, rotation }))}
+                />
               </div>
-              {previews[0] && form.imageMode === "photo" ? <small className="img-drag-hint">Drag to reposition · drag corner to resize</small> : null}
+              {previews[0] && form.imageMode === "photo" ? <small className="img-drag-hint">Drag to reposition · drag corner to resize · hold the corner icon to tilt</small> : null}
             </div>
           </div>
         ) : (

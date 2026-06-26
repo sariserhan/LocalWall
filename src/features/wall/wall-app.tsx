@@ -122,7 +122,7 @@ function makeDemoCard(draft: CardDraft, placement: Placement, zIndex: number): W
     images: draft.previews,
     x: placement.x,
     y: placement.y,
-    rotation: -3 + Math.random() * 6,
+    rotation: draft.rotation ?? 0,
     width: getCardFormat(draft.imageMode === "business-card" ? "biz" : draft.theme).width,
     zIndex,
     positionLockedAt: Date.now(),
@@ -859,7 +859,24 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     );
     const next = { x: (left / wallRect.width) * 100, y: top };
     movePositionRef.current = next;
-    setPositionOverrides((current) => ({ ...current, [String(card.id)]: next }));
+    setPositionOverrides((current) => ({ ...current, [String(card.id)]: { ...(current[String(card.id)] ?? {}), ...next } }));
+  };
+
+  const rotateOwnedCard = async (card: WallCardModel, rotation: number) => {
+    const id = String(card.id);
+    const next = { x: card.x, y: card.y, rotation };
+    setPositionOverrides((current) => ({ ...current, [id]: { ...(current[id] ?? {}), ...next } }));
+    if (!onMoveCard) return;
+    try {
+      await onMoveCard(card, next);
+    } catch (cause) {
+      setPositionOverrides((current) => {
+        const copy = { ...current };
+        delete copy[id];
+        return copy;
+      });
+      setError(cause instanceof Error ? cause.message : "The card tilt could not be saved.");
+    }
   };
 
   const finishCardMove = async (_event: PointerEvent<HTMLElement>, card: WallCardModel) => {
@@ -1561,6 +1578,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                     onOpen={handleCardClick}
                     onFront={front}
                     ownerDraggable={ownerDraggable}
+                    onRotate={ownerDraggable ? rotateOwnedCard : undefined}
                     expiringSoon={expiringSoon}
                     dragging={movingCardId === String(card.id)}
                     onDragStart={startCardMove}
@@ -1595,7 +1613,21 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             ? `${visible.length} CARDS · ${locationLabel()}${locationWeather ? ` · ${Math.round(locationWeather.tempC)}°C / ${Math.round(locationWeather.tempC * 9 / 5 + 32)}°F` : ""}`
             : "LOCATING..."}
         </div>
-        {pendingCard ? <PlacementMode card={pendingCard} position={placement} dragging={dragging} onDragStart={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }} onMove={movePlacement} onDragEnd={() => setDragging(false)} onCancel={() => { setPendingCard(null); setDragging(false); }} onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })} onConfirm={post} isSaving={isSaving} /> : null}
+              {pendingCard ? (
+                <PlacementMode
+                  card={pendingCard}
+                  position={placement}
+                  dragging={dragging}
+                  onDragStart={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }}
+                  onMove={movePlacement}
+                  onDragEnd={() => setDragging(false)}
+                  onCancel={() => { setPendingCard(null); setDragging(false); }}
+                  onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })}
+                  onConfirm={post}
+                  onRotate={(rotation) => setPendingCard((current) => current ? { ...current, rotation } : current)}
+                  isSaving={isSaving}
+                />
+              ) : null}
         {!listView ? <WallMinimap cards={visible} wallRef={wallRef} /> : null}
       </section>
       {notice ? <div className="notice-toast" role="status">{notice}</div> : null}

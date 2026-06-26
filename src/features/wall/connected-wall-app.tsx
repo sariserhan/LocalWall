@@ -446,7 +446,7 @@ export function ConnectedWallApp({
       thumbnailImageIds,
       x: placement.x,
       y: placement.y,
-      rotation: -3 + Math.random() * 6,
+      rotation: draft.rotation ?? 0,
       width: getCardFormat(draft.imageMode === "business-card" ? "biz" : draft.theme).width,
     };
     const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> };
@@ -656,7 +656,7 @@ export function ConnectedWallApp({
       onCancelAutoRenewCard={handleCancelAutoRenew}
       onSubscribeDigest={async (email, country, state, city) => subscribeDigest({ email, country, state, city })}
       onMoveCard={async (card, placement) => {
-        await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y });
+        await updateCardPosition({ cardId: card.id as Id<"cards">, x: placement.x, y: placement.y, rotation: placement.rotation });
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
       }}
       />

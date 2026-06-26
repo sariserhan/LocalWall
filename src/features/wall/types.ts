@@ -137,7 +137,7 @@ export interface OwnerCard extends WallCard {
 
 export type RenewalAmount = 0 | 2.99 | 7.99 | 24.99;
 
-export type CardUpdate = Pick<OwnerCard, "name" | "category" | "subcategory" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram" | "theme">;
+export type CardUpdate = Pick<OwnerCard, "name" | "category" | "subcategory" | "line" | "message" | "area" | "zipcode" | "neighborhood" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram" | "theme" | "rotation">;
 
 export interface CardDraft {
   name: string;
@@ -167,6 +167,7 @@ export interface CardDraft {
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
+  rotation?: number;
   paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   bundleCities?: Array<{ country: string; state: string; city: string }>;
   featuredTier: "none" | "bronze" | "silver" | "gold";
@@ -178,6 +179,7 @@ export interface CardDraft {
 export interface Placement {
   x: number;
   y: number;
+  rotation?: number;
 }
 
 export interface SavedWall {
