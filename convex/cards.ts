@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 
@@ -704,6 +704,11 @@ export const create = mutation({
     }
     if (!user) throw new Error("Your profile could not be created.");
     if (user.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
+
+    const cardCreationRateLimit = await ctx.runMutation(api.rateLimits.take, { scopes: ["card_create_hour"] });
+    if (!cardCreationRateLimit.allowed) {
+      throw new Error("Too many cards created. Please wait an hour before posting again.");
+    }
 
     const createdAt = Date.now();
     const rotation = args.rotation ?? 0;

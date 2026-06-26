@@ -963,7 +963,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/billing/page.tsx",
-      "source_location": "L10",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "billing_page_metadata",
       "community": 22,
@@ -973,7 +973,7 @@
       "label": "BillingCard()",
       "file_type": "code",
       "source_file": "app/billing/page.tsx",
-      "source_location": "L12",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "billing_page_billingcard",
       "community": 22,
@@ -983,7 +983,7 @@
       "label": "BillingPage()",
       "file_type": "code",
       "source_file": "app/billing/page.tsx",
-      "source_location": "L49",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "billing_page_billingpage",
       "community": 22,
@@ -1163,7 +1163,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "app_layout_metadata",
       "community": 42,
@@ -1173,7 +1173,7 @@
       "label": "RootLayout()",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
       "community": 42,
@@ -1193,7 +1193,7 @@
       "label": "NotFound()",
       "file_type": "code",
       "source_file": "app/not-found.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "app_not_found_notfound",
       "community": 2,
@@ -1253,7 +1253,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/privacy-policy/page.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "privacy_policy_page_metadata",
       "community": 22,
@@ -1263,7 +1263,7 @@
       "label": "PrivacyPolicyPage()",
       "file_type": "code",
       "source_file": "app/privacy-policy/page.tsx",
-      "source_location": "L10",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "privacy_policy_page_privacypolicypage",
       "community": 22,
@@ -1443,7 +1443,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/terms-and-conditions/page.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "terms_and_conditions_page_metadata",
       "community": 22,
@@ -1453,7 +1453,7 @@
       "label": "TermsAndConditionsPage()",
       "file_type": "code",
       "source_file": "app/terms-and-conditions/page.tsx",
-      "source_location": "L10",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "terms_and_conditions_page_termsandconditionspage",
       "community": 22,
@@ -1523,7 +1523,7 @@
       "label": "UnsubscribeClient()",
       "file_type": "code",
       "source_file": "app/unsubscribe/unsubscribe-client.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "unsubscribe_unsubscribe_client_unsubscribeclient",
       "community": 22,
@@ -4153,7 +4153,7 @@
       "label": "BugReportLink()",
       "file_type": "code",
       "source_file": "src/components/bug-report-link.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "components_bug_report_link_bugreportlink",
       "community": 22,
@@ -22048,9 +22048,9 @@
       "source_file": "src/components/app-providers.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_app_providers",
-      "target": "components_global_bug_report_modal",
-      "confidence_score": 1.0
+      "target": "components_global_bug_report_modal"
     },
     {
       "relation": "imports",
@@ -22059,9 +22059,9 @@
       "source_file": "src/components/app-providers.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_app_providers",
-      "target": "components_global_bug_report_modal_globalbugreportmodal",
-      "confidence_score": 1.0
+      "target": "components_global_bug_report_modal_globalbugreportmodal"
     },
     {
       "relation": "imports_from",
@@ -22146,9 +22146,9 @@
       "source_file": "src/components/bug-report-link.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_bug_report_link",
-      "target": "lib_bug_report_signal",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal"
     },
     {
       "relation": "imports",
@@ -22157,9 +22157,9 @@
       "source_file": "src/components/bug-report-link.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_bug_report_link",
-      "target": "lib_bug_report_signal_openbugreport",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal_openbugreport"
     },
     {
       "relation": "imports_from",
@@ -22254,9 +22254,9 @@
       "source_file": "src/components/global-bug-report-modal.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_global_bug_report_modal",
-      "target": "components_global_bug_report_modal_globalbugreportmodal",
-      "confidence_score": 1.0
+      "target": "components_global_bug_report_modal_globalbugreportmodal"
     },
     {
       "relation": "imports_from",
@@ -22265,9 +22265,9 @@
       "source_file": "src/components/global-bug-report-modal.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_global_bug_report_modal",
-      "target": "lib_bug_report_signal",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal"
     },
     {
       "relation": "imports",
@@ -22276,9 +22276,9 @@
       "source_file": "src/components/global-bug-report-modal.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_global_bug_report_modal",
-      "target": "lib_bug_report_signal_pushbugreporthandler",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal_pushbugreporthandler"
     },
     {
       "relation": "imports_from",
@@ -22287,9 +22287,9 @@
       "source_file": "src/components/global-bug-report-modal.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_global_bug_report_modal",
-      "target": "support_bug_report_page",
-      "confidence_score": 1.0
+      "target": "support_bug_report_page"
     },
     {
       "relation": "imports",
@@ -22298,9 +22298,9 @@
       "source_file": "src/components/global-bug-report-modal.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_global_bug_report_modal",
-      "target": "support_bug_report_page_bugreportpage",
-      "confidence_score": 1.0
+      "target": "support_bug_report_page_bugreportpage"
     },
     {
       "relation": "contains",
@@ -26437,9 +26437,9 @@
       "source_file": "src/lib/bug-report-signal.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_bug_report_signal",
-      "target": "lib_bug_report_signal_openbugreport",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal_openbugreport"
     },
     {
       "relation": "contains",
@@ -26447,9 +26447,9 @@
       "source_file": "src/lib/bug-report-signal.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_bug_report_signal",
-      "target": "lib_bug_report_signal_pushbugreporthandler",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal_pushbugreporthandler"
     },
     {
       "relation": "contains",
@@ -26457,9 +26457,9 @@
       "source_file": "src/lib/bug-report-signal.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_bug_report_signal",
-      "target": "lib_bug_report_signal_stack",
-      "confidence_score": 1.0
+      "target": "lib_bug_report_signal_stack"
     },
     {
       "relation": "contains",
@@ -35491,5 +35491,5 @@
       "source_file": ".claude/skills/playwright-cli/references/spec-driven-testing.md"
     }
   ],
-  "built_at_commit": "a99e9bdf928f36a6062034f5bdbd5863bd6e916e"
+  "built_at_commit": "69abe64be847ff3bfc42a46695849c10764286cf"
 }

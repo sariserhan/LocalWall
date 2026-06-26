@@ -6,6 +6,7 @@ const scopeValidator = v.union(
   v.literal("moderation_day"),
   v.literal("checkout_hour"),
   v.literal("checkout_day"),
+  v.literal("card_create_hour"),
 );
 
 const quotas = {
@@ -13,6 +14,7 @@ const quotas = {
   moderation_day: { limit: 100, windowMs: 24 * 60 * 60 * 1000 },
   checkout_hour: { limit: 10, windowMs: 60 * 60 * 1000 },
   checkout_day: { limit: 30, windowMs: 24 * 60 * 60 * 1000 },
+  card_create_hour: { limit: 10, windowMs: 60 * 60 * 1000 },
 } as const;
 
 export const take = mutation({
