@@ -8,10 +8,6 @@ import { test, expect } from "@playwright/test";
 
 const MODERATE_URL = "/api/moderate";
 
-async function moderate(request: Parameters<typeof test>[1] extends infer T ? T extends { request: infer R } ? R : never : never, body: FormData) {
-  return request.fetch(MODERATE_URL, { method: "POST", multipart: body as never });
-}
-
 function textForm(fields: Record<string, string>): FormData {
   const fd = new FormData();
   for (const [k, v] of Object.entries(fields)) fd.set(k, v);

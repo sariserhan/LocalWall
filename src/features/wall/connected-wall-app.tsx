@@ -88,12 +88,11 @@ export function ConnectedWallApp({
   const queryCountry = initialLocation?.country || undefined;
   const queryState = initialLocation?.state || undefined;
   const queryCity = initialLocation?.city || undefined;
-  const [activeCategory, setActiveCategory] = useState(initialCategory && initialCategory !== "All" ? initialCategory : undefined);
   const publishedCards = useQuery(api.cards.listPublished, {
     country: queryCountry,
     state: queryState,
     city: queryCity,
-    ...(activeCategory ? { category: activeCategory } : {}),
+    ...(initialCategory && initialCategory !== "All" ? { category: initialCategory } : {}),
   }) as WallCard[] | undefined;
   const directCard = useQuery(api.cards.getPublishedById, initialCardId ? { cardId: initialCardId as Id<"cards"> } : "skip") as WallCard | null | undefined;
   const isCardPage = typeof pathname === "string" && pathname.startsWith("/card/");
@@ -580,7 +579,6 @@ export function ConnectedWallApp({
       initialLocation={initialLocation}
       initialKeyword={initialKeyword}
       initialCategory={initialCategory}
-      onCategoryChange={(cat) => setActiveCategory(cat === "All" ? undefined : cat)}
       onSetSavedCard={async (card, saved) => {
         await setSavedCard({ cardId: card.id as Id<"cards">, saved });
         posthog.capture("card_saved", {

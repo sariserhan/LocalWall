@@ -1,7 +1,31 @@
 import { convexTest } from "convex-test";
 import schema from "../../convex/schema";
+import { readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-export const modules = import.meta.glob("../../convex/**/*.ts");
+function buildModules(rootDir: string) {
+  const modules: Record<string, () => Promise<unknown>> = {};
+
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === "_generated") continue;
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".ts") || entry.name.endsWith(".d.ts")) continue;
+      const rel = relative(rootDir, fullPath).split(sep).join("/");
+      modules[`./${rel}`] = () => import(pathToFileURL(fullPath).href);
+    }
+  };
+
+  walk(rootDir);
+  return modules;
+}
+
+export const modules = buildModules(fileURLToPath(new URL("../../convex/", import.meta.url)));
 
 /** A minimal valid card payload that passes all server-side validation. */
 export const validCard = {

@@ -138,10 +138,10 @@ describe("markDigestSent", () => {
 });
 
 // ---------------------------------------------------------------------------
-// findNewCardsForCity
+// findNewCardsForLocation
 // ---------------------------------------------------------------------------
 
-describe("findNewCardsForCity", () => {
+describe("findNewCardsForLocation", () => {
   test("returns published cards created after since matching location", async () => {
     const t = makeT();
     const before = Date.now() - 1000;
@@ -151,7 +151,7 @@ describe("findNewCardsForCity", () => {
       state: "WA",
       country: "US",
     });
-    const result = await t.query(internal.digest.findNewCardsForCity, {
+    const result = await t.query(internal.digest.findNewCardsForLocation, {
       country: "US",
       state: "WA",
       city: "Seattle",
@@ -170,7 +170,7 @@ describe("findNewCardsForCity", () => {
       country: "US",
     });
     const future = Date.now() + 60_000;
-    const result = await t.query(internal.digest.findNewCardsForCity, {
+    const result = await t.query(internal.digest.findNewCardsForLocation, {
       country: "US",
       state: "WA",
       city: "Seattle",
@@ -181,7 +181,7 @@ describe("findNewCardsForCity", () => {
 
   test("returns empty array when no matching cards", async () => {
     const t = makeT();
-    const result = await t.query(internal.digest.findNewCardsForCity, {
+    const result = await t.query(internal.digest.findNewCardsForLocation, {
       country: "US",
       state: "WA",
       city: "Seattle",
@@ -199,7 +199,7 @@ describe("findNewCardsForCity", () => {
       state: "OR",
       country: "US",
     });
-    const result = await t.query(internal.digest.findNewCardsForCity, {
+    const result = await t.query(internal.digest.findNewCardsForLocation, {
       country: "US",
       state: "WA",
       city: "Seattle",

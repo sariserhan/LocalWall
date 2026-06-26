@@ -17,7 +17,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.convex.cloud https://images.unsplash.com https://img.clerk.com",
   "font-src 'self'",
-  "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://clerk.com https://*.clerk.accounts.dev https://*.sentry.io",
+  "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://clerk.com https://*.clerk.accounts.dev https://*.sentry.io https://api.open-meteo.com",
   "frame-src https://challenges.cloudflare.com https://clerk.com https://*.clerk.accounts.dev",
   "worker-src 'self' blob:",
   "object-src 'none'",

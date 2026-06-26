@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { HomeNav } from "./home-nav";
 import { HomeSearch } from "./home-search";
 import { HomeHowItWorksModal } from "./home-how-it-works-modal";
@@ -29,7 +30,9 @@ export function HomePage() {
               <HomeHowItWorksModal />
               <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>
               <Link href="/privacy-policy">Privacy Policy</Link>
-              <BugReportLink />
+              <Suspense fallback={null}>
+                <BugReportLink />
+              </Suspense>
             </nav>
             <p className="home-footer-copy">© {new Date().getFullYear()} LocalWall. All rights reserved.</p>
           </div>

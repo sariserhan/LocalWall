@@ -91,7 +91,6 @@ interface WallAppProps {
   onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
   cardDailyStats?: { dates: string[]; byCard: Record<string, number[]> } | null;
   wallViewCount?: number;
-  onCategoryChange?: (category: string) => void;
   onSubscribeDigest?: (email: string, country: string, state: string, city: string) => Promise<{ alreadySubscribed: boolean }>;
 }
 
@@ -140,7 +139,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onCategoryChange, onSubscribeDigest }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, isAdmin = false, onOpenAdmin, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -186,9 +185,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   });
   const applyCategory = useCallback((cat: (typeof categories)[number]) => {
     setCategory(cat);
-    onCategoryChange?.(cat);
-  }, [onCategoryChange]);
-  const [subcategory, setSubcategory] = useState(searchParams.get("subcategory") ?? "");
+  }, []);
+  const subcategory = searchParams.get("subcategory") ?? "";
   const [query, setQuery] = useState(searchParams.get("keyword") ?? initialKeyword ?? "");
   const initialLocationRef = useRef(initialLocation);
   const deferredQuery = useDeferredValue(query);
@@ -238,7 +236,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [selectedCountry, setSelectedCountry] = useState(defaultSeedLocation.country);
   const [selectedState, setSelectedState] = useState(defaultSeedLocation.state);
   const [selectedCity, setSelectedCity] = useState(defaultSeedLocation.city);
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState(searchParams.get("neighborhood") ?? "");
+  const selectedNeighborhood = searchParams.get("neighborhood") ?? "";
   // Draft state — only committed when the user clicks Apply
   const [draftCountry, setDraftCountry] = useState(defaultSeedLocation.country);
   const [draftState, setDraftState] = useState(defaultSeedLocation.state);
@@ -517,15 +515,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     const cat = (categories as readonly string[]).includes(initialCategory ?? "")
       ? initialCategory as (typeof categories)[number]
       : "All";
-    applyCategory(cat);
-    setSubcategory("");
-  }, [applyCategory, initialCategory]);
-
-  // Sync subcategory/neighborhood from query params (these stay as params)
-  useEffect(() => {
-    setSubcategory(searchParams.get("subcategory") ?? "");
-    setSelectedNeighborhood(searchParams.get("neighborhood") ?? "");
-  }, [searchParams]);
+    setCategory(cat);
+  }, [initialCategory]);
 
   // Sync location from initialLocation prop (set by the page based on URL path)
   useEffect(() => {
@@ -604,7 +595,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     setSelectedCountry(country);
     setSelectedState(state);
     setSelectedCity(city);
-    setSelectedNeighborhood(neighborhood);
     setQuery("");
     updateLocationQuery(country, state, city, neighborhood);
     persistLocation(country, state, city);
@@ -1141,10 +1131,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const resetFilters = () => {
     startTransition(() => {
       applyCategory("All");
-      setSubcategory("");
       setQuery("");
       setFresh(false);
-      setSelectedNeighborhood("");
       setSortBy("default");
       setFilterHasWebsite(false);
       setFilterHasPhotos(false);
@@ -1292,7 +1280,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 <div className="filter-panel-footer">
                   <button className="primary" onClick={() => {
                     applyCategory(pendingCategory);
-                    setSubcategory(pendingSubcategory);
                     setFresh(pendingFresh);
                     setSortBy(pendingSortBy);
                     setFilterHasWebsite(pendingHasWebsite);
@@ -1308,7 +1295,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   }}>Apply filters</button>
                   {((category !== "All" ? 1 : 0) + (subcategory ? 1 : 0) + (selectedNeighborhood ? 1 : 0) + (fresh ? 1 : 0) + (sortBy !== "default" ? 1 : 0) + (filterHasWebsite ? 1 : 0) + (filterHasPhotos ? 1 : 0) + (filterFeaturedOnly ? 1 : 0)) > 0 && (
                     <button className="filter-clear-btn" onClick={() => {
-                      applyCategory("All"); setSubcategory(""); setSelectedNeighborhood(""); setFresh(false);
+                      applyCategory("All"); setFresh(false);
                       setSortBy("default"); setFilterHasWebsite(false); setFilterHasPhotos(false); setFilterFeaturedOnly(false);
                       const next = new URLSearchParams(window.location.search);
                       next.delete("subcategory"); next.delete("neighborhood");

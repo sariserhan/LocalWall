@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AppProviders } from "@/components/app-providers";
 import { BugReportLink } from "@/components/bug-report-link";
 import { HomeNav } from "@/features/home/home-nav";
@@ -48,7 +49,9 @@ export default async function TrendingPage() {
           <nav className="home-footer-links">
             <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>
             <Link href="/privacy-policy">Privacy Policy</Link>
-            <BugReportLink />
+            <Suspense fallback={null}>
+              <BugReportLink />
+            </Suspense>
           </nav>
           <p className="home-footer-copy">© {new Date().getFullYear()} LocalWall. All rights reserved.</p>
         </div>
