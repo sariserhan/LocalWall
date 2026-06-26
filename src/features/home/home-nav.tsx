@@ -18,7 +18,7 @@ export function HomeNav() {
   const isTrending = pathname === "/trending";
 
   return (
-    <header className="home-nav">
+    <header className={`home-nav${isTrending ? " home-nav--trending" : ""}`}>
       <Link href="/" className="home-nav-brand">
         <strong>LocalWall</strong>
         <small>your local bulletin board</small>
