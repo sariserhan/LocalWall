@@ -45,9 +45,9 @@ import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
 import { BugReportLink } from "@/components/bug-report-link";
 import { ContactLink } from "@/components/contact-link";
 import type { SavedWall } from "./types";
-import posthog from "posthog-js";
 import { toast } from "@/lib/toast";
 import { pushDashboardHandler } from "@/lib/dashboard-signal";
+import { captureAnalytics } from "@/lib/analytics";
 
 interface WallAppProps {
   mode: "demo" | "connected";
@@ -895,7 +895,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     }
     if (selected) closeCard();
     setComposer(true);
-    posthog.capture("card_composer_opened", {
+    captureAnalytics("card_composer_opened", {
       location_country: selectedCountry,
       location_state: selectedState,
       location_city: selectedCity,
@@ -1654,7 +1654,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                         setDigestStatus("done");
                         setDigestEmail("");
                         if (!result.alreadySubscribed) {
-                          posthog.capture("digest_subscribed", {
+      captureAnalytics("digest_subscribed", {
                             location_country: selectedCountry,
                             location_state: selectedState,
                             location_city: selectedCity,

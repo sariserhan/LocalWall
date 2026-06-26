@@ -17,8 +17,8 @@ import { WallApp } from "./wall-app";
 const AdminPanel = dynamic(() => import("./admin-panel").then((m) => ({ default: m.AdminPanel })), { ssr: false, loading: () => null });
 import { getCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 import { buildWallPath } from "@/lib/wall-slug";
-import posthog from "posthog-js";
 import { openDashboard } from "@/lib/dashboard-signal";
+import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -251,9 +251,9 @@ export function ConnectedWallApp({
 
   useEffect(() => {
     if (isAuthenticated && userId) {
-      posthog.identify(userId);
+      identifyAnalytics(userId);
     } else if (!isAuthenticated && !isConvexAuthLoading) {
-      posthog.reset();
+      resetAnalytics();
     }
   }, [isAuthenticated, isConvexAuthLoading, userId]);
 
@@ -463,7 +463,7 @@ export function ConnectedWallApp({
       });
       const checkoutResult = await response.json() as { url?: string; sessionId?: string; error?: string };
       if (!response.ok || !checkoutResult.url || !checkoutResult.sessionId) throw new Error(checkoutResult.error || "Could not start card checkout.");
-      posthog.capture("card_checkout_started", {
+      captureAnalytics("card_checkout_started", {
         card_name: draft.name,
         category: draft.category,
         payment_option: draft.paymentOption,
@@ -480,7 +480,7 @@ export function ConnectedWallApp({
     }
     const card = result as WallCard;
     addCardToLocalWall(card);
-    posthog.capture("card_created", {
+    captureAnalytics("card_created", {
       card_name: draft.name,
       category: draft.category,
       theme: draft.theme,
@@ -589,7 +589,7 @@ export function ConnectedWallApp({
       initialCategory={initialCategory}
       onSetSavedCard={async (card, saved) => {
         await setSavedCard({ cardId: card.id as Id<"cards">, saved });
-        posthog.capture("card_saved", {
+        captureAnalytics("card_saved", {
           card_name: card.name,
           category: card.category,
           saved,
@@ -602,7 +602,7 @@ export function ConnectedWallApp({
       onSetSavedWall={async (label, saved) => {
         if (!wallPath) return;
         await setSavedWall({ path: wallPath, label, saved });
-        posthog.capture("wall_saved", { wall_label: label, wall_path: wallPath, saved });
+        captureAnalytics("wall_saved", { wall_label: label, wall_path: wallPath, saved });
       }}
       savedWalls={savedWalls}
       onRemoveSavedWall={async (wall) => {
@@ -613,7 +613,7 @@ export function ConnectedWallApp({
       onToggleLike={isAuthenticated ? async (card) => {
         const isLiked = likedCardIds.has(String(card.id));
         void toggleLike({ cardId: card.id as Id<"cards"> });
-        posthog.capture("card_liked", {
+        captureAnalytics("card_liked", {
           card_name: card.name,
           category: card.category,
           liked: !isLiked,

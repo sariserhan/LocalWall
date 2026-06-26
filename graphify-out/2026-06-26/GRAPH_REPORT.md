@@ -1,11 +1,11 @@
 # Graph Report - local-wall  (2026-06-26)
 
 ## Corpus Check
-- 208 files · ~432,027 words
+- 208 files · ~432,340 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1513 nodes · 2078 edges · 130 communities (109 shown, 21 thin omitted)
+- 1514 nodes · 2079 edges · 125 communities (103 shown, 22 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 79 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
@@ -46,7 +46,6 @@
 - [[_COMMUNITY_Stripe Payments Actions|Stripe Payments Actions]]
 - [[_COMMUNITY_Renewal Reminder Emails|Renewal Reminder Emails]]
 - [[_COMMUNITY_Dev Dependencies|Dev Dependencies]]
-- [[_COMMUNITY_Composer Props & Placement Mode|Composer Props & Placement Mode]]
 - [[_COMMUNITY_Community 32|Community 32]]
 - [[_COMMUNITY_Package Metadata & Overrides|Package Metadata & Overrides]]
 - [[_COMMUNITY_Community 34|Community 34]]
@@ -54,7 +53,6 @@
 - [[_COMMUNITY_GDPR Data Export & Delete|GDPR Data Export & Delete]]
 - [[_COMMUNITY_Saved Cards|Saved Cards]]
 - [[_COMMUNITY_Generated Convex Server Types|Generated Convex Server Types]]
-- [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Schema & Data Model|Schema & Data Model]]
 - [[_COMMUNITY_Convex AI Guidelines|Convex AI Guidelines]]
 - [[_COMMUNITY_App Layout & Web Vitals|App Layout & Web Vitals]]
@@ -107,9 +105,7 @@
 - [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
-- [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 114|Community 114]]
-- [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 118|Community 118]]
@@ -123,7 +119,6 @@
 - [[_COMMUNITY_Community 129|Community 129]]
 - [[_COMMUNITY_Community 130|Community 130]]
 - [[_COMMUNITY_Community 131|Community 131]]
-- [[_COMMUNITY_Community 132|Community 132]]
 - [[_COMMUNITY_Community 133|Community 133]]
 - [[_COMMUNITY_Community 135|Community 135]]
 
@@ -148,8 +143,8 @@
   app/wall/[location]/[category]/page.tsx → src/lib/wall-slug.ts
 - `Convex Component Boundary` --semantically_similar_to--> `Widen-Migrate-Narrow Pattern`  [INFERRED] [semantically similar]
   .agents/skills/convex-create-component/SKILL.md → .agents/skills/convex-migration-helper/SKILL.md
-- `LocalWall Clerk Auth Integration` --implements--> `Clerk Provider Integration Guide`  [INFERRED]
-  README.md → .agents/skills/convex-setup-auth/references/clerk.md
+- `Playwright CLI Page Snapshot (TodoMVC 1)` --references--> `Playwright CLI Browser Automation Skill`  [INFERRED]
+  .playwright-cli/page-2026-06-25T00-39-04-264Z.yml → .claude/skills/playwright-cli/SKILL.md
 
 ## Import Cycles
 - None detected.
@@ -162,19 +157,19 @@
 - **PostHog Integration Workflow (Plan/Edit/Revise/Conclude)** — 1_begin_posthog_event_plan, 2_edit_posthog_event_impl, 3_revise_posthog_event_revise, 4_conclude_posthog_conclude [EXTRACTED 1.00]
 - **Playwright CLI Test Lifecycle (Generate/Debug/Heal)** — spec_driven_testing_plan_generate_heal, playwright_tests_debug_attach, test_generation_playwright_codegen [EXTRACTED 1.00]
 
-## Communities (130 total, 21 thin omitted)
+## Communities (125 total, 22 thin omitted)
 
 ### Community 0 - "Rate Limiting & API Utilities"
 Cohesion: 0.08
-Nodes (32): DurableRateLimitScope, durableUserRateLimit(), observe(), buckets, isSameOriginRequest(), pruneBuckets(), rateLimit(), handleCheckout() (+24 more)
+Nodes (31): durableUserRateLimit(), observe(), buckets, isSameOriginRequest(), pruneBuckets(), rateLimit(), handleCheckout(), isValidAmount() (+23 more)
 
 ### Community 1 - "Billing, Admin & Test Infrastructure"
-Cohesion: 0.08
-Nodes (29): bundleCard, bundleCities, crons, adminEnv, adminIdentity, applyEnv(), makeT(), modules (+21 more)
+Cohesion: 0.05
+Nodes (38): DurableRateLimitScope, metadata, BugReportLink(), GlobalBugReportModal(), bundleCard, bundleCities, crons, adminEnv (+30 more)
 
 ### Community 2 - "Geo-Routed Pages & RSS Feeds"
-Cohesion: 0.10
-Nodes (45): GET(), Props, GET(), GET(), NotFound(), CategoryPage(), generateMetadata(), CityPage() (+37 more)
+Cohesion: 0.13
+Nodes (36): GET(), Props, GET(), GET(), NotFound(), BASE_URL, CITY_PATHS, sitemap() (+28 more)
 
 ### Community 3 - "Auth Providers & Analytics Integration"
 Cohesion: 0.15
@@ -225,8 +220,8 @@ Cohesion: 0.11
 Nodes (18): BundleCity, clearImagesFromIDB(), ComposerForm, countries, defaultStates, DetailField, detailFieldLabels, featuredTierOptions (+10 more)
 
 ### Community 15 - "Home Page & Root Routes"
-Cohesion: 0.06
-Nodes (35): metadata, Props, RootPage(), BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES (+27 more)
+Cohesion: 0.08
+Nodes (29): metadata, Props, RootPage(), Props, WallLocationCategoryPage(), ICONS, Props, HomeHowItWorksModal() (+21 more)
 
 ### Community 16 - "Location Combobox & Seed Data"
 Cohesion: 0.10
@@ -251,10 +246,6 @@ Nodes (25): ClerkThemePortal(), HomeNav(), HomePostButton(), Loc, actionBtn, bar
 ### Community 21 - "Playwright CLI Testing Skill"
 Cohesion: 0.24
 Nodes (13): Playwright CLI Element Attribute Inspection, Playwright CLI Page Snapshot (TodoMVC 1), Playwright CLI Page Snapshot (TodoMVC 2), Playwright CLI Browser Automation Skill, Playwright Test Debugging with --debug=cli, Playwright CLI Request Mocking, Playwright CLI run-code Custom Code Execution, Playwright CLI Browser Session Management (+5 more)
-
-### Community 22 - "Dashboard Signal & Wall App"
-Cohesion: 0.18
-Nodes (12): PostHog User Identification Pattern, PostHog Card Lifecycle Events, PostHog Stripe Checkout Events, PostHog Analytics Basics Dashboard, PostHog Setup Report for LocalWall, PostHog User Identification via Clerk in LocalWall, Composer Draft Autosave (localStorage + IndexedDB), Card Renewal Reminder Cron Jobs (+4 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.07
@@ -288,10 +279,6 @@ Nodes (14): deleteAccount, _deleteMyData, exportMyData, _gatherMyData, GdprExpor
 Cohesion: 0.18
 Nodes (11): devDependencies, convex-test, @edge-runtime/vm, eslint, eslint-config-next, @playwright/test, @types/node, @types/react (+3 more)
 
-### Community 31 - "Composer Props & Placement Mode"
-Cohesion: 0.20
-Nodes (11): Auth0 CLI Setup Path, Auth0 Provider Integration Guide, ConvexProviderWithAuth0 Wrapper, Clerk Provider Integration Guide, ConvexProviderWithClerk Wrapper, useConvexAuth Hook, authTables Schema Addition, npx @convex-dev/auth Initializer (+3 more)
-
 ### Community 32 - "Community 32"
 Cohesion: 0.08
 Nodes (24): Agent Mode, Checklist, Convex Quickstart, Development vs Production, Environment variables, Install, Next.js (App Router), Next Steps (+16 more)
@@ -320,10 +307,6 @@ Nodes (20): Action guidelines, Authentication guidelines, Convex guidelines, Cro
 Cohesion: 0.29
 Nodes (6): ActionCtx, DatabaseReader, DatabaseWriter, Env, MutationCtx, QueryCtx
 
-### Community 39 - "Community 39"
-Cohesion: 0.33
-Nodes (6): Client-side initialization (instrumentation-client.ts), Error tracking (profile/page.tsx), Event tracking (burrito/page.tsx), Key integration points, Server-side tracking (app/api/auth/login/route.ts), User identification (AuthContext.tsx)
-
 ### Community 40 - "Schema & Data Model"
 Cohesion: 0.10
 Nodes (20): 1. Use point-in-time reads when live updates are not valuable, 2. Batch related data into fewer queries, 3. Use skip to avoid unnecessary subscriptions, 4. Isolate frequently-updated fields into separate documents, 5. Use the aggregate component for counts and sums, 6. Narrow query read sets, 7. Remove `Date.now()` from queries, 8. Consider pagination strategy (+12 more)
@@ -341,12 +324,12 @@ Cohesion: 0.67
 Nodes (4): LocalWall Logo Big (Full Branding with Tagline and Category Icons), LocalWall Logo Small (Compact Horizontal Logo), Wall Concept Mockup (Bulletin Board UI with Cards and Detail Panel), Wall Texture (Weathered Urban Bulletin Board Background Texture)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.13
-Nodes (15): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, A/B Testing Sessions, Best Practices, Browser Session Commands, Browser Session Configuration, Browser Session Isolation Properties (+7 more)
+Cohesion: 0.10
+Nodes (20): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, A/B Testing Sessions, Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser (+12 more)
 
 ### Community 55 - "Privacy Policy Page"
 Cohesion: 0.05
-Nodes (28): metadata, metadata, Props, AppProviders(), AppProvidersProps, BugReportLink(), ContactLink(), GlobalBugReportModal() (+20 more)
+Nodes (36): metadata, Props, AppProviders(), AppProvidersProps, ContactLink(), GlobalContactModal(), GlobalOwnerDashboard(), CardVars (+28 more)
 
 ### Community 81 - "Community 81"
 Cohesion: 0.11
@@ -365,8 +348,8 @@ Cohesion: 0.12
 Nodes (16): Card renewal reminders, Commands, Composer draft autosave, Connect Clerk, Connect Convex, Convex unit tests, Enable the admin panel, Homepage (+8 more)
 
 ### Community 85 - "Community 85"
-Cohesion: 0.12
-Nodes (17): App router differences from pages router, Deploy on Vercel, .env.example, Features, instrumentation-client.ts, Learn more, next.config.ts, PostHog Next.js app router example (+9 more)
+Cohesion: 0.07
+Nodes (27): 1. Install dependencies, 2. Configure environment variables, 3. Run the development server, App router differences from pages router, Client-side initialization (instrumentation-client.ts), Deploy on Vercel, .env.example, Error tracking (profile/page.tsx) (+19 more)
 
 ### Community 86 - "Community 86"
 Cohesion: 0.12
@@ -385,8 +368,8 @@ Cohesion: 0.14
 Nodes (10): Abort statuses, Status, Task list, Status, Status, Agent skill, Next steps, PostHog post-wizard report (+2 more)
 
 ### Community 90 - "Community 90"
-Cohesion: 0.22
-Nodes (12): PostHog Event Planning Phase, PostHog Event Implementation Phase, PostHog Integration Revision Phase, PostHog Integration Conclusion Phase, instrumentation-client.ts PostHog Init, PostHog Server-Side Client (posthog-node), PostHog Next.js App Router Integration Skill, PostHog Next.js Integration Docs (+4 more)
+Cohesion: 0.06
+Nodes (41): PostHog Event Planning Phase, PostHog Event Implementation Phase, PostHog Integration Revision Phase, PostHog Integration Conclusion Phase, Auth0 CLI Setup Path, Auth0 Provider Integration Guide, convex/auth.config.ts for Auth0, ConvexProviderWithAuth0 Wrapper (+33 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.17
@@ -405,8 +388,8 @@ Cohesion: 0.40
 Nodes (4): getMyReview, listForCard, remove, upsert
 
 ### Community 95 - "Community 95"
-Cohesion: 0.23
-Nodes (4): Examples, Inspecting Element Attributes, Debugging Playwright Tests, Running Playwright Tests
+Cohesion: 0.21
+Nodes (5): Debugging Playwright Tests, Running Playwright Tests, CLI Route Commands, Request Mocking, URL Patterns
 
 ### Community 96 - "Community 96"
 Cohesion: 0.17
@@ -445,7 +428,7 @@ Cohesion: 0.20
 Nodes (8): reportBug, sendContactMessage, http, quotas, scopeValidator, take, httpAction, mutation
 
 ### Community 106 - "Community 106"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): 1. Use Semantic Locators, 2. Explore Before Recording, 3. Add Assertions Manually, Best Practices, Building a Test File, Example Workflow, How It Works, Test Generation
 
 ### Community 107 - "Community 107"
@@ -460,17 +443,9 @@ Nodes (7): Error tracking, Framework guidelines, Identifying users, Key principl
 Cohesion: 0.25
 Nodes (7): Build Flow, Checklist, Default Approach, Package Exports, Packaged Convex Components, Testing, When to Choose This
 
-### Community 110 - "Community 110"
-Cohesion: 0.50
-Nodes (4): 1. Install dependencies, 2. Configure environment variables, 3. Run the development server, Getting started
-
 ### Community 114 - "Community 114"
 Cohesion: 0.33
 Nodes (5): Advanced Component Patterns, Class-based client wrappers, Deriving validators from schema, Function Handles for callbacks, Static configuration with a globals table
-
-### Community 115 - "Community 115"
-Cohesion: 0.40
-Nodes (6): convex/auth.config.ts for Auth0, convex/auth.config.ts for Clerk, Convex JWT Validation Pattern for Third-Party Auth, convex.json AuthKit Config, WorkOS AuthKit Integration Guide, WorkOS JWT Validation in Convex
 
 ### Community 116 - "Community 116"
 Cohesion: 0.33
@@ -493,8 +468,8 @@ Cohesion: 0.40
 Nodes (4): Agent skill, Next steps, PostHog post-wizard report, Verify before merging
 
 ### Community 121 - "Community 121"
-Cohesion: 0.25
-Nodes (8): Advanced Mocking with run-code, CLI Route Commands, Conditional Response Based on Request, Delayed Response, Modify Real Response, Request Mocking, Simulate Network Failures, URL Patterns
+Cohesion: 0.40
+Nodes (5): Advanced Mocking with run-code, Conditional Response Based on Request, Delayed Response, Modify Real Response, Simulate Network Failures
 
 ### Community 123 - "Community 123"
 Cohesion: 0.50
@@ -516,33 +491,29 @@ Nodes (3): Dual Read, Dual Write (Preferred), Zero-Downtime Strategies
 Cohesion: 0.50
 Nodes (4): EmailTestSection(), SubscriptionSection(), useAsync(), VerificationSection()
 
-### Community 132 - "Community 132"
-Cohesion: 0.40
-Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
-
 ### Community 135 - "Community 135"
 Cohesion: 0.40
 Nodes (5): 1.1 Prerequisite: workspace, 1.2 Prerequisite: seed test, 1.3 Explore the app, 1.4 Write the spec file, 1. Planning
 
 ## Knowledge Gaps
-- **829 isolated node(s):** `npx`, `Props`, `Props`, `Props`, `Props` (+824 more)
+- **830 isolated node(s):** `npx`, `Props`, `Props`, `Props`, `Props` (+825 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Billing, Admin & Test Infrastructure` to `Rate Limiting & API Utilities`, `Geo-Routed Pages & RSS Feeds`, `Card Data Layer (Convex)`, `Admin Panel & Moderation UI`, `Community 104`, `Owner Dashboard & Card Editing`, `Admin Backend (Convex)`, `UI Shared Components & Detail Panel`, `Home Page & Root Routes`, `Community 20`, `Privacy Policy Page`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
-- **Why does `WallCard` connect `Owner Dashboard & Card Editing` to `Billing, Admin & Test Infrastructure`, `Geo-Routed Pages & RSS Feeds`, `Card Display & Embed Pages`, `UI Shared Components & Detail Panel`, `Location Combobox & Seed Data`, `Community 20`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `api` connect `Billing, Admin & Test Infrastructure` to `Geo-Routed Pages & RSS Feeds`, `Card Data Layer (Convex)`, `Admin Panel & Moderation UI`, `Community 104`, `Owner Dashboard & Card Editing`, `Admin Backend (Convex)`, `UI Shared Components & Detail Panel`, `Home Page & Root Routes`, `Community 20`, `Privacy Policy Page`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `buildWallPath()` connect `Home Page & Root Routes` to `Location Combobox & Seed Data`, `Community 20`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `npx`, `Props`, `Props` to the rest of the system?**
-  _830 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _831 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
-  _Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0797979797979798 - nodes in this community are weakly interconnected._
 - **Should `Billing, Admin & Test Infrastructure` be split into smaller, more focused modules?**
-  _Cohesion score 0.08455625436757512 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05473684210526316 - nodes in this community are weakly interconnected._
 - **Should `Geo-Routed Pages & RSS Feeds` be split into smaller, more focused modules?**
-  _Cohesion score 0.09760374050263004 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12854609929078015 - nodes in this community are weakly interconnected._

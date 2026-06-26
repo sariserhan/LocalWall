@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { EditCardModal } from "./edit-card-modal";
 import type { CardUpdate, OwnerCard, RenewalAmount, SavedWall, WallCard } from "./types";
-import posthog from "posthog-js";
 import { BLUR_PLACEHOLDER } from "@/lib/blur-placeholder";
+import { captureAnalytics } from "@/lib/analytics";
 
 function Sparkline({ data }: { data: number[] }) {
   const max = Math.max(...data, 1);
@@ -96,7 +96,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setVerificationError(null);
     try {
       await onRequestVerification(plan);
-      posthog.capture("verification_checkout_started", { plan });
+      captureAnalytics("verification_checkout_started", { plan });
     } catch (cause) {
       setVerificationError(cause instanceof Error ? cause.message : "Verification could not be started.");
     } finally {
@@ -147,7 +147,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setError(null);
     try {
       await onDelete(deleteTarget);
-      posthog.capture("card_deleted", {
+      captureAnalytics("card_deleted", {
         card_name: deleteTarget.name,
         category: deleteTarget.category,
       });
@@ -165,7 +165,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     setError(null);
     try {
       await onRenew(renewTarget, renewalAmount, renewAutoRenew && renewalAmount !== 0);
-      posthog.capture("card_renewed", {
+      captureAnalytics("card_renewed", {
         card_name: renewTarget.name,
         category: renewTarget.category,
         renewal_amount: renewalAmount,

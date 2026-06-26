@@ -1376,7 +1376,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_sitemap",
-      "community": 2,
+      "community": 15,
       "norm_label": "sitemap.ts"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "app_sitemap_base_url",
-      "community": 2,
+      "community": 15,
       "norm_label": "base_url"
     },
     {
@@ -1396,7 +1396,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_sitemap_us_state_codes",
-      "community": 2,
+      "community": 15,
       "norm_label": "us_state_codes"
     },
     {
@@ -1406,7 +1406,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "app_sitemap_city_paths",
-      "community": 2,
+      "community": 15,
       "norm_label": "city_paths"
     },
     {
@@ -1416,7 +1416,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "app_sitemap_static_routes",
-      "community": 2,
+      "community": 15,
       "norm_label": "static_routes"
     },
     {
@@ -1426,7 +1426,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "app_sitemap_sitemap",
-      "community": 2,
+      "community": 15,
       "norm_label": "sitemap()"
     },
     {
@@ -4230,6 +4230,46 @@
       "norm_label": "sentry.server.config.ts"
     },
     {
+      "label": "analytics-consent-toast.tsx",
+      "file_type": "code",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_analytics_consent_toast",
+      "community": 55,
+      "norm_label": "analytics-consent-toast.tsx"
+    },
+    {
+      "label": "AnalyticsConsentToast()",
+      "file_type": "code",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "components_analytics_consent_toast_analyticsconsenttoast",
+      "community": 55,
+      "norm_label": "analyticsconsenttoast()"
+    },
+    {
+      "label": "analytics-tracker.tsx",
+      "file_type": "code",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_analytics_tracker",
+      "community": 55,
+      "norm_label": "analytics-tracker.tsx"
+    },
+    {
+      "label": "AnalyticsTracker()",
+      "file_type": "code",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "components_analytics_tracker_analyticstracker",
+      "community": 55,
+      "norm_label": "analyticstracker()"
+    },
+    {
       "label": "app-providers.tsx",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
@@ -4243,7 +4283,7 @@
       "label": "AppProvidersProps",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "components_app_providers_appprovidersprops",
       "community": 55,
@@ -4253,7 +4293,7 @@
       "label": "AppProviders()",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "components_app_providers_appproviders",
       "community": 55,
@@ -4263,7 +4303,7 @@
       "label": "ConnectedProviders()",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "components_app_providers_connectedproviders",
       "community": 55,
@@ -4586,7 +4626,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "home_home_post_button",
-      "community": 20,
+      "community": 15,
       "norm_label": "home-post-button.tsx"
     },
     {
@@ -4596,7 +4636,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "home_home_post_button_loc",
-      "community": 20,
+      "community": 15,
       "norm_label": "loc"
     },
     {
@@ -4606,7 +4646,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "home_home_post_button_resolveiplocation",
-      "community": 20,
+      "community": 15,
       "norm_label": "resolveiplocation()"
     },
     {
@@ -4686,7 +4726,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "home_trending_card_grid",
-      "community": 55,
+      "community": 31,
       "norm_label": "trending-card-grid.tsx"
     },
     {
@@ -4696,7 +4736,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "home_trending_card_grid_hashstr",
-      "community": 55,
+      "community": 31,
       "norm_label": "hashstr()"
     },
     {
@@ -4706,7 +4746,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "home_trending_card_grid_cardvars",
-      "community": 55,
+      "community": 31,
       "norm_label": "cardvars"
     },
     {
@@ -4716,7 +4756,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "home_trending_card_grid_minicard",
-      "community": 55,
+      "community": 31,
       "norm_label": "minicard()"
     },
     {
@@ -4726,7 +4766,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "home_trending_card_grid_props",
-      "community": 55,
+      "community": 31,
       "norm_label": "props"
     },
     {
@@ -4736,7 +4776,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "home_trending_card_grid_trendingcardgrid",
-      "community": 55,
+      "community": 31,
       "norm_label": "trendingcardgrid()"
     },
     {
@@ -4746,7 +4786,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "home_trending_card_modal",
-      "community": 55,
+      "community": 31,
       "norm_label": "trending-card-modal.tsx"
     },
     {
@@ -4756,7 +4796,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "home_trending_card_modal_detailpanel",
-      "community": 55,
+      "community": 31,
       "norm_label": "detailpanel"
     },
     {
@@ -4766,7 +4806,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "home_trending_card_modal_props",
-      "community": 55,
+      "community": 31,
       "norm_label": "props"
     },
     {
@@ -4776,7 +4816,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "home_trending_card_modal_trendingcardmodal",
-      "community": 55,
+      "community": 31,
       "norm_label": "trendingcardmodal()"
     },
     {
@@ -4786,7 +4826,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "home_trending_tabs",
-      "community": 55,
+      "community": 31,
       "norm_label": "trending-tabs.tsx"
     },
     {
@@ -4796,7 +4836,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "home_trending_tabs_topwall",
-      "community": 55,
+      "community": 31,
       "norm_label": "topwall"
     },
     {
@@ -4806,7 +4846,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "home_trending_tabs_tab",
-      "community": 55,
+      "community": 31,
       "norm_label": "tab"
     },
     {
@@ -4816,7 +4856,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "home_trending_tabs_tabs",
-      "community": 55,
+      "community": 31,
       "norm_label": "tabs"
     },
     {
@@ -4826,7 +4866,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "home_trending_tabs_props",
-      "community": 55,
+      "community": 31,
       "norm_label": "props"
     },
     {
@@ -4836,7 +4876,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "home_trending_tabs_trendingtabs",
-      "community": 55,
+      "community": 31,
       "norm_label": "trendingtabs()"
     },
     {
@@ -6546,7 +6586,7 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "wall_types_createcard",
-      "community": 9,
+      "community": 16,
       "norm_label": "createcard"
     },
     {
@@ -6818,6 +6858,176 @@
       "id": "wall_wall_skeletons_wallskeletons",
       "community": 16,
       "norm_label": "wallskeletons()"
+    },
+    {
+      "label": "analytics.ts",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_analytics",
+      "community": 55,
+      "norm_label": "analytics.ts"
+    },
+    {
+      "label": "AnalyticsConsent",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "lib_analytics_analyticsconsent",
+      "community": 55,
+      "norm_label": "analyticsconsent"
+    },
+    {
+      "label": "AnalyticsEventProps",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "lib_analytics_analyticseventprops",
+      "community": 55,
+      "norm_label": "analyticseventprops"
+    },
+    {
+      "label": "PostHogClient",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "lib_analytics_posthogclient",
+      "community": 55,
+      "norm_label": "posthogclient"
+    },
+    {
+      "label": "listeners",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "lib_analytics_listeners",
+      "community": 55,
+      "norm_label": "listeners"
+    },
+    {
+      "label": "readStoredConsent()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "lib_analytics_readstoredconsent",
+      "community": 55,
+      "norm_label": "readstoredconsent()"
+    },
+    {
+      "label": "persistConsent()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "lib_analytics_persistconsent",
+      "community": 55,
+      "norm_label": "persistconsent()"
+    },
+    {
+      "label": "notifyListeners()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "lib_analytics_notifylisteners",
+      "community": 55,
+      "norm_label": "notifylisteners()"
+    },
+    {
+      "label": "getPostHogConfig()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "lib_analytics_getposthogconfig",
+      "community": 55,
+      "norm_label": "getposthogconfig()"
+    },
+    {
+      "label": "loadPostHog()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "lib_analytics_loadposthog",
+      "community": 55,
+      "norm_label": "loadposthog()"
+    },
+    {
+      "label": "getAnalyticsConsent()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "lib_analytics_getanalyticsconsent",
+      "community": 55,
+      "norm_label": "getanalyticsconsent()"
+    },
+    {
+      "label": "setAnalyticsConsent()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "lib_analytics_setanalyticsconsent",
+      "community": 55,
+      "norm_label": "setanalyticsconsent()"
+    },
+    {
+      "label": "subscribeAnalyticsConsent()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L64",
+      "_origin": "ast",
+      "id": "lib_analytics_subscribeanalyticsconsent",
+      "community": 55,
+      "norm_label": "subscribeanalyticsconsent()"
+    },
+    {
+      "label": "initAnalytics()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "lib_analytics_initanalytics",
+      "community": 55,
+      "norm_label": "initanalytics()"
+    },
+    {
+      "label": "captureAnalytics()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "lib_analytics_captureanalytics",
+      "community": 55,
+      "norm_label": "captureanalytics()"
+    },
+    {
+      "label": "identifyAnalytics()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L107",
+      "_origin": "ast",
+      "id": "lib_analytics_identifyanalytics",
+      "community": 55,
+      "norm_label": "identifyanalytics()"
+    },
+    {
+      "label": "resetAnalytics()",
+      "file_type": "code",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "lib_analytics_resetanalytics",
+      "community": 55,
+      "norm_label": "resetanalytics()"
     },
     {
       "label": "blur-placeholder.ts",
@@ -7186,7 +7396,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_server_cards_fetchpublishedcardids",
-      "community": 2,
+      "community": 15,
       "norm_label": "fetchpublishedcardids()"
     },
     {
@@ -7206,7 +7416,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "lib_server_cards_topcard",
-      "community": 55,
+      "community": 31,
       "norm_label": "topcard"
     },
     {
@@ -11266,7 +11476,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "references_example_getting_started",
-      "community": 85,
+      "community": 122,
       "norm_label": "getting started"
     },
     {
@@ -11276,7 +11486,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "references_example_1_install_dependencies",
-      "community": 85,
+      "community": 122,
       "norm_label": "1. install dependencies"
     },
     {
@@ -11286,7 +11496,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "references_example_2_configure_environment_variables",
-      "community": 85,
+      "community": 122,
       "norm_label": "2. configure environment variables"
     },
     {
@@ -11296,7 +11506,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "references_example_3_run_the_development_server",
-      "community": 85,
+      "community": 122,
       "norm_label": "3. run the development server"
     },
     {
@@ -11316,7 +11526,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "references_example_key_integration_points",
-      "community": 85,
+      "community": 113,
       "norm_label": "key integration points"
     },
     {
@@ -11326,7 +11536,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "references_example_client_side_initialization_instrumentation_client_ts",
-      "community": 85,
+      "community": 113,
       "norm_label": "client-side initialization (instrumentation-client.ts)"
     },
     {
@@ -11336,7 +11546,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "references_example_user_identification_authcontext_tsx",
-      "community": 85,
+      "community": 113,
       "norm_label": "user identification (authcontext.tsx)"
     },
     {
@@ -11346,7 +11556,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "references_example_event_tracking_burrito_page_tsx",
-      "community": 85,
+      "community": 113,
       "norm_label": "event tracking (burrito/page.tsx)"
     },
     {
@@ -11356,7 +11566,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "references_example_error_tracking_profile_page_tsx",
-      "community": 85,
+      "community": 113,
       "norm_label": "error tracking (profile/page.tsx)"
     },
     {
@@ -11366,7 +11576,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "references_example_server_side_tracking_app_api_auth_login_route_ts",
-      "community": 85,
+      "community": 113,
       "norm_label": "server-side tracking (app/api/auth/login/route.ts)"
     },
     {
@@ -12366,7 +12576,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "references_request_mocking_request_mocking",
-      "community": 95,
+      "community": 121,
       "norm_label": "request mocking"
     },
     {
@@ -12376,7 +12586,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "references_request_mocking_cli_route_commands",
-      "community": 95,
+      "community": 121,
       "norm_label": "cli route commands"
     },
     {
@@ -12386,7 +12596,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "references_request_mocking_url_patterns",
-      "community": 95,
+      "community": 121,
       "norm_label": "url patterns"
     },
     {
@@ -12646,7 +12856,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "references_session_management_common_patterns",
-      "community": 46,
+      "community": 124,
       "norm_label": "common patterns"
     },
     {
@@ -12656,7 +12866,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "references_session_management_concurrent_scraping",
-      "community": 46,
+      "community": 124,
       "norm_label": "concurrent scraping"
     },
     {
@@ -12666,7 +12876,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "references_session_management_a_b_testing_sessions",
-      "community": 46,
+      "community": 124,
       "norm_label": "a/b testing sessions"
     },
     {
@@ -12676,7 +12886,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "references_session_management_persistent_profile",
-      "community": 46,
+      "community": 124,
       "norm_label": "persistent profile"
     },
     {
@@ -12686,7 +12896,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "references_session_management_attaching_to_a_running_browser",
-      "community": 46,
+      "community": 115,
       "norm_label": "attaching to a running browser"
     },
     {
@@ -12696,7 +12906,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "references_session_management_attach_by_channel_name",
-      "community": 46,
+      "community": 115,
       "norm_label": "attach by channel name"
     },
     {
@@ -12706,7 +12916,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "references_session_management_attach_via_cdp_endpoint",
-      "community": 46,
+      "community": 115,
       "norm_label": "attach via cdp endpoint"
     },
     {
@@ -12716,7 +12926,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "references_session_management_attach_via_browser_extension",
-      "community": 46,
+      "community": 115,
       "norm_label": "attach via browser extension"
     },
     {
@@ -12726,7 +12936,7 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "references_session_management_detach",
-      "community": 46,
+      "community": 115,
       "norm_label": "detach"
     },
     {
@@ -12816,7 +13026,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "references_spec_driven_testing_1_planning",
-      "community": 135,
+      "community": 93,
       "norm_label": "1. planning"
     },
     {
@@ -12826,7 +13036,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "references_spec_driven_testing_1_1_prerequisite_workspace",
-      "community": 135,
+      "community": 93,
       "norm_label": "1.1 prerequisite: workspace"
     },
     {
@@ -12836,7 +13046,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "references_spec_driven_testing_1_2_prerequisite_seed_test",
-      "community": 135,
+      "community": 93,
       "norm_label": "1.2 prerequisite: seed test"
     },
     {
@@ -12846,7 +13056,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "references_spec_driven_testing_1_3_explore_the_app",
-      "community": 135,
+      "community": 93,
       "norm_label": "1.3 explore the app"
     },
     {
@@ -12856,7 +13066,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "references_spec_driven_testing_1_4_write_the_spec_file",
-      "community": 135,
+      "community": 93,
       "norm_label": "1.4 write the spec file"
     },
     {
@@ -13346,7 +13556,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "references_test_generation",
-      "community": 106,
+      "community": 95,
       "norm_label": "test-generation.md"
     },
     {
@@ -13436,7 +13646,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "references_tracing",
-      "community": 95,
+      "community": 88,
       "norm_label": "tracing.md"
     },
     {
@@ -14687,7 +14897,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "auth0 provider integration guide",
       "id": "auth0_ref_auth0_provider"
     },
@@ -14700,7 +14910,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "convex/auth.config.ts for auth0",
       "id": "auth0_ref_convex_auth_config"
     },
@@ -14713,7 +14923,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "convexproviderwithauth0 wrapper",
       "id": "auth0_ref_convex_provider_with_auth0"
     },
@@ -14726,7 +14936,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "auth0 cli setup path",
       "id": "auth0_ref_auth0_cli"
     },
@@ -14739,7 +14949,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "clerk provider integration guide",
       "id": "clerk_ref_clerk_provider"
     },
@@ -14752,7 +14962,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "convexproviderwithclerk wrapper",
       "id": "clerk_ref_convex_provider_with_clerk"
     },
@@ -14765,7 +14975,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "convex/auth.config.ts for clerk",
       "id": "clerk_ref_clerk_auth_config"
     },
@@ -14778,7 +14988,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "useconvexauth hook",
       "id": "clerk_ref_use_convex_auth"
     },
@@ -14791,7 +15001,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "convex auth (native) integration guide",
       "id": "convex_auth_ref_convex_auth_provider"
     },
@@ -14804,7 +15014,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "authtables schema addition",
       "id": "convex_auth_ref_auth_tables"
     },
@@ -14817,7 +15027,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "npx @convex-dev/auth initializer",
       "id": "convex_auth_ref_convex_auth_init"
     },
@@ -14830,7 +15040,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "workos authkit integration guide",
       "id": "workos_authkit_ref_workos_authkit"
     },
@@ -14843,7 +15053,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "convex.json authkit config",
       "id": "workos_authkit_ref_convex_json"
     },
@@ -14856,7 +15066,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "workos jwt validation in convex",
       "id": "workos_authkit_ref_workos_jwt"
     },
@@ -14869,7 +15079,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "convex routing skill (skill.md)",
       "id": "convex_skill_skill_md_convex_routing"
     },
@@ -14986,7 +15196,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog user identification pattern",
       "id": "identify_users_posthog_identify"
     },
@@ -15207,7 +15417,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "localwall application readme",
       "id": "readme_md_localwall_app"
     },
@@ -15220,7 +15430,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "localwall clerk auth integration",
       "id": "readme_md_clerk_integration"
     },
@@ -15233,7 +15443,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 110,
       "norm_label": "localwall convex backend integration",
       "id": "readme_md_convex_integration"
     },
@@ -15246,7 +15456,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "localwall playwright e2e test suite",
       "id": "readme_md_playwright_e2e"
     },
@@ -15259,7 +15469,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "composer draft autosave (localstorage + indexeddb)",
       "id": "readme_md_card_draft_autosave"
     },
@@ -15272,7 +15482,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "trending page feature",
       "id": "readme_md_trending_page"
     },
@@ -15285,7 +15495,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "card renewal reminder cron jobs",
       "id": "readme_md_card_renewal_cron"
     },
@@ -15337,7 +15547,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog setup report for localwall",
       "id": "posthog_setup_report_md_posthog_report"
     },
@@ -15350,7 +15560,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog analytics basics dashboard",
       "id": "posthog_setup_report_md_posthog_dashboard"
     },
@@ -15363,7 +15573,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog card lifecycle events",
       "id": "posthog_setup_report_md_card_events"
     },
@@ -15376,7 +15586,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog stripe checkout events",
       "id": "posthog_setup_report_md_checkout_events"
     },
@@ -15389,7 +15599,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 39,
       "norm_label": "posthog user identification via clerk in localwall",
       "id": "posthog_setup_report_md_user_identify"
     },
@@ -15402,7 +15612,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 111,
       "norm_label": "convex jwt validation pattern for third-party auth",
       "id": "convex_auth_pattern_jwt_validation"
     },
@@ -22841,6 +23051,180 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast",
+      "target": "components_analytics_consent_toast_analyticsconsenttoast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast",
+      "target": "lib_analytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast",
+      "target": "lib_analytics_setanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast",
+      "target": "lib_analytics_subscribeanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "components_app_providers",
+      "target": "components_analytics_consent_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/analytics-consent-toast.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "components_analytics_consent_toast_analyticsconsenttoast",
+      "target": "lib_analytics_getanalyticsconsent"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "components_app_providers",
+      "target": "components_analytics_consent_toast_analyticsconsenttoast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "components_analytics_tracker_analyticstracker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "lib_analytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "lib_analytics_captureanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "lib_analytics_initanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/analytics-tracker.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_analytics_tracker",
+      "target": "lib_analytics_subscribeanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "components_app_providers",
+      "target": "components_analytics_tracker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "components_app_providers",
+      "target": "components_analytics_tracker_analyticstracker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/components/app-providers.tsx",
       "source_location": "L16",
       "weight": 1.0,
@@ -24376,9 +24760,9 @@
       "source_file": "src/features/support/contact-page.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "support_contact_page",
-      "target": "support_contact_page_clerkcontactuser",
-      "confidence_score": 1.0
+      "target": "support_contact_page_clerkcontactuser"
     },
     {
       "relation": "contains",
@@ -25826,6 +26210,50 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/features/wall/connected-wall-app.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "wall_connected_wall_app",
+      "target": "lib_analytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/connected-wall-app.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "wall_connected_wall_app",
+      "target": "lib_analytics_captureanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/connected-wall-app.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "wall_connected_wall_app",
+      "target": "lib_analytics_identifyanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/connected-wall-app.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "wall_connected_wall_app",
+      "target": "lib_analytics_resetanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L9",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26507,6 +26935,28 @@
       "confidence_score": 1.0,
       "source": "wall_wall_app",
       "target": "wall_location_combobox_locationcombobox"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/owner-dashboard.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "wall_owner_dashboard",
+      "target": "lib_analytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/owner-dashboard.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "wall_owner_dashboard",
+      "target": "lib_analytics_captureanalytics",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -27641,6 +28091,28 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/features/wall/wall-app.tsx",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "wall_wall_app",
+      "target": "lib_analytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/wall-app.tsx",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "wall_wall_app",
+      "target": "lib_analytics_captureanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L48",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -28053,6 +28525,265 @@
       "confidence_score": 1.0,
       "source": "wall_wall_skeletons",
       "target": "wall_wall_skeletons_wallskeletons"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_analyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_analyticseventprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_captureanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_getposthogconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_identifyanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_initanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_listeners",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_loadposthog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_notifylisteners",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_persistconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_posthogclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_readstoredconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_resetanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_setanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "lib_analytics",
+      "target": "lib_analytics_subscribeanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "lib_analytics_getanalyticsconsent",
+      "target": "lib_analytics_readstoredconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "lib_analytics_setanalyticsconsent",
+      "target": "lib_analytics_persistconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "lib_analytics_setanalyticsconsent",
+      "target": "lib_analytics_notifylisteners",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "lib_analytics_captureanalytics",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "lib_analytics_identifyanalytics",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "lib_analytics_initanalytics",
+      "target": "lib_analytics_getanalyticsconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "lib_analytics_setanalyticsconsent",
+      "target": "lib_analytics_initanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "lib_analytics_captureanalytics",
+      "target": "lib_analytics_initanalytics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/analytics.ts",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "lib_analytics_identifyanalytics",
+      "target": "lib_analytics_initanalytics",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -37144,5 +37875,5 @@
       "source_file": ".claude/skills/playwright-cli/references/spec-driven-testing.md"
     }
   ],
-  "built_at_commit": "aaee182d1481cc9faaf3a997470b116cf2d0f0a1"
+  "built_at_commit": "5bea1c6dcd4d91d93b4fe874f7cf4270bddeb550"
 }

@@ -240,8 +240,8 @@
     "semantic_hash": "7f96a22ed6ab02f9d8c22de8c7089630"
   },
   "convex/admin.ts": {
-    "mtime": 1782514442.2192268,
-    "ast_hash": "f888c110e196d1f12451402bcf7691bc",
+    "mtime": 1782515363.8156161,
+    "ast_hash": "68292e564f91dba79175e59ec34b1d21",
     "semantic_hash": ""
   },
   "convex/auth.config.ts": {
@@ -315,8 +315,8 @@
     "semantic_hash": "e6fb19f83af33e69f1137cf7e384b590"
   },
   "convex/schema.ts": {
-    "mtime": 1782514420.939191,
-    "ast_hash": "44e6b7d55719557dbf6ad9a80a7c3662",
+    "mtime": 1782515352.9090798,
+    "ast_hash": "ea4621ab9566171bd0a5c1d7fb56f637",
     "semantic_hash": ""
   },
   "convex/tsconfig.json": {
@@ -345,8 +345,8 @@
     "semantic_hash": "cb3681665850e2dc04e4b6e1a7b6fab0"
   },
   "next-env.d.ts": {
-    "mtime": 1782487457.5703151,
-    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+    "mtime": 1782515709.287749,
+    "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -465,8 +465,8 @@
     "semantic_hash": "37746bcae078faeb674c6fce5087ac31"
   },
   "src/features/wall/admin-panel.tsx": {
-    "mtime": 1782514653.4952571,
-    "ast_hash": "8074892ab4724afcf4b49315b6d4fb03",
+    "mtime": 1782515385.3747087,
+    "ast_hash": "ca6b65379c8346bcb0a0f01b38065df4",
     "semantic_hash": ""
   },
   "src/features/wall/admin-playground.tsx": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782514552.653226,
-    "ast_hash": "438efe395e90b9736cd2fda142f84e83",
+    "mtime": 1782515430.470096,
+    "ast_hash": "8f1d468bf57ffac298e57c699b2181e8",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
@@ -535,8 +535,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782514494.7473617,
-    "ast_hash": "7323fef3184400eb882b84f7c43a5a16",
+    "mtime": 1782515494.7883499,
+    "ast_hash": "7d7b7cfc04ac8b1954cb361ee0930d3f",
     "semantic_hash": ""
   },
   "src/features/wall/wall-card.tsx": {
@@ -1095,8 +1095,8 @@
     "semantic_hash": ""
   },
   "convex/contactMessages.ts": {
-    "mtime": 1782514427.781424,
-    "ast_hash": "bd47e6206d8869e57c4638b26c739c3e",
+    "mtime": 1782515358.661027,
+    "ast_hash": "a1020a26ecc09810f289d578e70e9d42",
     "semantic_hash": ""
   },
   "src/components/contact-link.tsx": {
@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "src/features/support/contact-page.tsx": {
-    "mtime": 1782514469.5554843,
-    "ast_hash": "78131d6c40e3d26884621b781216b0a8",
+    "mtime": 1782515410.5140386,
+    "ast_hash": "defe8d885c3dd6f15f33a9c83d75f6dc",
     "semantic_hash": ""
   },
   "src/lib/contact-signal.ts": {
