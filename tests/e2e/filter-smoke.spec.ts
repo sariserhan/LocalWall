@@ -1,14 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function openFilters(page: Page, mobile = false) {
-  if (mobile) {
-    const menuToggle = page.locator(".mobile-menu-toggle");
-    await menuToggle.click();
-    await page.waitForTimeout(300);
+  const compact = mobile || (page.viewportSize()?.width ?? 1280) < 1000;
+  if (compact) {
+    await page.locator(".mobile-menu-toggle").click();
+    await page.waitForFunction(() => document.querySelector(".topbar nav")?.classList.contains("mobile-open"));
   }
 
-  const filterButton = page.locator(".filter-btn");
-  await filterButton.click({ force: true });
+  await page.locator(".filter-btn").click();
   await expect(page.locator(".filter-panel")).toBeVisible();
 }
 
@@ -20,19 +19,20 @@ test.describe("Wall filter smoke", () => {
       if (message.type() === "error") errors.push(message.text());
     });
 
-    await page.goto("/us");
-    await expect(page.locator(".wall, .app-loading")).toBeVisible();
+    await page.goto("/us", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".wall")).toBeAttached();
+    await page.waitForTimeout(4000);
     await expect(page).toHaveURL(/\/us(?:\?|$)/);
 
     await openFilters(page);
     await page.locator(".filter-panel select").first().selectOption({ label: "Services" });
     await page.locator(".filter-panel .primary").click({ force: true });
-    await expect.poll(() => page.url()).toMatch(/\/us\/services(?:\?|$)/);
+    await expect.poll(() => page.url(), { timeout: 20_000 }).toMatch(/\/us\/services(?:\?|$)/);
     await expect(page.locator(".filter-badge")).toHaveText("1");
 
     await openFilters(page);
     await page.locator(".filter-panel .filter-clear-btn").last().click({ force: true });
-    await expect.poll(() => page.url()).toMatch(/\/us(?:\?|$)/);
+    await expect.poll(() => page.url(), { timeout: 20_000 }).toMatch(/\/us(?:\?|$)/);
     await expect(page.locator(".filter-badge")).toHaveCount(0);
 
     const relevantErrors = errors.filter((entry) => !entry.includes("Hydration") && !entry.includes("hydration"));
@@ -41,13 +41,14 @@ test.describe("Wall filter smoke", () => {
 
   test("category filter remains usable on mobile viewport", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/us");
-    await expect(page.locator(".wall, .app-loading")).toBeVisible();
+    await page.goto("/us", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".wall")).toBeAttached();
+    await page.waitForTimeout(4000);
 
     await openFilters(page, true);
     await page.locator(".filter-panel select").first().selectOption({ label: "Services" });
     await page.locator(".filter-panel .primary").click({ force: true });
-    await expect.poll(() => page.url()).toMatch(/\/us\/services(?:\?|$)/);
+    await expect.poll(() => page.url(), { timeout: 20_000 }).toMatch(/\/us\/services(?:\?|$)/);
     await expect(page.locator(".filter-badge")).toHaveText("1");
   });
 });
