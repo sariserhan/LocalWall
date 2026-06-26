@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppProviders } from "@/components/app-providers";
+import { BugReportLink } from "@/components/bug-report-link";
 import { HomeNav } from "@/features/home/home-nav";
 import { TrendingTabs } from "@/features/home/trending-tabs";
 import { fetchTopWalls, fetchTopCards } from "@/lib/server-cards";
@@ -47,6 +48,7 @@ export default async function TrendingPage() {
           <nav className="home-footer-links">
             <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>
             <Link href="/privacy-policy">Privacy Policy</Link>
+            <BugReportLink />
           </nav>
           <p className="home-footer-copy">© {new Date().getFullYear()} LocalWall. All rights reserved.</p>
         </div>

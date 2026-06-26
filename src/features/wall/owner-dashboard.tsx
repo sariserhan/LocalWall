@@ -126,7 +126,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     live: cards.filter((card) => card.status === "published").length,
     actions: cards.reduce((sum, card) => sum + (card.websiteClicks ?? 0) + (card.phoneClicks ?? 0) + (card.emailClicks ?? 0) + (card.socialClicks ?? 0), 0),
     saved: savedCards.length,
-  }), [cards]);
+  }), [cards, savedCards.length]);
 
   const changeVisibility = async (card: OwnerCard) => {
     const status = card.status === "published" ? "hidden" : "published";

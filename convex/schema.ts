@@ -192,6 +192,17 @@ export default defineSchema({
     .index("by_card", ["cardId"])
     .index("by_status_and_createdAt", ["status", "createdAt"]),
 
+  bugReports: defineTable({
+    reporterId: v.optional(v.id("users")),
+    page: v.string(),
+    reason: v.union(v.literal("ui-broken"), v.literal("text-unreadable"), v.literal("not-working"), v.literal("wrong-content"), v.literal("other")),
+    details: v.optional(v.string()),
+    status: v.union(v.literal("open"), v.literal("resolved")),
+    createdAt: v.number(),
+  })
+    .index("by_status_and_createdAt", ["status", "createdAt"])
+    .index("by_page", ["page"]),
+
   digestSubscriptions: defineTable({
     email: v.string(),
     country: v.string(),

@@ -1,12 +1,12 @@
 "use client";
 
-import { AlertTriangle, BarChart2, Bookmark, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
+import { AlertTriangle, BarChart2, Bookmark, Bug, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AdminPlayground } from "./admin-playground";
 
 export interface AdminDashboardData {
-  stats: { cards: number; published: number; users: number; reports: number; searches: number; pendingVerifications?: number };
+  stats: { cards: number; published: number; users: number; reports: number; bugs: number; searches: number; pendingVerifications?: number };
   cards: Array<{
     id: Id<"cards">;
     name: string;
@@ -35,6 +35,7 @@ export interface AdminDashboardData {
     cardCount: number;
   }>;
   reports: Array<{ id: Id<"reports">; cardId: Id<"cards">; cardName: string; reason: string; details?: string; createdAt: number }>;
+  bugReports: Array<{ id: Id<"bugReports">; page: string; reason: string; details?: string; reporterName?: string; reporterEmail?: string; createdAt: number }>;
   searchInsights?: { topKeywords: Array<{ keyword: string; count: number }>; topCategories: Array<{ category: string; count: number }>; total: number };
   verificationRequests?: Array<{
     id: Id<"verificationRequests">;
@@ -59,6 +60,7 @@ interface AdminPanelProps {
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onVerifyUser: (userId: Id<"users">, verified: boolean) => Promise<void>;
   onResolveReport: (reportId: Id<"reports">) => Promise<void>;
+  onResolveBugReport: (bugReportId: Id<"bugReports">) => Promise<void>;
   onApproveVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
   onRejectVerification: (requestId: Id<"verificationRequests">) => Promise<void>;
 }
@@ -67,8 +69,8 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onApproveVerification, onRejectVerification }: AdminPanelProps) {
-  const [tab, setTab] = useState<"cards" | "users" | "reports" | "analytics" | "verification" | "playground">("cards");
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+  const [tab, setTab] = useState<"cards" | "users" | "reports" | "bugs" | "analytics" | "verification" | "playground">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
@@ -78,6 +80,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
   const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
   const users = useMemo(() => (data?.users ?? []).filter((user) => !deferredQuery || [user.displayName, user.email].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.users, deferredQuery]);
   const reports = useMemo(() => (data?.reports ?? []).filter((report) => !deferredQuery || [report.cardName, report.reason, report.details].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.reports, deferredQuery]);
+  const bugReports = useMemo(() => (data?.bugReports ?? []).filter((bugReport) => !deferredQuery || [bugReport.page, bugReport.reason, bugReport.details, bugReport.reporterName, bugReport.reporterEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.bugReports, deferredQuery]);
   const cardsById = useMemo(() => new Map((data?.cards ?? []).map((card) => [String(card.id), card])), [data?.cards]);
 
   const sendMessage = (email: string | undefined, context: string) => {
@@ -130,6 +133,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
           <div><Eye /><span>Recent cards</span><strong>{data?.stats.cards ?? "—"}</strong></div>
           <div><UserRound /><span>Recent users</span><strong>{data?.stats.users ?? "—"}</strong></div>
           <div><Flag /><span>Open reports</span><strong>{data?.stats.reports ?? "—"}</strong></div>
+          <div><Bug /><span>Open bugs</span><strong>{data?.stats.bugs ?? "—"}</strong></div>
           <div><Search /><span>Searches (30d)</span><strong>{data?.stats.searches ?? "—"}</strong></div>
         </div>
 
@@ -138,6 +142,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
             <button role="tab" aria-selected={tab === "cards"} className={tab === "cards" ? "selected" : ""} onClick={() => setTab("cards")}><Layers size={13} /> Cards</button>
             <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "selected" : ""} onClick={() => setTab("users")}><UserRound size={13} /> Users</button>
             <button role="tab" aria-selected={tab === "reports"} className={tab === "reports" ? "selected" : ""} onClick={() => setTab("reports")}><Flag size={13} /> Reports</button>
+            <button role="tab" aria-selected={tab === "bugs"} className={tab === "bugs" ? "selected" : ""} onClick={() => setTab("bugs")}><Bug size={13} /> Bugs</button>
             <button role="tab" aria-selected={tab === "analytics"} className={tab === "analytics" ? "selected" : ""} onClick={() => setTab("analytics")}><BarChart2 size={13} /> Analytics</button>
             <button role="tab" aria-selected={tab === "verification"} className={tab === "verification" ? "selected" : ""} onClick={() => setTab("verification")}>
               <ShieldCheck size={13} /> Verifications{(data?.stats.pendingVerifications ?? 0) > 0 ? <span className="admin-tab-badge">{data?.stats.pendingVerifications}</span> : null}
@@ -330,6 +335,39 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
               );
             })}
             {!reports.length ? <div className="dashboard-empty">No open reports.</div> : null}
+          </div>
+        ) : null}
+
+        {data && tab === "bugs" ? (
+          <div className="admin-list" role="tabpanel">
+            {bugReports.map((bugReport) => {
+              const busy = busyId === String(bugReport.id);
+              return (
+                <article className="admin-row" key={String(bugReport.id)}>
+                  <div className="admin-row-main">
+                    <div><span>{dateLabel(bugReport.createdAt)}</span></div>
+                    <h3>{bugReport.reason.replace(/-/g, " ")}</h3>
+                    <p>{bugReport.details || bugReport.page}</p>
+                    <small>{bugReport.page}{bugReport.reporterName || bugReport.reporterEmail ? ` · ${bugReport.reporterName || bugReport.reporterEmail}` : ""}</small>
+                  </div>
+                  <div className="admin-row-actions admin-row-actions-wide">
+                    <button className="secondary" disabled={!bugReport.reporterEmail || busy} onClick={() => sendMessage(bugReport.reporterEmail, `Bug report: ${bugReport.page}`)}><Mail /> Send message</button>
+                    <button className="secondary" disabled={busy} onClick={async () => {
+                      setBusyId(String(bugReport.id));
+                      setError(null);
+                      try {
+                        await onResolveBugReport(bugReport.id);
+                      } catch (cause) {
+                        setError(cause instanceof Error ? cause.message : "The bug report could not be resolved.");
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}><Check /> Resolve</button>
+                  </div>
+                </article>
+              );
+            })}
+            {!bugReports.length ? <div className="dashboard-empty">No open bug reports.</div> : null}
           </div>
         ) : null}
 

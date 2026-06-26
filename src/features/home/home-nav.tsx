@@ -1,13 +1,14 @@
 "use client";
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { CreditCard, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
+import { CreditCard, Download, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
-import { clerkUserButtonAppearance, clerkUserProfileAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { openDashboard } from "@/lib/dashboard-signal";
 import { HomePostButton } from "./home-post-button";
+import { ClerkMyDataPage } from "../wall/clerk-my-data-page";
 
 export function HomeNav() {
   const { isSignedIn } = useAuth();
@@ -31,7 +32,10 @@ export function HomeNav() {
         )}        
         <HomePostButton />
         {isSignedIn ? (
-          <UserButton appearance={clerkUserButtonAppearance} userProfileProps={{ appearance: clerkUserProfileAppearance }}>
+          <UserButton appearance={getClerkUserButtonAppearance(isDark)} userProfileProps={{ appearance: getClerkUserProfileAppearance(isDark) }}>
+            <UserButton.UserProfilePage label="My data" url="my-data" labelIcon={<Download size={16} />}>
+              <ClerkMyDataPage />
+            </UserButton.UserProfilePage>
             <UserButton.MenuItems>
               <UserButton.Action
                 label="My board"

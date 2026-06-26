@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CreditCard, Download, LayoutDashboard, Moon, Sun, TrendingUp } from "lucide-react";
 import { ClerkMyDataPage } from "./clerk-my-data-page";
 import { useTheme } from "@/lib/use-theme";
-import { clerkUserButtonAppearance, clerkUserProfileAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -84,7 +84,7 @@ export function ConnectedWallApp({
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, userId } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [layoutCards, setLayoutCards] = useState<WallCard[] | null>(null);
-  const hasAppliedInitialServerSnapshotRef = useRef(false);
+  const [hasAppliedInitialServerSnapshot, setHasAppliedInitialServerSnapshot] = useState(false);
   const queryCountry = initialLocation?.country || undefined;
   const queryState = initialLocation?.state || undefined;
   const queryCity = initialLocation?.city || undefined;
@@ -107,10 +107,10 @@ export function ConnectedWallApp({
     return [...baseCards, directCard];
   }, [directCard, layoutCards, publishedCards, initialCards]);
   const pendingCreatedCards = useMemo(() => {
-    if (publishedCards === undefined || !hasAppliedInitialServerSnapshotRef.current) return [];
+    if (publishedCards === undefined || !hasAppliedInitialServerSnapshot) return [];
     const layoutIds = new Set((layoutCards ?? []).map((card) => String(card.id)));
     return publishedCards.filter((card) => !layoutIds.has(String(card.id)));
-  }, [layoutCards, publishedCards]);
+  }, [hasAppliedInitialServerSnapshot, layoutCards, publishedCards]);
   const liveCardIds = useMemo(() => renderCards.map((card) => card.id as Id<"cards">), [renderCards]);
   const liveViewCounts = useQuery(api.cards.getLiveViewCounts, liveCardIds.length === 0 ? "skip" : { cardIds: liveCardIds }) as Array<{ id: Id<"cards">; clicks: number; likes: number }> | undefined;
   const likedCardData = useQuery(api.cards.getLikedCards, isAuthenticated ? {} : "skip") as Id<"cards">[] | undefined;
@@ -147,7 +147,7 @@ export function ConnectedWallApp({
       const stats = statsMap.get(String(card.id));
       return { ...card, clicks: stats?.clicks ?? card.clicks ?? 0, likes: stats?.likes ?? card.likes ?? 0 };
     });
-  }, [layoutCards, liveViewCounts, publishedCards, renderCards]);
+  }, [initialCards?.length, layoutCards, liveViewCounts, publishedCards, renderCards]);
   const ownerCards = useQuery(api.cards.listMine, isAuthenticated ? {} : "skip") as OwnerCard[] | undefined;
   const cardDailyStats = useQuery(api.cards.getMyCardDailyStats, isAuthenticated ? {} : "skip") as { dates: string[]; byCard: Record<string, number[]> } | null | undefined;
   const savedCards = useQuery(api.savedCards.list, isAuthenticated ? {} : "skip") as WallCard[] | undefined;
@@ -194,6 +194,7 @@ export function ConnectedWallApp({
   const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminVerifyUser = useMutation(api.admin.setUserVerified);
   const adminResolveReport = useMutation(api.admin.resolveReport);
+  const adminResolveBugReport = useMutation(api.admin.resolveBugReport);
   const recordWallVisit = useMutation(api.walls.recordVisit);
   const effectiveWallPath = isCardPage ? cardWallPath : (pathname && pathname !== "/" ? pathname : null);
   const wallData = useQuery(api.walls.getWall, effectiveWallPath ? { path: effectiveWallPath } : "skip");
@@ -283,11 +284,11 @@ export function ConnectedWallApp({
 
   useEffect(() => {
     if (publishedCards === undefined) return;
-    if (hasAppliedInitialServerSnapshotRef.current) return;
+    if (hasAppliedInitialServerSnapshot) return;
 
     setLayoutCards(publishedCards);
-    hasAppliedInitialServerSnapshotRef.current = true;
-  }, [publishedCards]);
+    setHasAppliedInitialServerSnapshot(true);
+  }, [hasAppliedInitialServerSnapshot, publishedCards]);
 
   const addCardToLocalWall = useCallback((card: WallCard) => {
     setLayoutCards((current) => {
@@ -373,7 +374,7 @@ export function ConnectedWallApp({
     };
 
     processCheckout();
-  }, [searchParams, finalizePaidCard, finalizePaidRenewal, addCardToLocalWall]);
+  }, [searchParams, finalizePaidCard, finalizePaidRenewal, finalizeBundlePosting, finalizeSubscriptionPosting, finalizeSubscriptionRenewal, finalizeVerification, addCardToLocalWall]);
 
   const uploadVariant = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateUploadUrl({});
@@ -547,7 +548,7 @@ export function ConnectedWallApp({
         await reportCard({ cardId: card.id as Id<"cards">, reason, details });
       }}
       authControl={isClerkSignedIn ? (
-        <UserButton appearance={clerkUserButtonAppearance} userProfileProps={{ appearance: clerkUserProfileAppearance }}>
+        <UserButton appearance={getClerkUserButtonAppearance(isDark)} userProfileProps={{ appearance: getClerkUserProfileAppearance(isDark) }}>
           <UserButton.UserProfilePage label="My data" url="my-data" labelIcon={<Download size={16} />}>
             <ClerkMyDataPage />
           </UserButton.UserProfilePage>
@@ -683,6 +684,7 @@ export function ConnectedWallApp({
           }}
           onVerifyUser={async (userId, verified) => { await adminVerifyUser({ userId, verified }); }}
           onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
+          onResolveBugReport={async (bugReportId) => { await adminResolveBugReport({ bugReportId }); }}
           onApproveVerification={async (requestId) => { await adminApproveVerification({ requestId }); }}
           onRejectVerification={async (requestId) => { await adminRejectVerification({ requestId }); }}
         />

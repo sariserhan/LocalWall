@@ -43,6 +43,7 @@ import { WallMinimap } from "./wall-minimap";
 import { WallSkeletons } from "./wall-skeletons";
 import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
+import { BugReportLink } from "@/components/bug-report-link";
 import type { SavedWall } from "./types";
 import posthog from "posthog-js";
 import { toast } from "@/lib/toast";
@@ -144,7 +145,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [demoCards, setDemoCards] = useState<WallCardModel[]>(seedCards);
-  const cards = mode === "connected" ? (remoteCards ?? []) : demoCards;
+  const cards = useMemo(() => (mode === "connected" ? (remoteCards ?? []) : demoCards), [demoCards, mode, remoteCards]);
   const [selected, setSelected] = useState<WallCardModel | null>(null);
   const [composer, setComposer] = useState(false);
   const [dashboard, setDashboard] = useState(false);
@@ -518,7 +519,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       : "All";
     applyCategory(cat);
     setSubcategory("");
-  }, [initialCategory]);
+  }, [applyCategory, initialCategory]);
 
   // Sync subcategory/neighborhood from query params (these stay as params)
   useEffect(() => {
@@ -1640,6 +1641,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           <nav className="footer-col footer-col-center footer-legal" aria-label="Legal links">
             <Link href="/terms-and-conditions">Terms & Conditions</Link>
             <Link href="/privacy-policy">Privacy Policy</Link>
+            <BugReportLink />
           </nav>
 
           {/* right — digest widget */}

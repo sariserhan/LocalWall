@@ -102,7 +102,6 @@ export default async function Image({ params }: { params: Promise<{ id: string }
 
       {/* Card image */}
       {cardImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={cardImage}
           alt=""

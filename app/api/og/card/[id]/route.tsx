@@ -61,7 +61,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         {/* Left image panel */}
         {hasImage && (
           <div style={{ width: 460, height: H, display: "flex", flexShrink: 0, overflow: "hidden" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={thumbnail} width={460} height={H} style={{ objectFit: "cover" }} alt="" />
             {/* subtle right-edge fade */}
             <div

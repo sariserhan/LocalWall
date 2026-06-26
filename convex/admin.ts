@@ -45,10 +45,11 @@ export const getDashboard = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const [cards, users, reports, allCardStats, recentSearches, verificationRequests] = await Promise.all([
+    const [cards, users, reports, bugReports, allCardStats, recentSearches, verificationRequests] = await Promise.all([
       ctx.db.query("cards").order("desc").take(150),
       ctx.db.query("users").order("desc").take(150),
       ctx.db.query("reports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
+      ctx.db.query("bugReports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("cardStats").take(500),
       ctx.db.query("searchEvents").withIndex("by_createdAt", (q) => q.gte("createdAt", thirtyDaysAgo)).order("desc").take(1000),
       ctx.db.query("verificationRequests").order("desc").take(100),
@@ -83,6 +84,7 @@ export const getDashboard = query({
         published: cards.filter((card) => card.status === "published" && card.expiresAt > Date.now()).length,
         users: users.length,
         reports: reports.length,
+        bugs: bugReports.length,
         searches: recentSearches.length,
         pendingVerifications: verificationRequests.filter((r) => r.status === "pending").length,
       },
@@ -129,6 +131,18 @@ export const getDashboard = query({
         const card = await ctx.db.get(report.cardId);
         return { id: report._id, cardId: report.cardId, cardName: card?.name ?? "Deleted card", reason: report.reason, details: report.details, createdAt: report.createdAt };
       })),
+      bugReports: bugReports.map((bugReport) => {
+        const reporter = bugReport.reporterId ? userById.get(bugReport.reporterId) : null;
+        return {
+          id: bugReport._id,
+          page: bugReport.page,
+          reason: bugReport.reason,
+          details: bugReport.details,
+          reporterName: reporter?.displayName,
+          reporterEmail: reporter?.email,
+          createdAt: bugReport.createdAt,
+        };
+      }),
       searchInsights: {
         topKeywords,
         topCategories,
@@ -244,6 +258,17 @@ export const resolveReport = mutation({
     const report = await ctx.db.get(args.reportId);
     if (!report) throw new Error("That report no longer exists.");
     await ctx.db.patch(report._id, { status: "resolved" });
+    return { success: true };
+  },
+});
+
+export const resolveBugReport = mutation({
+  args: { bugReportId: v.id("bugReports") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const bugReport = await ctx.db.get(args.bugReportId);
+    if (!bugReport) throw new Error("That bug report no longer exists.");
+    await ctx.db.patch(bugReport._id, { status: "resolved" });
     return { success: true };
   },
 });
