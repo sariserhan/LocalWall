@@ -1038,7 +1038,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body { width: 210mm; min-height: 297mm; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 60px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-    .bg-fill { position: fixed; inset: 0; z-index: -1; background-color: #747672; background-image: url('${appUrl}/assets/wall-texture.png'); background-size: cover; background-position: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .bg-fill { position: fixed; inset: 0; z-index: -1; background-color: #747672; background-image: url('${appUrl}/assets/wall-texture.png'); background-size: 1659px auto; background-repeat: repeat; background-position: center top; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E"); opacity: .08; mix-blend-mode: overlay; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .ghost { position: fixed; border-radius: 1px; background: #0002; box-shadow: 1px 3px 8px #0003; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .g1 { width: 200px; height: 240px; top: 8%; left: 5%; transform: rotate(3.5deg); opacity: .55; }

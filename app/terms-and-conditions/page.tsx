@@ -11,7 +11,7 @@ export default function TermsAndConditionsPage() {
   return (
     <main className="legal-page">
       <div className="legal-page__hero">
-        <p className="legal-page__eyebrow">WALL legal</p>
+        <p className="legal-page__eyebrow">LOCALWALL legal</p>
         <h1>Terms & Conditions</h1>
         <p className="legal-page__intro">
           These terms govern access to and use of WALL, including browsing local ads, posting cards, and interacting with content on the platform.

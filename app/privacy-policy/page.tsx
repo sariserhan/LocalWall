@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
   return (
     <main className="legal-page">
       <div className="legal-page__hero">
-        <p className="legal-page__eyebrow">WALL legal</p>
+        <p className="legal-page__eyebrow">LOCALWALL legal</p>
         <h1>Privacy Policy</h1>
         <p className="legal-page__intro">
           This policy explains what information WALL may collect, how it may be used, and the choices available to people who browse or post on the platform.

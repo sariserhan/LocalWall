@@ -99,7 +99,7 @@ button { color: inherit; }
 .mobile-myboard-btn { display: none; }
 .mobile-menu-toggle { display: none; }
 .mobile-menu-backdrop { display: none; }
-.wall { position: relative; min-height: max(calc(100vh - var(--topbar-height)), 1850px); min-height: max(calc(100dvh - var(--topbar-height)), 1850px); margin-top: var(--topbar-height); width: 100%; overflow: hidden; background-color: #747672; background-image: linear-gradient(#0001, #0001), url('/assets/wall-texture.png'); background-size: cover; background-position: center top; isolation: isolate; }
+.wall { position: relative; min-height: max(calc(100vh - var(--topbar-height)), 1850px); min-height: max(calc(100dvh - var(--topbar-height)), 1850px); margin-top: var(--topbar-height); width: 100%; overflow: hidden; background-color: #747672; background-image: linear-gradient(#0001, #0001), url('/assets/wall-texture.png'); background-size: 1659px auto, 1659px auto; background-repeat: repeat, repeat; background-position: center top, center top; isolation: isolate; }
 .wall::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; box-shadow: inset 0 0 120px #161a1b40; background-image: repeating-linear-gradient(91deg, transparent 0 129px, #fff1 130px, transparent 132px); mix-blend-mode: multiply; }
 .wall-grain { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
 .wall-card { position: absolute; left: var(--x); top: var(--y); width: var(--w); min-height: var(--h, 220px); display: flex; flex-direction: column; padding: 17px 15px 12px; transform: rotate(var(--r)); border: 0; border-radius: 1px; background: #edede8; color: #171717; box-shadow: 2px 5px 2px #0005, 12px 18px 22px #0003; cursor: pointer; transition: transform .24s cubic-bezier(.22,.61,.36,1) 80ms, filter .24s ease 80ms, box-shadow .24s ease 80ms; animation: slap .52s both cubic-bezier(.16,.75,.32,1.25); overflow: visible; outline: none; }
@@ -298,9 +298,8 @@ button { color: inherit; }
 .privacy-settings-link svg { width: 16px; height: 16px; }
 .home-footer-links .privacy-settings-link { color: #888; }
 .home-footer-links .privacy-settings-link:hover, .home-footer-links .privacy-settings-link:focus-visible { color: #f43d38; }
-.legal-page { position: relative; min-height: 100vh; min-height: 100dvh; padding: 36px 20px 56px; color: #161616; background-color: #747672; background-image: linear-gradient(#0001, #0001), url('/assets/wall-texture.png'); background-size: cover; background-position: center top; isolation: isolate; overflow: hidden; }
-.legal-page::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; box-shadow: inset 0 0 120px #161a1b40; background-image: repeating-linear-gradient(91deg, transparent 0 129px, #fff1 130px, transparent 132px); mix-blend-mode: multiply; }
-.legal-page::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+.legal-page { position: relative; min-height: 100vh; min-height: 100dvh; padding: 36px 20px 56px; color: #161616; background: #2c2a27; background-image: url('/assets/wall-texture.png'); background-size: 1659px auto; background-repeat: repeat; background-position: center top; isolation: isolate; overflow: hidden; }
+.legal-page::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.45) 0%, rgba(0,0,0,.15) 45%, rgba(0,0,0,.6) 100%); }
 .legal-page__hero, .legal-page__body { width: min(920px, 100%); margin: 0 auto; }
 .legal-page__hero, .legal-page__body section { position: relative; z-index: 1; }
 .legal-page__hero { padding: 28px 28px 22px; border: 1px solid #111; background: #f8f5ed; box-shadow: 8px 10px 0 #111; }
@@ -308,9 +307,9 @@ button { color: inherit; }
 .legal-page h1 { margin: 0; font: 900 clamp(42px, 8vw, 78px)/.9 var(--font-barlow-condensed); text-transform: uppercase; }
 .legal-page__intro { max-width: 720px; margin: 14px 0 0; font: 600 17px/1.6 var(--font-inter); }
 .legal-page__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-.legal-page__actions a, .legal-page__actions button { display: inline-flex; align-items: center; min-height: 42px; padding: 0 14px; border: 1px solid #111; text-transform: uppercase; font: 800 11px var(--font-inter); letter-spacing: .08em; cursor: pointer; transition: background .15s, color .15s, transform .15s, box-shadow .15s; }
+.legal-page__actions a, .legal-page__actions button { display: inline-flex; align-items: center; min-height: 42px; padding: 0 14px; border: 1px solid #111; text-transform: uppercase; font: 800 11px var(--font-inter); letter-spacing: .08em; cursor: pointer; transition: transform .15s, box-shadow .15s, opacity .15s; }
 .legal-page__actions a, .legal-page__actions button:not(.legal-page__back-link) { background: #111; color: #f8f5ed; text-decoration: none; }
-.legal-page__actions a:hover, .legal-page__actions a:focus-visible, .legal-page__actions button:hover, .legal-page__actions button:focus-visible { background: #edcf35; color: #111; transform: translate(-1px, -1px); box-shadow: 3px 3px 0 #111; }
+.legal-page__actions a:hover, .legal-page__actions a:focus-visible, .legal-page__actions button:hover, .legal-page__actions button:focus-visible { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 #111; }
 .legal-page__back-link { background: #edcf35 !important; color: #111 !important; }
 .legal-page__back-link:hover, .legal-page__back-link:focus-visible { background: #edcf35 !important; color: #111 !important; }
 .legal-page__privacy-settings { color: #f8f5ed; }
@@ -1741,7 +1740,7 @@ button { color: inherit; }
 .unsubscribe-home-link:hover { opacity: .8; }
 
 /* 404 Not Found page */
-.nf-page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background-color: #747672; background-image: linear-gradient(#0001, #0001), url('/assets/wall-texture.png'); background-size: cover; background-position: center; padding: 60px 20px 80px; overflow: hidden; }
+.nf-page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background-color: #747672; background-image: linear-gradient(#0001, #0001), url('/assets/wall-texture.png'); background-size: 1659px auto, 1659px auto; background-repeat: repeat, repeat; background-position: center top, center top; padding: 60px 20px 80px; overflow: hidden; }
 .nf-grain { position: absolute; inset: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E"); opacity: .08; mix-blend-mode: overlay; }
 
 /* Ghost cards for wall atmosphere */
