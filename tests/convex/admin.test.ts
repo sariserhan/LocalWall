@@ -21,12 +21,12 @@ async function createCard(t: ReturnType<typeof makeT>) {
   return result.id;
 }
 
-// Helper: get the regular user's DB Id (requires a card to exist first).
-async function getUserId(t: ReturnType<typeof makeT>) {
+// Helper: get a user's DB Id (requires that identity to exist first).
+async function getUserId(t: ReturnType<typeof makeT>, identity = userIdentity) {
   return t.run(async (ctx) => {
     const u = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", userIdentity.tokenIdentifier))
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
       .unique();
     return u!._id;
   });
@@ -72,6 +72,8 @@ describe("getDashboard", () => {
     expect(dashboard.stats.cards).toBeGreaterThan(0);
     expect(Array.isArray(dashboard.cards)).toBe(true);
     expect(Array.isArray(dashboard.users)).toBe(true);
+    expect(dashboard.users[0]).toHaveProperty("displayName");
+    expect(dashboard.users[0]).toHaveProperty("email");
     expect(Array.isArray(dashboard.reports)).toBe(true);
   });
 });
@@ -139,6 +141,46 @@ describe("removeCard", () => {
     const result = await t.withIdentity(adminIdentity).mutation(api.admin.removeCard, { cardId });
     expect(result.success).toBe(true);
     expect((await t.withIdentity(userIdentity).query(api.cards.listMine, {})).length).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteAllCardsByOwner
+// ---------------------------------------------------------------------------
+
+describe("deleteAllCardsByOwner", () => {
+  test("non-admin cannot delete cards by owner", async () => {
+    const t = makeT();
+    await createCard(t);
+    const userId = await getUserId(t);
+    await expect(
+      t.withIdentity(userIdentity).mutation(api.admin.deleteAllCardsByOwner, { userId }),
+    ).rejects.toThrow("Administrator access is required");
+  });
+
+  test("admin can delete every card for another creator", async () => {
+    const t = makeT();
+    await createCard(t);
+    await t.withIdentity(userIdentity).mutation(api.cards.create, validCard);
+    const userId = await getUserId(t);
+
+    const result = await t.withIdentity(adminIdentity).mutation(api.admin.deleteAllCardsByOwner, { userId });
+    expect(result.success).toBe(true);
+
+    const mine = await t.withIdentity(userIdentity).query(api.cards.listMine, {});
+    expect(mine.length).toBe(0);
+  });
+
+  test("admin can delete their own cards too", async () => {
+    const t = makeT();
+    await t.withIdentity(adminIdentity).mutation(api.cards.create, validCard);
+    const adminUserId = await getUserId(t, adminIdentity);
+
+    const result = await t.withIdentity(adminIdentity).mutation(api.admin.deleteAllCardsByOwner, { userId: adminUserId });
+    expect(result.success).toBe(true);
+
+    const adminCards = await t.withIdentity(adminIdentity).query(api.cards.listMine, {});
+    expect(adminCards.length).toBe(0);
   });
 });
 

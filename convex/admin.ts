@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { action, env, mutation, query } from "./_generated/server";
-import { api } from "./_generated/api";
+import { action, env, internalMutation, mutation, query } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 
 function configuredAdminEmails() {
@@ -48,7 +48,7 @@ export const getDashboard = query({
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const [cards, users, reports, bugReports, contactMessages, allCardStats, recentSearches, verificationRequests] = await Promise.all([
       ctx.db.query("cards").order("desc").take(150),
-      ctx.db.query("users").order("desc").take(150),
+      ctx.db.query("users").order("desc").take(1000),
       ctx.db.query("reports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("bugReports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
       ctx.db.query("contactMessages").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
@@ -122,6 +122,8 @@ export const getDashboard = query({
       users: users.map((user) => ({
         id: user._id,
         displayName: user.displayName,
+        username: user.username,
+        businessName: user.businessName,
         email: user.email,
         blockedAt: user.blockedAt,
         blockedReason: user.blockedReason,
@@ -329,6 +331,43 @@ export const removeCard = mutation({
     await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
     await ctx.db.delete(card._id);
     return { success: true };
+  },
+});
+
+const DELETE_OWNER_BATCH_SIZE = 50;
+
+export const deleteCardsByOwnerBatch = internalMutation({
+  args: { ownerId: v.id("users") },
+  handler: async (ctx, args) => {
+    const cards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId)).take(DELETE_OWNER_BATCH_SIZE);
+    for (const card of cards) {
+      const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
+      for (const imageId of storedImages) {
+        await ctx.storage.delete(imageId);
+      }
+      await ctx.db.delete(card._id);
+    }
+    if (cards.length === DELETE_OWNER_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(0, internal.admin.deleteCardsByOwnerBatch, { ownerId: args.ownerId });
+    }
+    return { deleted: cards.length, scheduledMore: cards.length === DELETE_OWNER_BATCH_SIZE };
+  },
+});
+
+export const deleteAllCardsByOwner = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("That user no longer exists.");
+    await audit(ctx, identity, "deleteAllCardsByOwner", args.userId, {
+      email: user.email,
+      displayName: user.displayName,
+      username: user.username,
+      businessName: user.businessName,
+    });
+    const result: { deleted: number; scheduledMore: boolean } = await ctx.runMutation(internal.admin.deleteCardsByOwnerBatch, { ownerId: args.userId });
+    return { success: true, deleted: result.deleted, scheduledMore: result.scheduledMore };
   },
 });
 

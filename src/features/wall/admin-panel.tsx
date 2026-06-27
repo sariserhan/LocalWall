@@ -1,9 +1,10 @@
 "use client";
 
 import { AlertTriangle, BarChart2, Bookmark, Bug, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AdminPlayground } from "./admin-playground";
+import { LocationCombobox } from "./location-combobox";
 
 export interface AdminDashboardData {
   stats: { cards: number; published: number; users: number; reports: number; bugs: number; messages: number; searches: number; pendingVerifications?: number };
@@ -26,6 +27,8 @@ export interface AdminDashboardData {
   users: Array<{
     id: Id<"users">;
     displayName?: string;
+    username?: string;
+    businessName?: string;
     email?: string;
     blockedAt?: number;
     blockedReason?: string;
@@ -57,6 +60,7 @@ interface AdminPanelProps {
   onClose: () => void;
   onSetCardStatus: (cardId: Id<"cards">, status: "published" | "hidden") => Promise<void>;
   onDeleteCard: (cardId: Id<"cards">) => Promise<void>;
+  onDeleteCardsByOwner: (userId: Id<"users">) => Promise<void>;
   onBlockUser: (userId: Id<"users">) => Promise<void>;
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onVerifyUser: (userId: Id<"users">, verified: boolean) => Promise<void>;
@@ -71,20 +75,38 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDeleteCardsByOwner, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
   const [tab, setTab] = useState<"cards" | "users" | "reports" | "bugs" | "contact" | "analytics" | "verification" | "playground">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
+  const [selectedOwnerId, setSelectedOwnerId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
-  const users = useMemo(() => (data?.users ?? []).filter((user) => !deferredQuery || [user.displayName, user.email].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.users, deferredQuery]);
+  const users = useMemo(() => (data?.users ?? []).filter((user) => !deferredQuery || [user.displayName, user.username, user.businessName, user.email].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.users, deferredQuery]);
   const reports = useMemo(() => (data?.reports ?? []).filter((report) => !deferredQuery || [report.cardName, report.reason, report.details].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.reports, deferredQuery]);
   const bugReports = useMemo(() => (data?.bugReports ?? []).filter((bugReport) => !deferredQuery || [bugReport.page, bugReport.reason, bugReport.details, bugReport.reporterName, bugReport.reporterEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.bugReports, deferredQuery]);
   const contactMessages = useMemo(() => (data?.contactMessages ?? []).filter((contactMessage) => !deferredQuery || [contactMessage.page, contactMessage.topic, contactMessage.message, contactMessage.reporterName, contactMessage.reporterUsername, contactMessage.reporterBusinessName, contactMessage.reporterEmail, contactMessage.reporterPhone].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.contactMessages, deferredQuery]);
   const cardsById = useMemo(() => new Map((data?.cards ?? []).map((card) => [String(card.id), card])), [data?.cards]);
+  const ownerOptions = useMemo(() => (data?.users ?? []).map((user) => {
+    const parts = [
+      user.displayName?.trim(),
+      user.username?.trim() ? `@${user.username.trim()}` : undefined,
+      user.businessName?.trim(),
+      user.email?.trim(),
+    ].filter(Boolean);
+    return { value: String(user.id), label: parts.join(" · ") || "Unnamed user" };
+  }), [data?.users]);
+  const selectedOwner = useMemo(() => (data?.users ?? []).find((user) => String(user.id) === selectedOwnerId), [data?.users, selectedOwnerId]);
+  const selectedOwnerLabel = selectedOwner ? [selectedOwner.displayName?.trim(), selectedOwner.username?.trim() ? `@${selectedOwner.username.trim()}` : undefined, selectedOwner.businessName?.trim(), selectedOwner.email?.trim()].filter(Boolean).join(" · ") || "Unnamed user" : "";
+
+  useEffect(() => {
+    if (selectedOwnerId && !ownerOptions.some((option) => option.value === selectedOwnerId)) {
+      setSelectedOwnerId("");
+    }
+  }, [ownerOptions, selectedOwnerId]);
 
   const sendMessage = (email: string | undefined, context: string) => {
     if (!email) {
@@ -118,6 +140,19 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
       setDeleteTarget(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The card could not be deleted.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const deleteAllCardsForOwner = async () => {
+    if (!selectedOwnerId) return;
+    setBusyId(selectedOwnerId);
+    setError(null);
+    try {
+      await onDeleteCardsByOwner(selectedOwnerId as Id<"users">);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The cards could not be deleted.");
     } finally {
       setBusyId(null);
     }
@@ -198,13 +233,35 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
         ) : null}
 
         {data && tab === "users" ? (
-          <div className="admin-list" role="tabpanel">
+          <div className="admin-users-panel" role="tabpanel">
+            <div className="admin-owner-delete">
+              <div className="admin-owner-delete-copy">
+                <h3>Delete all cards by creator</h3>
+                <p>Type a user name, username, business name, or email, then choose the account from the dropdown.</p>
+              </div>
+              <div className="admin-owner-delete-controls">
+                <LocationCombobox
+                  value={selectedOwnerId}
+                  options={ownerOptions}
+                  onChange={setSelectedOwnerId}
+                  placeholder="Search users or creators"
+                />
+                <button className="secondary danger-action" disabled={!selectedOwnerId || busyId === selectedOwnerId} onClick={deleteAllCardsForOwner}>
+                  <Trash2 /> Delete all cards
+                </button>
+              </div>
+              <div className="admin-owner-delete-meta">
+                <span>{selectedOwner ? `${selectedOwner.cardCount} cards in the current dashboard snapshot` : "Pick a creator to see the delete action."}</span>
+                {selectedOwnerLabel ? <strong>{selectedOwnerLabel}</strong> : null}
+              </div>
+            </div>
+            <div className="admin-list">
             {users.map((user) => (
               <article className="admin-row admin-user-row" key={String(user.id)}>
-                <div className="admin-avatar">{(user.displayName || user.email || "U").slice(0, 1).toUpperCase()}</div>
+                <div className="admin-avatar">{(user.displayName || user.businessName || user.username || user.email || "U").slice(0, 1).toUpperCase()}</div>
                 <div className="admin-row-main">
-                  <h3>{user.displayName || "Unnamed user"}{user.verified ? <span className="admin-verified-badge">✓ Verified</span> : null}</h3>
-                  <p>{user.email || "No public email"}</p>
+                  <h3>{user.displayName || user.businessName || user.username || "Unnamed user"}{user.verified ? <span className="admin-verified-badge">✓ Verified</span> : null}</h3>
+                  <p>{user.businessName || user.username ? [user.businessName, user.username ? `@${user.username}` : null].filter(Boolean).join(" · ") : user.email || "No public email"}</p>
                   <small>Joined {dateLabel(user.createdAt)} · {user.cardCount} recent cards{user.verifiedAt ? ` · Verified ${dateLabel(user.verifiedAt)}` : ""}</small>
                 </div>
                 <div className="admin-row-actions admin-row-actions-wide">
@@ -240,6 +297,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onBlo
               </article>
             ))}
             {!users.length ? <div className="dashboard-empty">No users match this search.</div> : null}
+          </div>
           </div>
         ) : null}
 

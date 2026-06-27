@@ -2,12 +2,12 @@
 
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Check, ChevronDown, ChevronUp, Clock, CreditCard, ExternalLink, FileText, FlaskConical, Layers, Mail, RefreshCw, Shield, ShieldOff, Star, Trash2, Upload, X, Zap } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState, type DragEvent } from "react";
 import { City, Country, State } from "country-state-city";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { categories, cardThemes, SUBCATEGORY_OPTIONS, type CardCategory } from "./types";
-import { buildPlaygroundTemplateWorkbook } from "./admin-playground-xlsx";
+import { buildPlaygroundCsvTemplate, resolveLocationFields } from "./admin-playground-csv";
 
 const PG_WALL_URL = "/admin/wall";
 const PG_DEFAULTS = { country: "xx", state: "test", city: "Playground" };
@@ -177,6 +177,9 @@ const CSV_ALLOWED_HEADERS = new Set([
   "y",
   "rotation",
   "width",
+  "rating",
+  "googleMapsUrl",
+  "image",
 ]);
 
 function parseCsv(text: string) {
@@ -260,8 +263,9 @@ function csvPick(data: Record<string, string>, key: string, values: readonly str
   return raw && values.includes(raw) ? raw : undefined;
 }
 
-function sanitizeExcelName(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "default";
+async function isZipArchive(file: File) {
+  const bytes = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+  return bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
 }
 
 type LocationCatalog = {
@@ -286,16 +290,6 @@ function toExcelColumnLetter(index: number) {
 function formatLocationLabel(code: string, name: string) {
   if (code === "TR") return "TR - Türkiye";
   return `${code} - ${name}`;
-}
-
-function normalizeLocationText(value: string) {
-  return value.trim().replace(/\s+/g, " ").toLowerCase();
-}
-
-function extractSelectionCode(value: string) {
-  const trimmed = value.trim();
-  const separatorIndex = trimmed.indexOf(" - ");
-  return separatorIndex > 0 ? trimmed.slice(0, separatorIndex).trim() : trimmed;
 }
 
 async function loadLocationCatalog() {
@@ -329,72 +323,6 @@ async function loadLocationCatalog() {
 
 function getSubcategoriesForCategory(category: string) {
   return category !== "All" ? (SUBCATEGORY_OPTIONS[category as CardCategory] ?? []) : [];
-}
-
-function fileNameFromUpload(file: File, fallback: string) {
-  return file.name.replace(/\.[^.]+$/, "") || fallback;
-}
-
-function xlsxValueToString(value: unknown): string {
-  if (value == null) return "";
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === "object") {
-    const cell = value as { text?: string; richText?: Array<{ text?: string }>; result?: unknown; formula?: unknown };
-    if (typeof cell.text === "string") return cell.text;
-    if (Array.isArray(cell.richText)) return cell.richText.map((part) => part.text ?? "").join("");
-    if ("result" in cell) return xlsxValueToString(cell.result);
-  }
-  return String(value);
-}
-
-function xlsxCellValueToPayloadString(value: unknown) {
-  const text = xlsxValueToString(value);
-  return text.trim();
-}
-
-function resolveLocationErrors(data: Record<string, string>, locationCatalog?: LocationCatalog) {
-  const errors: string[] = [];
-  if (!locationCatalog) return errors;
-
-  const country = csvString(data, "country");
-  const state = csvString(data, "state");
-  const city = csvString(data, "city");
-  const countryCodeCandidate = country ? extractSelectionCode(country) : "";
-  const countryCode = country
-    ? locationCatalog.countries.find((entry) => {
-        const normalized = normalizeLocationText(country);
-        const label = formatLocationLabel(entry.code, entry.name);
-        return normalized === normalizeLocationText(entry.code)
-          || normalized === normalizeLocationText(entry.name)
-          || normalized === normalizeLocationText(label)
-          || normalizeLocationText(countryCodeCandidate) === normalizeLocationText(entry.code);
-      })?.code
-    : "";
-  const stateCodeCandidate = state ? extractSelectionCode(state) : "";
-  const stateCode = countryCode && state
-    ? (locationCatalog.statesByCountry.get(countryCode) ?? []).find((entry) => {
-        const normalized = normalizeLocationText(state);
-        const label = formatLocationLabel(entry.code, entry.name);
-        return normalized === normalizeLocationText(entry.code)
-          || normalized === normalizeLocationText(entry.name)
-          || normalized === normalizeLocationText(label)
-          || normalizeLocationText(stateCodeCandidate) === normalizeLocationText(entry.code);
-      })?.code
-    : "";
-
-  if (country && !countryCode) {
-    errors.push(`invalid country: ${country}`);
-  }
-  if (countryCode && state && !stateCode) {
-    errors.push(`invalid state for ${country}: ${state}`);
-  }
-  if (countryCode && stateCode && city) {
-    const cities = locationCatalog.citiesByCountryState.get(`${countryCode}|${stateCode}`) ?? [];
-    if (!cities.includes(city)) errors.push(`invalid city for ${country}/${state}: ${city}`);
-  }
-
-  return errors;
 }
 
 // ─── Create Card Section ──────────────────────────────────────────────────────
@@ -688,15 +616,18 @@ function BulkCsvImportSection() {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const resolveRow = (data: Record<string, string>, locationCatalog?: LocationCatalog) => {
     const errors: string[] = [];
     const name = csvString(data, "name");
     const category = csvString(data, "category");
     const line = csvString(data, "line");
-    const city = csvString(data, "city");
-    const state = csvString(data, "state");
-    const country = csvString(data, "country");
+    const resolvedLocation = resolveLocationFields(data, locationCatalog);
+    const city = resolvedLocation.city;
+    const state = resolvedLocation.state;
+    const country = resolvedLocation.country;
     const theme = csvString(data, "theme");
     const paidAmountField = csvMaybeNumber(data, "paidAmount");
     const imageXField = csvMaybeNumber(data, "imageX");
@@ -782,7 +713,7 @@ function BulkCsvImportSection() {
     if (widthField.provided && !widthField.valid) errors.push(`width must be a number: ${widthField.raw}`);
     if (featuredTierRaw && !featuredTier) errors.push(`invalid featuredTier: ${featuredTierRaw}`);
     if (statusRaw && !status) errors.push(`invalid status: ${statusRaw}`);
-    errors.push(...resolveLocationErrors(data, locationCatalog));
+    errors.push(...resolvedLocation.errors);
     if (errors.length > 0) {
       return { errors };
     }
@@ -842,6 +773,7 @@ function BulkCsvImportSection() {
   const handleFile = async (file: File | null) => {
     setError(null);
     setOk(null);
+    setDragActive(false);
     if (!file) {
       setRows([]);
       setHeaders([]);
@@ -849,37 +781,24 @@ function BulkCsvImportSection() {
       return;
     }
     try {
+      if (await isZipArchive(file)) {
+        throw new Error("That file is a spreadsheet workbook, not a CSV. Export it as plain CSV and upload the .csv file.");
+      }
       const locationCatalog = await loadLocationCatalog();
-      const { Workbook } = await import("exceljs");
-      const workbook = new Workbook();
-      await workbook.xlsx.load(await file.arrayBuffer());
-      const worksheet = workbook.getWorksheet("Bulk Import") ?? workbook.worksheets.find((ws) => ws.name === "Bulk Import") ?? workbook.worksheets[0];
-      if (!worksheet) throw new Error("The workbook needs at least one sheet.");
-      const headerRow = worksheet.getRow(1);
-      const headerCount = headerRow.cellCount;
-      const parsedHeaders = Array.from({ length: headerCount }, (_, index) => xlsxCellValueToPayloadString(headerRow.getCell(index + 1).value));
-      const headersFromSheet = parsedHeaders.filter((header, index) => header || index < CSV_REQUIRED_HEADERS.length || headerCount > 0);
-      if (!headersFromSheet.length) throw new Error("The workbook needs a header row.");
+      const { headers: headersFromSheet, records } = parseCsv(await file.text());
+      if (!headersFromSheet.length) throw new Error("The CSV needs a header row.");
       const unknownHeaders = headersFromSheet.filter((header) => header && !CSV_ALLOWED_HEADERS.has(header));
       if (unknownHeaders.length > 0) {
-        throw new Error(`Unknown XLSX columns: ${unknownHeaders.join(", ")}`);
+        throw new Error(`Unknown CSV columns: ${unknownHeaders.join(", ")}`);
       }
       const missingHeaders = CSV_REQUIRED_HEADERS.filter((header) => !headersFromSheet.includes(header));
       if (missingHeaders.length > 0) {
-        throw new Error(`Missing required XLSX columns: ${missingHeaders.join(", ")}`);
+        throw new Error(`Missing required CSV columns: ${missingHeaders.join(", ")}`);
       }
-      const nextRows: ParsedCsvRow[] = [];
-      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
-        const row = worksheet.getRow(rowNumber);
-        const hasValue = headersFromSheet.some((_, index) => xlsxCellValueToPayloadString(row.getCell(index + 1).value) !== "");
-        if (!hasValue) continue;
-        const data = headersFromSheet.reduce<Record<string, string>>((acc, header, index) => {
-          acc[header] = xlsxCellValueToPayloadString(row.getCell(index + 1).value);
-          return acc;
-        }, {});
-        const resolved = resolveRow(data, locationCatalog);
-        nextRows.push({ rowNumber, data, errors: resolved.errors });
-      }
+      const nextRows: ParsedCsvRow[] = records.map((record) => {
+        const resolved = resolveRow(record.data, locationCatalog);
+        return { rowNumber: record.rowNumber, data: record.data, errors: resolved.errors };
+      });
       setHeaders(headersFromSheet);
       setRows(nextRows);
       setFileName(file.name);
@@ -887,15 +806,16 @@ function BulkCsvImportSection() {
       setRows([]);
       setHeaders([]);
       setFileName(null);
-      setError(cause instanceof Error ? cause.message : "Could not read the workbook.");
+      setError(cause instanceof Error ? cause.message : "Could not read the CSV.");
     }
   };
 
   const importRows = async () => {
-    const readyRows = rows.map((row) => ({ row, resolved: resolveRow(row.data) }));
+    const locationCatalog = await loadLocationCatalog();
+    const readyRows = rows.map((row) => ({ row, resolved: resolveRow(row.data, locationCatalog) }));
     const invalid = readyRows.filter(({ row, resolved }) => row.errors.length > 0 || resolved.errors.length > 0);
     if (invalid.length > 0) {
-      setError(`Fix the workbook issues first. ${invalid.length} row${invalid.length === 1 ? "" : "s"} have errors.`);
+      setError(`Fix the CSV issues first. ${invalid.length} row${invalid.length === 1 ? "" : "s"} have errors.`);
       return;
     }
     setBusy(true);
@@ -915,34 +835,24 @@ function BulkCsvImportSection() {
       setHeaders([]);
       setFileName(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "XLSX import failed.");
+      setError(cause instanceof Error ? cause.message : "CSV import failed.");
     } finally {
       setBusy(false);
       setTimeout(() => setProgress(null), 2000);
     }
   };
 
-  const visibleRows = rows.slice(0, 5);
   const invalidCount = rows.filter((row) => row.errors.length > 0).length;
   const canImport = rows.length > 0 && !busy && invalidCount === 0;
   const downloadTemplate = async () => {
     setError(null);
     setOk(null);
     try {
-      const locationCatalog = await loadLocationCatalog();
-      const { Workbook } = await import("exceljs");
-      const workbook = new Workbook();
-      workbook.creator = "LocalWall";
-      workbook.created = new Date();
-      workbook.modified = new Date();
-      buildPlaygroundTemplateWorkbook(workbook, locationCatalog);
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([buildPlaygroundCsvTemplate()], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "wall-xlsx-template.xlsx";
+      link.download = "wall-csv-template.csv";
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
@@ -950,11 +860,22 @@ function BulkCsvImportSection() {
         URL.revokeObjectURL(url);
         link.remove();
       }, 0);
-      setOk("XLSX template downloaded.");
+      setOk("CSV template downloaded.");
       setTimeout(() => setOk(null), 2500);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not generate the XLSX template.");
+      setError(cause instanceof Error ? cause.message : "Could not generate the CSV template.");
     }
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+    void handleFile(event.dataTransfer.files?.[0] ?? null);
   };
 
   return (
@@ -962,17 +883,54 @@ function BulkCsvImportSection() {
       <p className="pg-hint">
         One row = one location. Small businesses can repeat the same name across multiple rows for each branch.
         Every row must provide its own plan, featured tier, status, duration, likes, clicks, and review count.
-        Contact and social columns are supported too: `phone`, `email`, `website`, `location`, `instagram`, `facebook`, `tiktok`, `linkedin`, `whatsapp`, and `telegram`.
-        The workbook contains all fields and dropdowns. <button className="pg-inline-link pg-download-link" type="button" onClick={() => void downloadTemplate()}><FileText size={12} className="pg-download-icon" /> <span>Download XLSX template</span></button>
+        Contact, social, and image-url columns are supported too. <button className="pg-inline-link pg-download-link" type="button" onClick={() => void downloadTemplate()}><FileText size={12} className="pg-download-icon" /> <span>Download CSV template</span></button>
       </p>
+      <div
+        className={`pg-dropzone${dragActive ? " is-active" : ""}`}
+        onClick={openFilePicker}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setDragActive(true);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setDragActive(true);
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setDragActive(false);
+        }}
+        onDrop={handleDrop}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openFilePicker();
+          }
+        }}
+        aria-label="Drop CSV file here or click to choose a file"
+      >
+        <div className="pg-dropzone-icon-wrap" aria-hidden="true">
+          <Upload className="pg-dropzone-icon" size={20} />
+        </div>
+        <div className="pg-dropzone-copy">
+          <strong>Drop CSV here</strong>
+          <span>or click to choose a file</span>
+        </div>
+        <div className="pg-dropzone-chip">CSV only</div>
+      </div>
       <div className="pg-row-2">
         <label className="pg-field">
-          <span>Upload XLSX</span>
-          <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(e) => void handleFile(e.target.files?.[0] ?? null)} />
+          <span>Choose file</span>
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" onChange={(e) => void handleFile(e.target.files?.[0] ?? null)} />
         </label>
         <div className="pg-field">
           <span>Required columns</span>
-          <p className="pg-hint">name, category, line, city, state, country, theme, paidAmount, featuredTier, status, durationDays, likes, clicks, reviewCount. Optional: subcategory, ownerName, area, contact, social, and analytics fields.</p>
+          <p className="pg-hint">name, category, line, city, state, country, theme, paidAmount, featuredTier, status, durationDays, likes, clicks, reviewCount. Optional: subcategory, ownerName, area, contact, social, image, rating, and analytics fields.</p>
         </div>
       </div>
       {fileName ? <p className="pg-hint">Loaded <strong>{fileName}</strong> with {rows.length} row{rows.length === 1 ? "" : "s"}.</p> : null}
@@ -985,37 +943,13 @@ function BulkCsvImportSection() {
           <span>{progress.done} / {progress.total} cards imported</span>
         </div>
       ) : null}
-      {visibleRows.length ? (
-        <div className="pg-csv-preview">
-          <div className="pg-csv-preview-head">
-            <strong>Preview</strong>
-            <span>{rows.length} row{rows.length === 1 ? "" : "s"} ready</span>
-          </div>
-          {visibleRows.map((row) => (
-            <div key={row.rowNumber} className={`pg-csv-row${row.errors.length ? " has-error" : ""}`}>
-              <div className="pg-csv-row-main">
-                <strong>Row {row.rowNumber}</strong>
-                <span>{csvString(row.data, "name") || "(missing name)"}</span>
-                <small>{csvString(row.data, "city") || "(missing city)"} · {csvString(row.data, "state") || "(missing state)"} · {csvString(row.data, "country") || "(missing country)"}</small>
-              </div>
-              <div className="pg-csv-row-meta">
-                <span>{csvString(row.data, "featuredTier") || "(missing)"}</span>
-                <span>{csvString(row.data, "status") || "(missing)"}</span>
-                <span>{csvString(row.data, "paidAmount") || "(missing)"}</span>
-              </div>
-              {row.errors.length ? <p className="pg-csv-row-error">{row.errors.join(" · ")}</p> : null}
-            </div>
-          ))}
-          {rows.length > visibleRows.length ? <p className="pg-hint">Showing first {visibleRows.length} rows only.</p> : null}
-        </div>
-      ) : null}
       <div className="pg-bulk-actions">
         <button className="pg-action-btn" disabled={!canImport} onClick={() => void importRows()}>
-          {busy ? "Importing…" : <><Upload size={13} /> Import XLSX rows</>}
+          {busy ? "Importing…" : <><Upload size={13} /> Import CSV rows</>}
         </button>
       </div>
       <p className="pg-hint">
-        XLSX rows are the source of truth for plan, featured tier, status, duration days, likes, clicks, and review count. Missing values will block import.
+        CSV rows are the source of truth for plan, featured tier, status, duration days, likes, clicks, and review count. Missing values will block import.
       </p>
     </div>
   );
@@ -1511,7 +1445,7 @@ export function AdminPlayground() {
         <CreateCardSection />
       </Section>
 
-      <Section title="Bulk XLSX Import" icon={<Upload size={14} />}>
+      <Section title="Bulk CSV Import" icon={<Upload size={14} />}>
         <BulkCsvImportSection />
       </Section>
 
