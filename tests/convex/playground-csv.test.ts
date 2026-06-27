@@ -41,6 +41,16 @@ describe("admin playground csv template", () => {
     expect(records[0].data.name).toBe("Call Cleaning Collection");
   });
 
+  test("keeps image links intact", () => {
+    const { records } = parseCsv([
+      "name,category,line,city,state,country,theme,paidAmount,featuredTier,status,durationDays,likes,clicks,reviewCount,image",
+      'Photo Spot,Services,Photo friendly listing,Arlington,VA,USA,paper,0,bronze,published,90,1,2,3,https://example.com/photo.jpg?x=1&y=2',
+    ].join("\n"));
+
+    expect(records).toHaveLength(1);
+    expect(records[0].data.image).toBe("https://example.com/photo.jpg?x=1&y=2");
+  });
+
   test("normalizes USA and state codes", () => {
     const resolved = resolveLocationFields(
       { country: "USA", state: "VA", city: "Arlington" },

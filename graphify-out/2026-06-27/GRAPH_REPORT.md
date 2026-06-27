@@ -1,16 +1,16 @@
 # Graph Report - local-wall  (2026-06-27)
 
 ## Corpus Check
-- 214 files · ~432,424 words
+- 214 files · ~433,199 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1545 nodes · 2168 edges · 128 communities (110 shown, 18 thin omitted)
+- 1548 nodes · 2175 edges · 128 communities (110 shown, 18 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 79 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2e79392f`
+- Built from commit: `e1c25938`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -123,7 +123,7 @@
 - [[_COMMUNITY_Community 129|Community 129]]
 - [[_COMMUNITY_Community 130|Community 130]]
 - [[_COMMUNITY_Community 131|Community 131]]
-- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 132|Community 132]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `api` - 27 edges
@@ -168,11 +168,11 @@ Nodes (32): DurableRateLimitScope, durableUserRateLimit(), observe(), buckets, i
 
 ### Community 1 - "Billing, Admin & Test Infrastructure"
 Cohesion: 0.07
-Nodes (33): metadata, Props, bundleCard, bundleCities, crons, adminEnv, adminIdentity, applyEnv() (+25 more)
+Nodes (32): metadata, Props, bundleCard, bundleCities, adminEnv, adminIdentity, applyEnv(), makeT() (+24 more)
 
 ### Community 2 - "Geo-Routed Pages & RSS Feeds"
-Cohesion: 0.17
-Nodes (30): GET(), Props, GET(), GET(), NotFound(), CategoryPage(), generateMetadata(), CityPage() (+22 more)
+Cohesion: 0.12
+Nodes (37): GET(), Props, GET(), GET(), NotFound(), BASE_URL, CITY_PATHS, sitemap() (+29 more)
 
 ### Community 3 - "Auth Providers & Analytics Integration"
 Cohesion: 0.11
@@ -203,8 +203,8 @@ Cohesion: 0.20
 Nodes (16): OwnerDashboard, EditCardModal(), themeLabels, OwnerDashboardProps, renewalOptions, CardTheme, cardThemes, CardUpdate (+8 more)
 
 ### Community 10 - "Admin Backend (Convex)"
-Cohesion: 0.06
-Nodes (34): approveVerification, blockUser, configuredAdminEmails(), getAccess, getAdminIdentity(), getAuditLog, getDashboard, PG_ADMIN_CARD_ARGS (+26 more)
+Cohesion: 0.05
+Nodes (37): approveVerification, blockUser, configuredAdminEmails(), deleteAllCardsByOwner, deleteCardsByOwnerBatch, getAccess, getAdminIdentity(), getAuditLog (+29 more)
 
 ### Community 11 - "Dependencies & Package Config"
 Cohesion: 0.08
@@ -223,12 +223,12 @@ Cohesion: 0.11
 Nodes (18): BundleCity, clearImagesFromIDB(), ComposerForm, countries, defaultStates, DetailField, detailFieldLabels, featuredTierOptions (+10 more)
 
 ### Community 15 - "Home Page & Root Routes"
-Cohesion: 0.06
-Nodes (35): metadata, Props, RootPage(), BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES (+27 more)
+Cohesion: 0.08
+Nodes (29): metadata, Props, RootPage(), Props, WallLocationCategoryPage(), ICONS, Props, HomeHowItWorksModal() (+21 more)
 
 ### Community 16 - "Location Combobox & Seed Data"
-Cohesion: 0.10
-Nodes (17): LocationCombobox(), Option, Props, seedCards, cardFormats, Composer, defaultSeedLocation, DetailPanel (+9 more)
+Cohesion: 0.12
+Nodes (14): seedCards, cardFormats, Composer, defaultSeedLocation, DetailPanel, OwnerDashboard, PlacementMode, Dims (+6 more)
 
 ### Community 17 - "Convex TypeScript Config"
 Cohesion: 0.12
@@ -239,8 +239,8 @@ Cohesion: 0.06
 Nodes (35): Advanced: Multiple Cookies or Custom Options, Advanced: Multiple Operations, Authentication State Reuse, Clear All Cookies, Clear All localStorage, Clear sessionStorage, Common Patterns, Cookies (+27 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.10
-Nodes (25): ClerkThemePortal(), HomeNav(), HomePostButton(), Loc, actionBtn, barlowUpper, font, getClerkUserButtonAppearance() (+17 more)
+Cohesion: 0.11
+Nodes (24): ClerkThemePortal(), HomeNav(), HomePostButton(), Loc, actionBtn, barlowUpper, font, getClerkUserButtonAppearance() (+16 more)
 
 ### Community 21 - "Playwright CLI Testing Skill"
 Cohesion: 0.24
@@ -435,8 +435,8 @@ Cohesion: 0.31
 Nodes (10): Digest/Summary Table Pattern, Optimistic Concurrency Control (OCC), Point-in-Time Read, Reactive Subscription, Convex Migration Helper Skill, Convex Performance Audit Skill, Function Budget Reference, Hot Path Rules Reference (+2 more)
 
 ### Community 105 - "Community 105"
-Cohesion: 0.11
-Nodes (18): reportBug, sendContactMessage, http, quotas, scopeValidator, take, getMyReview, listForCard (+10 more)
+Cohesion: 0.10
+Nodes (19): reportBug, sendContactMessage, crons, http, quotas, scopeValidator, take, getMyReview (+11 more)
 
 ### Community 106 - "Community 106"
 Cohesion: 0.25
@@ -503,8 +503,8 @@ Cohesion: 0.50
 Nodes (4): Convex Auth Provider, ConvexProvider React Client Setup, Convex Quickstart Skill, Convex Setup Auth Skill
 
 ### Community 125 - "Community 125"
-Cohesion: 0.33
-Nodes (3): AdminDashboardData, AdminPanelProps, AdminPlayground()
+Cohesion: 0.22
+Nodes (6): AdminDashboardData, AdminPanelProps, AdminPlayground(), LocationCombobox(), Option, Props
 
 ### Community 126 - "Community 126"
 Cohesion: 0.50
@@ -522,29 +522,29 @@ Nodes (3): Dual Read, Dual Write (Preferred), Zero-Downtime Strategies
 Cohesion: 0.50
 Nodes (4): EmailTestSection(), SubscriptionSection(), useAsync(), VerificationSection()
 
-### Community 136 - "Community 136"
+### Community 132 - "Community 132"
 Cohesion: 0.28
 Nodes (4): AppProviders(), AppProvidersProps, GlobalOwnerDashboard(), UnsubscribeClient()
 
 ## Knowledge Gaps
-- **839 isolated node(s):** `npx`, `Props`, `Props`, `Props`, `Props` (+834 more)
+- **842 isolated node(s):** `npx`, `Props`, `Props`, `Props`, `Props` (+837 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Billing, Admin & Test Infrastructure` to `Rate Limiting & API Utilities`, `Geo-Routed Pages & RSS Feeds`, `Card Data Layer (Convex)`, `Admin Panel & Moderation UI`, `Community 136`, `Owner Dashboard & Card Editing`, `Admin Backend (Convex)`, `UI Shared Components & Detail Panel`, `Community 12`, `Home Page & Root Routes`, `Community 20`, `Community 122`, `Community 127`, `Community 94`, `Community 31`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `api` connect `Billing, Admin & Test Infrastructure` to `Rate Limiting & API Utilities`, `Geo-Routed Pages & RSS Feeds`, `Card Data Layer (Convex)`, `Community 132`, `Admin Panel & Moderation UI`, `UI Shared Components & Detail Panel`, `Owner Dashboard & Card Editing`, `Admin Backend (Convex)`, `Community 12`, `Home Page & Root Routes`, `Community 20`, `Community 122`, `Community 127`, `Community 94`, `Community 31`?**
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Why does `WallCard` connect `Owner Dashboard & Card Editing` to `Geo-Routed Pages & RSS Feeds`, `Card Display & Embed Pages`, `UI Shared Components & Detail Panel`, `Community 12`, `Location Combobox & Seed Data`, `Community 20`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `npx`, `Props`, `Props` to the rest of the system?**
-  _840 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _843 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
   _Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected._
 - **Should `Billing, Admin & Test Infrastructure` be split into smaller, more focused modules?**
-  _Cohesion score 0.07049180327868852 - nodes in this community are weakly interconnected._
-- **Should `Auth Providers & Analytics Integration` be split into smaller, more focused modules?**
-  _Cohesion score 0.10666666666666667 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07364114552893045 - nodes in this community are weakly interconnected._
+- **Should `Geo-Routed Pages & RSS Feeds` be split into smaller, more focused modules?**
+  _Cohesion score 0.12408163265306123 - nodes in this community are weakly interconnected._

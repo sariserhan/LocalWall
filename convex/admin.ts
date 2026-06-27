@@ -187,6 +187,29 @@ export const getDashboard = query({
   },
 });
 
+export const playgroundStoreImageFromUrl = action({
+  args: { imageUrl: v.string() },
+  handler: async (ctx, args) => {
+    const access: { isAdmin: boolean } = await ctx.runQuery(api.admin.getAccess, {});
+    if (!access.isAdmin) throw new Error("Administrator access is required.");
+    const imageUrl = args.imageUrl.trim();
+    const parsedUrl = new URL(imageUrl);
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      throw new Error("Image URL must start with http:// or https://.");
+    }
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Could not download image: ${response.status}`);
+    }
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      throw new Error("Image URL must point to an image.");
+    }
+    const storageId = await ctx.storage.store(await response.blob());
+    return { storageId };
+  },
+});
+
 export const sendTestReminderEmail = action({
   args: { to: v.string() },
   handler: async (ctx, args) => {
@@ -504,6 +527,8 @@ const PG_ADMIN_CARD_ARGS = {
   whatsapp: v.optional(v.string()),
   telegram: v.optional(v.string()),
   ownerName: v.optional(v.string()),
+  imageIds: v.optional(v.array(v.id("_storage"))),
+  thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
   theme: PG_ADMIN_THEME,
   imageMode: v.optional(PG_ADMIN_IMAGE_MODE),
   imageX: v.optional(v.number()),
@@ -555,6 +580,8 @@ type PlaygroundCardArgs = {
   telegram?: string;
   ownerName?: string;
   theme: string;
+  imageIds?: Id<"_storage">[];
+  thumbnailImageIds?: Id<"_storage">[];
   imageMode?: "photo" | "business-card";
   imageX?: number;
   imageY?: number;
@@ -602,7 +629,6 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
   const socialClicks = Math.max(0, Math.floor(args.socialClicks ?? 0));
   const saves = Math.max(0, Math.floor(args.saves ?? 0));
   const shares = Math.max(0, Math.floor(args.shares ?? 0));
-
   const cardId = await ctx.db.insert("cards", {
     ownerId: userId,
     name: args.name.trim(),
@@ -630,7 +656,8 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     telegram: args.telegram?.trim() || undefined,
     theme: args.theme as any,
     imageMode: args.imageMode,
-    imageIds: [],
+    imageIds: args.imageIds ?? [],
+    thumbnailImageIds: args.thumbnailImageIds,
     x,
     y,
     rotation,

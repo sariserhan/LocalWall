@@ -110,7 +110,10 @@ type PlaygroundCardArgs = {
   whatsapp?: string;
   telegram?: string;
   ownerName?: string;
+  imageUrl?: string;
   theme: string;
+  imageIds?: Id<"_storage">[];
+  thumbnailImageIds?: Id<"_storage">[];
   imageMode?: "photo" | "business-card";
   imageX?: number;
   imageY?: number;
@@ -609,6 +612,7 @@ function CreateCardSection() {
 
 function BulkCsvImportSection() {
   const createCard = useMutation(api.admin.playgroundCreateCard) as unknown as (args: PlaygroundCardArgs) => Promise<{ cardId: Id<"cards"> }>;
+  const storeImageFromUrl = useAction(api.admin.playgroundStoreImageFromUrl) as unknown as (args: { imageUrl: string }) => Promise<{ storageId: Id<"_storage"> }>;
   const [fileName, setFileName] = useState<string | null>(null);
   const [rows, setRows] = useState<ParsedCsvRow[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -633,6 +637,7 @@ function BulkCsvImportSection() {
     const imageXField = csvMaybeNumber(data, "imageX");
     const imageYField = csvMaybeNumber(data, "imageY");
     const imageWidthField = csvMaybeNumber(data, "imageWidth");
+    const imageUrl = csvString(data, "image");
     const durationDaysField = csvMaybeInteger(data, "durationDays");
     const expiresAtField = csvMaybeNumber(data, "expiresAt");
     const clicksField = csvMaybeInteger(data, "clicks");
@@ -683,6 +688,7 @@ function BulkCsvImportSection() {
     if (imageXField.provided && !imageXField.valid) errors.push(`imageX must be a number: ${imageXField.raw}`);
     if (imageYField.provided && !imageYField.valid) errors.push(`imageY must be a number: ${imageYField.raw}`);
     if (imageWidthField.provided && !imageWidthField.valid) errors.push(`imageWidth must be a number: ${imageWidthField.raw}`);
+    if (imageUrl && !/^https?:\/\//i.test(imageUrl)) errors.push(`image must be an http or https URL: ${imageUrl}`);
     if (durationDaysField.provided && !durationDaysField.valid) errors.push(`durationDays must be a whole number: ${durationDaysField.raw}`);
     if (durationDaysField.provided && durationDaysField.value !== undefined && durationDaysField.value < 0) errors.push(`durationDays must be zero or greater: ${durationDaysField.raw}`);
     if (expiresAtField.provided && !expiresAtField.valid) errors.push(`expiresAt must be a number: ${expiresAtField.raw}`);
@@ -743,6 +749,7 @@ function BulkCsvImportSection() {
       telegram: csvString(data, "telegram") || undefined,
       ownerName: csvString(data, "ownerName") || undefined,
       theme: themeValue,
+      imageUrl: csvString(data, "image") || undefined,
       imageMode,
       imageX: imageXField.value,
       imageY: imageYField.value,
@@ -765,6 +772,7 @@ function BulkCsvImportSection() {
       y: yField.value,
       rotation: rotationField.value,
       width: widthField.value,
+      ...(imageUrl ? { imageUrl } : {}),
     };
 
     return { payload, errors };
@@ -826,7 +834,10 @@ function BulkCsvImportSection() {
       for (let index = 0; index < readyRows.length; index++) {
         const { resolved } = readyRows[index];
         if (!resolved.payload) continue;
-        await createCard(resolved.payload);
+        const imageUrl = resolved.payload.imageUrl;
+        const { imageUrl: _imageUrl, ...payload } = resolved.payload;
+        const imageIds = imageUrl ? [ (await storeImageFromUrl({ imageUrl })).storageId ] : undefined;
+        await createCard(imageIds ? { ...payload, imageIds } : payload);
         setProgress({ done: index + 1, total: readyRows.length });
       }
       setOk(`Imported ${readyRows.length} card${readyRows.length === 1 ? "" : "s"}.`);
@@ -883,54 +894,51 @@ function BulkCsvImportSection() {
       <p className="pg-hint">
         One row = one location. Small businesses can repeat the same name across multiple rows for each branch.
         Every row must provide its own plan, featured tier, status, duration, likes, clicks, and review count.
-        Contact, social, and image-url columns are supported too. <button className="pg-inline-link pg-download-link" type="button" onClick={() => void downloadTemplate()}><FileText size={12} className="pg-download-icon" /> <span>Download CSV template</span></button>
+        Contact, social, and image-link columns are supported too. <button className="pg-inline-link pg-download-link" type="button" onClick={() => void downloadTemplate()}><FileText size={12} className="pg-download-icon" /> <span>Download CSV template</span></button>
       </p>
-      <div
-        className={`pg-dropzone${dragActive ? " is-active" : ""}`}
-        onClick={openFilePicker}
-        onDragEnter={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setDragActive(true);
-        }}
-        onDragOver={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setDragActive(true);
-        }}
-        onDragLeave={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setDragActive(false);
-        }}
-        onDrop={handleDrop}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
+      <input ref={fileInputRef} type="file" accept=".csv,text/csv" onChange={(e) => void handleFile(e.target.files?.[0] ?? null)} style={{ display: "none" }} />
+      <div className="flex gap-4 h-20">
+        <div
+          className={`flex-[0.5] pg-dropzone${dragActive ? " is-active" : ""}`}
+          onClick={openFilePicker}
+          onDragEnter={(event) => {
             event.preventDefault();
-            openFilePicker();
-          }
-        }}
-        aria-label="Drop CSV file here or click to choose a file"
-      >
-        <div className="pg-dropzone-icon-wrap" aria-hidden="true">
-          <Upload className="pg-dropzone-icon" size={20} />
+            event.stopPropagation();
+            setDragActive(true);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setDragActive(true);
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setDragActive(false);
+          }}
+          onDrop={handleDrop}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openFilePicker();
+            }
+          }}
+          aria-label="Drop CSV file here or click to upload"
+        >
+          <div className="pg-dropzone-icon-wrap" aria-hidden="true">
+            <Upload className="pg-dropzone-icon" size={20} />
+          </div>
+          <div className="pg-dropzone-copy">
+            <strong>Drop CSV here</strong>
+            <span>or click to upload</span>
+          </div>
+          <div className="pg-dropzone-chip">CSV only</div>
         </div>
-        <div className="pg-dropzone-copy">
-          <strong>Drop CSV here</strong>
-          <span>or click to choose a file</span>
-        </div>
-        <div className="pg-dropzone-chip">CSV only</div>
-      </div>
-      <div className="pg-row-2">
-        <label className="pg-field">
-          <span>Choose file</span>
-          <input ref={fileInputRef} type="file" accept=".csv,text/csv" onChange={(e) => void handleFile(e.target.files?.[0] ?? null)} />
-        </label>
-        <div className="pg-field">
+        <div className="flex-1 pg-field mt-2">
           <span>Required columns</span>
-          <p className="pg-hint">name, category, line, city, state, country, theme, paidAmount, featuredTier, status, durationDays, likes, clicks, reviewCount. Optional: subcategory, ownerName, area, contact, social, image, rating, and analytics fields.</p>
+          <p className="pg-hint">name, category, line, city, state, country, theme, paidAmount, featuredTier, status, durationDays, likes, clicks, reviewCount. Optional: subcategory, ownerName, area, contact, social, image link, rating, and analytics fields.</p>
         </div>
       </div>
       {fileName ? <p className="pg-hint">Loaded <strong>{fileName}</strong> with {rows.length} row{rows.length === 1 ? "" : "s"}.</p> : null}
