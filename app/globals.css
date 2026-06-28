@@ -575,6 +575,20 @@ button { color: inherit; }
 }
 .details-back-card .card-tape { display: block; z-index: 3; }
 .details-back-card.image-top-layout .card-tape { display: block; z-index: 3; }
+.details-back-art,
+.wall-card-back-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: inherit;
+}
+.details-back-art > img,
+.wall-card-back-art > img,
+.image-swap-stage.backside-art > img {
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+}
 .details-back-image {
   position: absolute;
   inset: 0;
@@ -589,6 +603,116 @@ button { color: inherit; }
   cursor: grab;
 }
 .details-back-image:active { cursor: grabbing; }
+.details-back-art.layout-full > img,
+.wall-card-back-art.layout-full > img,
+.image-swap-stage.backside-art.layout-full > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.details-back-art.layout-horizontal,
+.wall-card-back-art.layout-horizontal,
+.image-swap-stage.backside-art.layout-horizontal {
+  display: block;
+}
+.details-back-art.layout-horizontal > img,
+.wall-card-back-art.layout-horizontal > img,
+.image-swap-stage.backside-art.layout-horizontal > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #111;
+  box-shadow: 0 2px 8px #0002;
+}
+.details-back-card.theme-biz .details-back-art.layout-horizontal::before,
+.theme-biz .wall-card-back-art.layout-horizontal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: linear-gradient(90deg, #111 0 48%, #ededed 48% 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+.details-back-card.theme-biz .details-back-art.layout-horizontal::after,
+.theme-biz .wall-card-back-art.layout-horizontal::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0 12%, #e7e7e7 12% 88%, transparent 88% 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+.theme-biz .wall-card-back-art.layout-horizontal > img,
+.details-back-card.theme-biz .details-back-art.layout-horizontal > img,
+.details-expanded-card .image-swap-stage.layout-horizontal > img {
+  object-position: 50% 50%;
+}
+.theme-ticket .wall-card-back-art.layout-horizontal > img,
+.details-back-card.theme-ticket .details-back-art.layout-horizontal > img {
+  object-position: 50% 50%;
+}
+.details-back-card.theme-ticket .details-back-art.layout-horizontal::before,
+.theme-ticket .wall-card-back-art.layout-horizontal::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 72%;
+  width: 3px;
+  background: repeating-linear-gradient(to bottom, #2a160d 0 4px, transparent 4px 8px);
+  z-index: 0;
+  pointer-events: none;
+}
+.details-back-card.theme-ticket .details-back-art.layout-horizontal::after,
+.theme-ticket .wall-card-back-art.layout-horizontal::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 28%;
+  top: 10px;
+  border-top: 1px dashed rgba(42, 22, 13, .58);
+  z-index: 0;
+  pointer-events: none;
+}
+.details-back-art.layout-photo,
+.wall-card-back-art.layout-photo,
+.image-swap-stage.backside-art.layout-photo {
+  display: block;
+}
+.details-back-art.layout-photo > img,
+.wall-card-back-art.layout-photo > img,
+.image-swap-stage.backside-art.layout-photo > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #111;
+  box-shadow: 0 2px 8px #0002;
+}
+.details-back-card.theme-photo .details-back-art.layout-photo,
+.theme-photo .wall-card-back-art.layout-photo {
+  background: #f3efe5;
+}
+.details-back-card.theme-photo .details-back-art.layout-photo::before,
+.theme-photo .wall-card-back-art.layout-photo::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(215, 210, 200, .9);
+  pointer-events: none;
+}
+.theme-photo .wall-card-back-art.layout-photo > img,
+.details-back-card.theme-photo .details-back-art.layout-photo > img,
+.details-expanded-card .image-swap-stage.layout-photo > img {
+  object-position: 50% 35%;
+}
 .details-back-empty {
   position: absolute;
   inset: 0;
@@ -795,8 +919,6 @@ button { color: inherit; }
   height: 100%;
   object-fit: cover;
   display: block;
-  -webkit-user-drag: none;
-  user-select: none;
 }
 .wall-card-back-empty {
   position: absolute;

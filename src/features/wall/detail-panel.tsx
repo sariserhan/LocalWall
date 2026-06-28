@@ -73,6 +73,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const phoneRevealed = revealedPhoneFor === String(card.id);
   const frontImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
+  const backLayout = card.theme === "photo" ? "photo" : card.imageMode === "business-card" || card.theme === "biz" || card.theme === "ticket" ? "horizontal" : "full";
 
   useEffect(() => setOptimisticSaved(saved), [saved]);
   useEffect(() => { setOptimisticLiked(liked); }, [liked]);
@@ -238,6 +239,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
         frontAlt={`${card.name} front image`}
         backAlt={`${card.name} back image`}
         className="sheet-image-swap-wrap"
+        layout={backLayout}
       />
       {card.message ? <div className="note-copy">{card.message}</div> : null}
       {card.price ? <div className="sheet-price">Starting at <strong>{card.price}</strong></div> : null}

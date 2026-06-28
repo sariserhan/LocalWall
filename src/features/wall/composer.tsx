@@ -308,6 +308,7 @@ function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: Com
 
 function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: ComposerForm; image?: string; backImage?: string; isVerified?: boolean }) {
   const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
+  const backLayout = form.theme === "photo" ? "photo" : form.theme === "biz" || form.theme === "ticket" ? "horizontal" : "full";
   const categoryLabel = form.category ? `${form.category}${form.subcategory ? ` · ${form.subcategory}` : ""}` : "Category";
   const titleLabel = form.name.trim() || "Your business";
   const lineLabel = form.line.trim() || "Your offer goes here.";
@@ -342,6 +343,7 @@ function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: Com
             frontAlt="Expanded card front image"
             backAlt="Expanded card back image"
             className="details-expanded-image-wrap"
+            layout={backLayout}
           />
         ) : null}
         <div className="details-expanded-copy">
@@ -395,6 +397,7 @@ function BackCardPreview({
   onImageScaleChange?: (scale: number) => void;
 }) {
   const format = getCardFormat(form.theme);
+  const backLayout = form.theme === "photo" ? "photo" : form.theme === "biz" || form.theme === "ticket" ? "horizontal" : "full";
   const zoomRef = useRef<{ id: number; y: number; scale: number } | null>(null);
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
   const [backPan, setBackPan] = useState({ x: 50, y: 35 });
@@ -464,17 +467,19 @@ function BackCardPreview({
       <span className="card-tape" aria-hidden="true" />
       <div className="details-back-frame">
         {image ? (
-          <img
-            src={image}
-            alt=""
-            draggable={false}
-            className="details-back-image"
-            style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${backPan.x}% ${backPan.y}%` } as CSSProperties}
-            onPointerDown={handlePanPointerDown}
-            onPointerMove={handlePanPointerMove}
-            onPointerUp={handlePanPointerEnd}
-            onPointerCancel={handlePanPointerEnd}
-          />
+          <div className={`details-back-art backside-art layout-${backLayout}`}>
+            <img
+              src={image}
+              alt=""
+              draggable={false}
+              className="details-back-image"
+              style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${backPan.x}% ${backPan.y}%` } as CSSProperties}
+              onPointerDown={handlePanPointerDown}
+              onPointerMove={handlePanPointerMove}
+              onPointerUp={handlePanPointerEnd}
+              onPointerCancel={handlePanPointerEnd}
+            />
+          </div>
         ) : (
           <div className="details-back-empty" aria-hidden="true" />
         )}

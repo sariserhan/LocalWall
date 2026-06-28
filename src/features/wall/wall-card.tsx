@@ -48,6 +48,7 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
   const format = getCardFormat(displayTheme);
   const imageTopLayout = Boolean(cardImage && card.imageMode !== "business-card" && displayTheme !== "biz" && displayTheme !== "ticket");
+  const backLayout = displayTheme === "photo" ? "photo" : displayTheme === "biz" || displayTheme === "ticket" ? "horizontal" : "full";
 
   useEffect(() => {
     setRotationDraft(card.rotation);
@@ -135,7 +136,9 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const backFace = (
     <div className="wall-card-face wall-card-face-back">
       {backImage ? (
-        <img src={backImage} alt="" draggable={false} className="wall-card-back-image" />
+        <div className={`wall-card-back-art backside-art layout-${backLayout}`}>
+          <img src={backImage} alt="" draggable={false} className="wall-card-back-image" />
+        </div>
       ) : (
         <div className={`wall-card-back-empty theme-${displayTheme}`}>
           <strong>Back side</strong>

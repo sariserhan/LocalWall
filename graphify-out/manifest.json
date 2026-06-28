@@ -625,13 +625,13 @@
     "semantic_hash": ""
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782588079.658776,
-    "ast_hash": "e5d8b5f65d2500a15748270129f29a89",
+    "mtime": 1782630960.7384408,
+    "ast_hash": "e5d1e516d64ad8162f81300807444f1e",
     "semantic_hash": ""
   },
   "src/features/wall/wall-card.tsx": {
-    "mtime": 1782614314.5411723,
-    "ast_hash": "f02923a3cdd97e5a74767efd7e67343b",
+    "mtime": 1782630490.7571812,
+    "ast_hash": "c0a5535b3f76a5ed811bfee3788b723a",
     "semantic_hash": ""
   },
   "src/features/wall/wall-minimap.tsx": {
