@@ -5,6 +5,7 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useState } from "react";
 import { Toaster } from "@/lib/toast";
+import { GlobalAdminPanel } from "./global-admin-panel";
 import { GlobalOwnerDashboard } from "./global-owner-dashboard";
 import { GlobalBugReportModal } from "./global-bug-report-modal";
 import { GlobalContactModal } from "./global-contact-modal";
@@ -36,7 +37,7 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl }: AppPr
         },
       }}
     >
-    <ConnectedProviders convexUrl={convexUrl}>{children}</ConnectedProviders>
+      <ConnectedProviders convexUrl={convexUrl}>{children}</ConnectedProviders>
     </ClerkProvider>
   );
 }
@@ -46,6 +47,7 @@ function ConnectedProviders({ children, convexUrl }: { children: React.ReactNode
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       {children}
+      <GlobalAdminPanel />
       <GlobalBugReportModal />
       <GlobalContactModal />
       <GlobalOwnerDashboard />

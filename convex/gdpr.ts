@@ -1,6 +1,7 @@
 import { action, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { deleteCardOwnedData } from "./cardCleanup";
 
 type GdprExport = {
   exportedAt: string;
@@ -83,7 +84,10 @@ export const _deleteMyData = internalMutation({
     ]);
     await Promise.all(allStorageIds.map((id) => ctx.storage.delete(id).catch(() => {})));
 
-    await Promise.all(cards.map((c) => ctx.db.delete(c._id)));
+    for (const card of cards) {
+      await deleteCardOwnedData(ctx, card._id);
+      await ctx.db.delete(card._id);
+    }
 
     const [reviews, savedCards, savedWalls, cardLikes, verificationRequests] = await Promise.all([
       ctx.db.query("reviews").withIndex("by_user_and_card", (q) => q.eq("userId", user._id)).collect(),

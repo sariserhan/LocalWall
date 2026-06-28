@@ -3,6 +3,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { action, env, internalMutation, mutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { deleteCardOwnedData } from "./cardCleanup";
 
 function configuredAdminEmails() {
   return new Set(
@@ -46,7 +47,7 @@ export const getDashboard = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const [cards, users, reports, bugReports, contactMessages, allCardStats, recentSearches, verificationRequests] = await Promise.all([
+    const [cards, users, reports, bugReports, contactMessages, allCardStats, recentSearches, verificationRequests, authEvents, recentWallVisits] = await Promise.all([
       ctx.db.query("cards").order("desc").take(150),
       ctx.db.query("users").order("desc").take(1000),
       ctx.db.query("reports").withIndex("by_status_and_createdAt", (q) => q.eq("status", "open")).order("desc").take(100),
@@ -55,9 +56,11 @@ export const getDashboard = query({
       ctx.db.query("cardStats").take(500),
       ctx.db.query("searchEvents").withIndex("by_createdAt", (q) => q.gte("createdAt", thirtyDaysAgo)).order("desc").take(1000),
       ctx.db.query("verificationRequests").order("desc").take(100),
+      ctx.db.query("authEvents").withIndex("by_createdAt", (q) => q.gte("createdAt", thirtyDaysAgo)).order("desc").take(1000),
+      ctx.db.query("wallVisits").withIndex("by_visitedAt", (q) => q.gte("visitedAt", thirtyDaysAgo)).order("desc").take(1000),
     ]);
 
-    const userById = new Map(users.map((user) => [user._id, user]));
+    const userById = new Map(users.map((user) => [String(user._id), user] as const));
     const cardCountByUser = new Map<string, number>();
     for (const card of cards) {
       const ownerId = String(card.ownerId);
@@ -65,9 +68,12 @@ export const getDashboard = query({
     }
     const statsMap = new Map(allCardStats.map((s) => [String(s.cardId), s]));
 
+    const formatLocation = (country: string, state: string, city: string) => [city, state, country].filter(Boolean).join(", ");
+
     // Aggregate search terms over the last 30 days
     const keywordCounts = new Map<string, number>();
     const categoryCounts = new Map<string, number>();
+    const locationCounts = new Map<string, number>();
     for (const search of recentSearches) {
       if (search.keyword) {
         const kw = search.keyword.toLowerCase();
@@ -76,9 +82,65 @@ export const getDashboard = query({
       if (search.category) {
         categoryCounts.set(search.category, (categoryCounts.get(search.category) ?? 0) + 1);
       }
+      const location = formatLocation(search.country, search.state, search.city);
+      locationCounts.set(location, (locationCounts.get(location) ?? 0) + 1);
     }
     const topKeywords = [...keywordCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([keyword, count]) => ({ keyword, count }));
     const topCategories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([category, count]) => ({ category, count }));
+    const topSearchLocations = [...locationCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([location, count]) => ({ location, count }));
+
+    const loginCountsByUser = new Map<string, number>();
+    const loginCountsByDay = new Map<string, number>();
+    for (const event of authEvents) {
+      loginCountsByUser.set(String(event.userId), (loginCountsByUser.get(String(event.userId)) ?? 0) + 1);
+      const day = new Date(event.createdAt).toISOString().slice(0, 10);
+      loginCountsByDay.set(day, (loginCountsByDay.get(day) ?? 0) + 1);
+    }
+
+    const signupCountsByDay = new Map<string, number>();
+    for (const user of users) {
+      if (user.createdAt < thirtyDaysAgo) continue;
+      const day = new Date(user.createdAt).toISOString().slice(0, 10);
+      signupCountsByDay.set(day, (signupCountsByDay.get(day) ?? 0) + 1);
+    }
+
+    const wallMap = new Map<string, { _id: Id<"walls">; path: string; viewCount: number; createdAt: number; updatedAt: number }>();
+    for (const wall of await ctx.db.query("walls").collect()) {
+      wallMap.set(String(wall._id), wall);
+    }
+    const wallVisitCounts = new Map<string, { visits: number; uniqueUsers: Set<string>; lastVisitedAt: number }>();
+    for (const visit of recentWallVisits) {
+      const current = wallVisitCounts.get(String(visit.wallId)) ?? { visits: 0, uniqueUsers: new Set<string>(), lastVisitedAt: 0 };
+      current.visits += 1;
+      if (visit.userId) current.uniqueUsers.add(String(visit.userId));
+      current.lastVisitedAt = Math.max(current.lastVisitedAt, visit.visitedAt);
+      wallVisitCounts.set(String(visit.wallId), current);
+    }
+    const topWalls = [...wallVisitCounts.entries()]
+      .map(([wallId, stats]) => {
+        const wall = wallMap.get(wallId);
+        return wall ? {
+          path: wall.path,
+          visits: stats.visits,
+          uniqueUsers: stats.uniqueUsers.size,
+          lastVisitedAt: stats.lastVisitedAt,
+        } : null;
+      })
+      .filter((wall): wall is { path: string; visits: number; uniqueUsers: number; lastVisitedAt: number } => Boolean(wall))
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 10);
+
+    const recentLoginUsers = [...loginCountsByUser.entries()]
+      .map(([userId, count]) => {
+        const user = userById.get(userId);
+        return {
+          id: user?._id ?? userId,
+          label: user?.displayName || user?.businessName || user?.username || user?.email || "Unknown user",
+          count,
+        };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
 
     return {
       stats: {
@@ -89,6 +151,8 @@ export const getDashboard = query({
         bugs: bugReports.length,
         messages: contactMessages.length,
         searches: recentSearches.length,
+        logins: authEvents.length,
+        wallVisits: recentWallVisits.length,
         pendingVerifications: verificationRequests.filter((r) => r.status === "pending").length,
       },
       cards: cards.map((card) => {
@@ -166,7 +230,24 @@ export const getDashboard = query({
       searchInsights: {
         topKeywords,
         topCategories,
+        topLocations: topSearchLocations,
         total: recentSearches.length,
+      },
+      wallInsights: {
+        totalVisits: recentWallVisits.length,
+        topWalls,
+        recentVisits: recentWallVisits.slice(0, 12).map((visit) => ({
+          wallId: visit.wallId,
+          path: wallMap.get(String(visit.wallId))?.path ?? "Unknown wall",
+          visitedAt: visit.visitedAt,
+          userName: visit.userId ? (userById.get(visit.userId)?.displayName || userById.get(visit.userId)?.username || userById.get(visit.userId)?.businessName || userById.get(visit.userId)?.email || "Signed-in user") : "Guest",
+        })),
+      },
+      userInsights: {
+        totalLogins: authEvents.length,
+        dailyLogins: [...loginCountsByDay.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date, count })),
+        dailySignups: [...signupCountsByDay.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date, count })),
+        topLoginUsers: recentLoginUsers,
       },
       verificationRequests: verificationRequests.map((req) => {
         const user = userById.get(req.userId);
@@ -352,8 +433,51 @@ export const removeCard = mutation({
     await audit(ctx, identity, "removeCard", args.cardId, { name: card.name, ownerId: card.ownerId });
     const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? []), ...(card.backImageIds ?? []), ...(card.backThumbnailImageIds ?? [])]);
     await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
+    await deleteCardOwnedData(ctx, card._id);
     await ctx.db.delete(card._id);
     return { success: true };
+  },
+});
+
+export const purgeOrphanCardData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const cards = await ctx.db.query("cards").collect();
+    const liveCardIds = new Set(cards.map((card) => String(card._id)));
+
+    const [reviews, savedCards, cardLikes, cardStats, dailyCardStats] = await Promise.all([
+      ctx.db.query("reviews").collect(),
+      ctx.db.query("savedCards").collect(),
+      ctx.db.query("cardLikes").collect(),
+      ctx.db.query("cardStats").collect(),
+      ctx.db.query("dailyCardStats").collect(),
+    ]);
+
+    const orphanReviews = reviews.filter((row) => !liveCardIds.has(String(row.cardId)));
+    const orphanSavedCards = savedCards.filter((row) => !liveCardIds.has(String(row.cardId)));
+    const orphanLikes = cardLikes.filter((row) => !liveCardIds.has(String(row.cardId)));
+    const orphanStats = cardStats.filter((row) => !liveCardIds.has(String(row.cardId)));
+    const orphanDailyStats = dailyCardStats.filter((row) => !liveCardIds.has(String(row.cardId)));
+
+    await Promise.all([
+      ...orphanReviews.map((row) => ctx.db.delete(row._id)),
+      ...orphanSavedCards.map((row) => ctx.db.delete(row._id)),
+      ...orphanLikes.map((row) => ctx.db.delete(row._id)),
+      ...orphanStats.map((row) => ctx.db.delete(row._id)),
+      ...orphanDailyStats.map((row) => ctx.db.delete(row._id)),
+    ]);
+
+    return {
+      deleted: {
+        reviews: orphanReviews.length,
+        savedCards: orphanSavedCards.length,
+        cardLikes: orphanLikes.length,
+        cardStats: orphanStats.length,
+        dailyCardStats: orphanDailyStats.length,
+      },
+    };
   },
 });
 
@@ -368,6 +492,7 @@ export const deleteCardsByOwnerBatch = internalMutation({
       for (const imageId of storedImages) {
         await ctx.storage.delete(imageId);
       }
+      await deleteCardOwnedData(ctx, card._id);
       await ctx.db.delete(card._id);
     }
     if (cards.length === DELETE_OWNER_BATCH_SIZE) {
@@ -804,6 +929,7 @@ export const playgroundDeleteCard = mutation({
     if (!card) throw new Error("Card not found.");
     const storedImages = new Set([...card.imageIds, ...(card.thumbnailImageIds ?? []), ...(card.backImageIds ?? []), ...(card.backThumbnailImageIds ?? [])]);
     await Promise.all([...storedImages].map((id) => ctx.storage.delete(id)));
+    await deleteCardOwnedData(ctx, card._id);
     await ctx.db.delete(args.cardId);
     return { success: true };
   },
@@ -820,6 +946,7 @@ export const playgroundDeleteAllMyCards = mutation({
     for (const card of cards) {
       const storedImages = [...card.imageIds, ...(card.thumbnailImageIds ?? []), ...(card.backImageIds ?? []), ...(card.backThumbnailImageIds ?? [])];
       for (const id of storedImages) await ctx.storage.delete(id);
+      await deleteCardOwnedData(ctx, card._id);
       await ctx.db.delete(card._id);
       deleted++;
     }

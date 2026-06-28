@@ -182,7 +182,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user_and_card", ["userId", "cardId"])
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_card", ["cardId"]),
 
   reports: defineTable({
     cardId: v.id("cards"),
@@ -266,7 +267,15 @@ export default defineSchema({
     visitedAt: v.number(),
   })
     .index("by_wall", ["wallId"])
-    .index("by_wall_and_user", ["wallId", "userId"]),
+    .index("by_wall_and_user", ["wallId", "userId"])
+    .index("by_visitedAt", ["visitedAt"]),
+
+  authEvents: defineTable({
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_user_and_createdAt", ["userId", "createdAt"]),
 
   dailyCardStats: defineTable({
     cardId: v.id("cards"),

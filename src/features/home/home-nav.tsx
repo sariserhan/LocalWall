@@ -1,11 +1,14 @@
 "use client";
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { CreditCard, Download, LayoutDashboard, TrendingUp } from "lucide-react";
+import { useQuery } from "convex/react";
+import { CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
 import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
+import { api } from "../../../convex/_generated/api";
+import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
 import { HomePostButton } from "./home-post-button";
 import { ClerkMyDataPage } from "../wall/clerk-my-data-page";
@@ -16,6 +19,7 @@ export function HomeNav() {
   const router = useRouter();
   const pathname = usePathname();
   const isTrending = pathname === "/trending";
+  const adminAccess = useQuery(api.admin.getAccess, isSignedIn ? {} : "skip") as { isAdmin: boolean } | undefined;
 
   return (
     <header className={`home-nav${isTrending ? " home-nav--trending" : ""}`}>
@@ -37,6 +41,13 @@ export function HomeNav() {
               <ClerkMyDataPage />
             </UserButton.UserProfilePage>
             <UserButton.MenuItems>
+              {adminAccess?.isAdmin ? (
+                <UserButton.Action
+                  label="Admin"
+                  labelIcon={<ShieldCheck size={16} />}
+                  onClick={() => openAdminPanel()}
+                />
+              ) : null}
               <UserButton.Action
                 label="My board"
                 labelIcon={<LayoutDashboard size={16} />}

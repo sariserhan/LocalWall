@@ -4,10 +4,9 @@ import { AlertTriangle, BarChart2, Bookmark, Bug, Check, Eye, EyeOff, ExternalLi
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AdminPlayground } from "./admin-playground";
-import { LocationCombobox } from "./location-combobox";
 
 export interface AdminDashboardData {
-  stats: { cards: number; published: number; users: number; reports: number; bugs: number; messages: number; searches: number; pendingVerifications?: number };
+  stats: { cards: number; published: number; users: number; reports: number; bugs: number; messages: number; searches: number; logins?: number; wallVisits?: number; pendingVerifications?: number };
   cards: Array<{
     id: Id<"cards">;
     name: string;
@@ -40,7 +39,18 @@ export interface AdminDashboardData {
   reports: Array<{ id: Id<"reports">; cardId: Id<"cards">; cardName: string; reason: string; details?: string; createdAt: number }>;
   bugReports: Array<{ id: Id<"bugReports">; page: string; reason: string; details?: string; reporterName?: string; reporterEmail?: string; createdAt: number }>;
   contactMessages: Array<{ id: Id<"contactMessages">; page: string; topic: string; message: string; reporterName?: string; reporterUsername?: string; reporterEmail?: string; reporterBusinessName?: string; reporterPhone?: string; createdAt: number }>;
-  searchInsights?: { topKeywords: Array<{ keyword: string; count: number }>; topCategories: Array<{ category: string; count: number }>; total: number };
+  searchInsights?: { topKeywords: Array<{ keyword: string; count: number }>; topCategories: Array<{ category: string; count: number }>; topLocations: Array<{ location: string; count: number }>; total: number };
+  wallInsights?: {
+    totalVisits: number;
+    topWalls: Array<{ path: string; visits: number; uniqueUsers: number; lastVisitedAt: number }>;
+    recentVisits: Array<{ wallId: Id<"walls">; path: string; visitedAt: number; userName: string }>;
+  };
+  userInsights?: {
+    totalLogins: number;
+    dailyLogins: Array<{ date: string; count: number }>;
+    dailySignups: Array<{ date: string; count: number }>;
+    topLoginUsers: Array<{ id: Id<"users"> | string; label: string; count: number }>;
+  };
   verificationRequests?: Array<{
     id: Id<"verificationRequests">;
     userId: Id<"users">;
@@ -60,6 +70,7 @@ interface AdminPanelProps {
   onClose: () => void;
   onSetCardStatus: (cardId: Id<"cards">, status: "published" | "hidden") => Promise<void>;
   onDeleteCard: (cardId: Id<"cards">) => Promise<void>;
+  onPurgeOrphanCardData: () => Promise<void>;
   onDeleteCardsByOwner: (userId: Id<"users">) => Promise<void>;
   onBlockUser: (userId: Id<"users">) => Promise<void>;
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
@@ -75,12 +86,11 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDeleteCardsByOwner, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
-  const [tab, setTab] = useState<"cards" | "users" | "reports" | "bugs" | "contact" | "analytics" | "verification" | "playground">("cards");
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPurgeOrphanCardData, onDeleteCardsByOwner, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+  const [tab, setTab] = useState<"cards" | "users" | "reports" | "bugs" | "contact" | "analytics" | "verification" | "playground" | "maintenance">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminDashboardData["cards"][number] | null>(null);
-  const [selectedOwnerId, setSelectedOwnerId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
@@ -90,24 +100,39 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
   const bugReports = useMemo(() => (data?.bugReports ?? []).filter((bugReport) => !deferredQuery || [bugReport.page, bugReport.reason, bugReport.details, bugReport.reporterName, bugReport.reporterEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.bugReports, deferredQuery]);
   const contactMessages = useMemo(() => (data?.contactMessages ?? []).filter((contactMessage) => !deferredQuery || [contactMessage.page, contactMessage.topic, contactMessage.message, contactMessage.reporterName, contactMessage.reporterUsername, contactMessage.reporterBusinessName, contactMessage.reporterEmail, contactMessage.reporterPhone].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.contactMessages, deferredQuery]);
   const cardsById = useMemo(() => new Map((data?.cards ?? []).map((card) => [String(card.id), card])), [data?.cards]);
-  const ownerOptions = useMemo(() => (data?.users ?? []).map((user) => {
-    const parts = [
-      user.displayName?.trim(),
-      user.username?.trim() ? `@${user.username.trim()}` : undefined,
-      user.businessName?.trim(),
-      user.email?.trim(),
-    ].filter(Boolean);
-    return { value: String(user.id), label: parts.join(" · ") || "Unnamed user" };
-  }), [data?.users]);
-  const selectedOwner = useMemo(() => (data?.users ?? []).find((user) => String(user.id) === selectedOwnerId), [data?.users, selectedOwnerId]);
-  const selectedOwnerLabel = selectedOwner ? [selectedOwner.displayName?.trim(), selectedOwner.username?.trim() ? `@${selectedOwner.username.trim()}` : undefined, selectedOwner.businessName?.trim(), selectedOwner.email?.trim()].filter(Boolean).join(" · ") || "Unnamed user" : "";
-
-  useEffect(() => {
-    if (selectedOwnerId && !ownerOptions.some((option) => option.value === selectedOwnerId)) {
-      setSelectedOwnerId("");
-    }
-  }, [ownerOptions, selectedOwnerId]);
-
+  const maxLoginCount = data?.userInsights ? Math.max(1, ...data.userInsights.dailyLogins.map((day) => day.count)) : 1;
+  const matchesAnalyticsQuery = (value: string) => !deferredQuery || value.toLowerCase().includes(deferredQuery);
+  const analyticsSearchInput = tab === "analytics" ? (
+    <label className="admin-panel-search">
+      <Search />
+      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search analytics" aria-label="Search analytics" />
+    </label>
+  ) : null;
+  const searchPlaceholder = tab === "users"
+    ? "Search users"
+    : tab === "cards"
+    ? "Search cards"
+    : tab === "reports"
+    ? "Search reports"
+    : tab === "bugs"
+    ? "Search bug reports"
+    : tab === "contact"
+    ? "Search messages"
+    : tab === "verification"
+    ? "Search verifications"
+    : `Search ${tab}`;
+  const panelSearch = tab !== "analytics" && tab !== "maintenance" && tab !== "playground" ? (
+    <label className="admin-panel-search" data-tab={tab}>
+      <Search />
+      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} />
+    </label>
+  ) : null;
+  const analyticsKeywords = data?.searchInsights?.topKeywords.filter(({ keyword }) => matchesAnalyticsQuery(keyword)) ?? [];
+  const analyticsCategories = data?.searchInsights?.topCategories.filter(({ category }) => matchesAnalyticsQuery(category)) ?? [];
+  const analyticsLocations = data?.searchInsights?.topLocations.filter(({ location }) => matchesAnalyticsQuery(location)) ?? [];
+  const analyticsWalls = data?.wallInsights?.topWalls.filter(({ path }) => matchesAnalyticsQuery(path)) ?? [];
+  const analyticsRecentVisits = data?.wallInsights?.recentVisits.filter(({ path, userName }) => matchesAnalyticsQuery(path) || matchesAnalyticsQuery(userName)) ?? [];
+  const analyticsCards = data?.cards.filter((card) => matchesAnalyticsQuery(card.name) || matchesAnalyticsQuery(card.city) || matchesAnalyticsQuery(card.state) || matchesAnalyticsQuery(card.country)) ?? [];
   const sendMessage = (email: string | undefined, context: string) => {
     if (!email) {
       setError("This owner has no public email address.");
@@ -145,14 +170,15 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
     }
   };
 
-  const deleteAllCardsForOwner = async () => {
-    if (!selectedOwnerId) return;
-    setBusyId(selectedOwnerId);
+  const purgeOrphanCardData = async () => {
+    const confirmed = window.confirm("Delete orphaned reviews, saved cards, likes, stats, and daily stats for cards that no longer exist?");
+    if (!confirmed) return;
+    setBusyId("purge-orphans");
     setError(null);
     try {
-      await onDeleteCardsByOwner(selectedOwnerId as Id<"users">);
+      await onPurgeOrphanCardData();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The cards could not be deleted.");
+      setError(cause instanceof Error ? cause.message : "The orphaned data could not be deleted.");
     } finally {
       setBusyId(null);
     }
@@ -162,7 +188,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
     <div className="dashboard-backdrop admin-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="owner-dashboard admin-panel" aria-label="Admin panel">
         <header className="dashboard-header">
-          <div><span>WALL ADMINISTRATION</span><h2>Admin panel</h2></div>
+          <div><span>LOCALWALL ADMINISTRATION</span><h2>Admin panel</h2></div>
           <button className="icon-btn" onClick={onClose} aria-label="Close admin panel"><X /></button>
         </header>
 
@@ -170,10 +196,19 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
           <div><ShieldCheck /><span>Published cards</span><strong>{data?.stats.published ?? "—"}</strong></div>
           <div><Eye /><span>Recent cards</span><strong>{data?.stats.cards ?? "—"}</strong></div>
           <div><UserRound /><span>Recent users</span><strong>{data?.stats.users ?? "—"}</strong></div>
+          <div><Check /><span>Logins (30d)</span><strong>{data?.stats.logins ?? "—"}</strong></div>
           <div><Flag /><span>Open reports</span><strong>{data?.stats.reports ?? "—"}</strong></div>
           <div><Bug /><span>Open bugs</span><strong>{data?.stats.bugs ?? "—"}</strong></div>
           <div><Mail /><span>Contact messages</span><strong>{data?.stats.messages ?? "—"}</strong></div>
           <div><Search /><span>Searches (30d)</span><strong>{data?.stats.searches ?? "—"}</strong></div>
+          <div><MapPin /><span>Wall visits (30d)</span><strong>{data?.stats.wallVisits ?? "—"}</strong></div>
+          <div className="admin-stats-link">
+            <ExternalLink />
+            <span>Shortcut</span>
+            <button type="button" className="admin-stats-button" onClick={() => window.open("/admin/wall", "_blank", "noopener,noreferrer")}>
+              Go to admin/wall page
+            </button>
+          </div>
         </div>
 
         <div className="admin-controls">
@@ -187,11 +222,11 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
             <button role="tab" aria-selected={tab === "verification"} className={tab === "verification" ? "selected" : ""} onClick={() => setTab("verification")}>
               <ShieldCheck size={13} /> Verifications{(data?.stats.pendingVerifications ?? 0) > 0 ? <span className="admin-tab-badge">{data?.stats.pendingVerifications}</span> : null}
             </button>
+            <button role="tab" aria-selected={tab === "maintenance"} className={tab === "maintenance" ? "selected" : ""} onClick={() => setTab("maintenance")}><Trash2 size={13} /> Maintenance</button>
             <button role="tab" aria-selected={tab === "playground"} className={`${tab === "playground" ? "selected" : ""} admin-tab-playground`} onClick={() => setTab("playground")}>
               <FlaskConical size={13} /> Playground
             </button>
           </div>
-          {tab !== "analytics" ? <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}`} aria-label={`Search ${tab}`} /></label> : null}
         </div>
 
         {error ? <div className="dashboard-error" role="alert">{error}</div> : null}
@@ -199,6 +234,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
 
         {data && tab === "cards" ? (
           <div className="admin-list" role="tabpanel">
+            {panelSearch}
             {cards.map((card) => {
               const busy = busyId === String(card.id);
               return (
@@ -234,27 +270,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
 
         {data && tab === "users" ? (
           <div className="admin-users-panel" role="tabpanel">
-            <div className="admin-owner-delete">
-              <div className="admin-owner-delete-copy">
-                <h3>Delete all cards by creator</h3>
-                <p>Type a user name, username, business name, or email, then choose the account from the dropdown.</p>
-              </div>
-              <div className="admin-owner-delete-controls">
-                <LocationCombobox
-                  value={selectedOwnerId}
-                  options={ownerOptions}
-                  onChange={setSelectedOwnerId}
-                  placeholder="Search users or creators"
-                />
-                <button className="secondary danger-action" disabled={!selectedOwnerId || busyId === selectedOwnerId} onClick={deleteAllCardsForOwner}>
-                  <Trash2 /> Delete all cards
-                </button>
-              </div>
-              <div className="admin-owner-delete-meta">
-                <span>{selectedOwner ? `${selectedOwner.cardCount} cards in the current dashboard snapshot` : "Pick a creator to see the delete action."}</span>
-                {selectedOwnerLabel ? <strong>{selectedOwnerLabel}</strong> : null}
-              </div>
-            </div>
+            {panelSearch}
             <div className="admin-list">
             {users.map((user) => (
               <article className="admin-row admin-user-row" key={String(user.id)}>
@@ -277,6 +293,19 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
                       setBusyId(null);
                     }
                   }}>{user.verified ? <><X size={13} /> Unverify</> : <><Check size={13} /> Verify</>}</button>
+                  <button className="secondary danger-action" disabled={busyId === String(user.id)} onClick={async () => {
+                    const confirmed = window.confirm(`Delete all cards for ${user.displayName || user.businessName || user.username || user.email || "this user"}?`);
+                    if (!confirmed) return;
+                    setBusyId(String(user.id));
+                    setError(null);
+                    try {
+                      await onDeleteCardsByOwner(user.id);
+                    } catch (cause) {
+                      setError(cause instanceof Error ? cause.message : "The cards could not be deleted.");
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}><Trash2 /> Delete cards</button>
                   <button className="secondary danger-action" disabled={busyId === String(user.id)} onClick={async () => {
                     setBusyId(String(user.id));
                     setError(null);
@@ -303,11 +332,57 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
 
         {data && tab === "analytics" ? (
           <div className="admin-analytics" role="tabpanel">
+            {analyticsSearchInput}
+            <div className="admin-analytics-intro">
+              <div>
+                <span>Analytics</span>
+                <h3>What people are doing</h3>
+                <p>Last 30 days of search, wall, and account activity.</p>
+              </div>
+              <div className="admin-analytics-summary admin-analytics-summary-tight">
+                <div><strong>{data.stats.searches ?? "—"}</strong><span>searches</span></div>
+                <div><strong>{data.stats.wallVisits ?? "—"}</strong><span>wall visits</span></div>
+                <div><strong>{data.stats.logins ?? "—"}</strong><span>logins</span></div>
+              </div>
+            </div>
+            <div className="admin-analytics-grid">
+            <div className="admin-analytics-section admin-analytics-section-highlight">
+              <h3>User logins <span className="admin-analytics-period">(last 30 days)</span></h3>
+              {data.userInsights ? (
+                <>
+                  <div className="admin-analytics-summary">
+                    <div><strong>{data.userInsights.totalLogins}</strong><span>sessions recorded</span></div>
+                    <div><strong>{data.userInsights.dailySignups.reduce((sum, day) => sum + day.count, 0)}</strong><span>new users</span></div>
+                  </div>
+                  {data.userInsights.dailyLogins.length > 0 ? (
+                    <ol className="admin-analytics-list">
+                      {data.userInsights.dailyLogins.slice(-7).map(({ date, count }) => (
+                        <li key={date}>
+                          <span className="admin-analytics-term">{dateLabel(new Date(`${date}T00:00:00Z`).getTime())}</span>
+                          <span className="admin-analytics-bar" style={{ width: `${Math.round((count / maxLoginCount) * 100)}%` }} />
+                          <span className="admin-analytics-count">{count}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : <p className="dashboard-empty">No login events yet.</p>}
+                  {data.userInsights.topLoginUsers.length > 0 ? (
+                    <div className="admin-analytics-mini">
+                      {data.userInsights.topLoginUsers.slice(0, 5).map((user) => (
+                        <div key={String(user.id)}>
+                          <strong>{user.label}</strong>
+                          <span>{user.count} sessions</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              ) : <p className="dashboard-empty">No login analytics yet.</p>}
+            </div>
             <div className="admin-analytics-section">
               <h3>Top search keywords <span className="admin-analytics-period">(last 30 days)</span></h3>
-              {data.searchInsights && data.searchInsights.topKeywords.length > 0 ? (
+              {analyticsKeywords.length > 0 ? (
                 <ol className="admin-analytics-list">
-                  {data.searchInsights.topKeywords.map(({ keyword, count }) => (
+                  {analyticsKeywords.map(({ keyword, count }) => (
                     <li key={keyword}>
                       <span className="admin-analytics-term">{keyword}</span>
                       <span className="admin-analytics-bar" style={{ width: `${Math.round((count / (data.searchInsights?.topKeywords[0]?.count ?? 1)) * 100)}%` }} />
@@ -319,9 +394,9 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
             </div>
             <div className="admin-analytics-section">
               <h3>Top searched categories <span className="admin-analytics-period">(last 30 days)</span></h3>
-              {data.searchInsights && data.searchInsights.topCategories.length > 0 ? (
+              {analyticsCategories.length > 0 ? (
                 <ol className="admin-analytics-list">
-                  {data.searchInsights.topCategories.map(({ category, count }) => (
+                  {analyticsCategories.map(({ category, count }) => (
                     <li key={category}>
                       <span className="admin-analytics-term">{category}</span>
                       <span className="admin-analytics-bar" style={{ width: `${Math.round((count / (data.searchInsights?.topCategories[0]?.count ?? 1)) * 100)}%` }} />
@@ -332,10 +407,48 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
               ) : <p className="dashboard-empty">No category searches yet.</p>}
             </div>
             <div className="admin-analytics-section">
-              <h3>Top converting cards</h3>
-              {data.cards.filter((c) => (c.conversions?.total ?? 0) > 0).length > 0 ? (
+              <h3>Top searched locations <span className="admin-analytics-period">(last 30 days)</span></h3>
+              {analyticsLocations.length > 0 ? (
                 <ol className="admin-analytics-list">
-                  {data.cards
+                  {analyticsLocations.map(({ location, count }) => (
+                    <li key={location}>
+                      <span className="admin-analytics-term">{location}</span>
+                      <span className="admin-analytics-bar" style={{ width: `${Math.round((count / (data.searchInsights?.topLocations[0]?.count ?? 1)) * 100)}%` }} />
+                      <span className="admin-analytics-count">{count}</span>
+                    </li>
+                  ))}
+                </ol>
+              ) : <p className="dashboard-empty">No location searches yet.</p>}
+            </div>
+            <div className="admin-analytics-section admin-analytics-section-wide">
+              <h3>Used walls <span className="admin-analytics-period">(last 30 days)</span></h3>
+              {analyticsWalls.length > 0 ? (
+                <ol className="admin-analytics-list">
+                  {analyticsWalls.map((wall) => (
+                    <li key={wall.path}>
+                      <span className="admin-analytics-term">{wall.path}</span>
+                      <span className="admin-analytics-card-stats">{wall.visits} visits · {wall.uniqueUsers} signed-in users</span>
+                      <span className="admin-analytics-count">{dateLabel(wall.lastVisitedAt)}</span>
+                    </li>
+                  ))}
+                </ol>
+              ) : <p className="dashboard-empty">No wall visits yet.</p>}
+              {analyticsRecentVisits.length ? (
+                <div className="admin-analytics-mini">
+                  {analyticsRecentVisits.slice(0, 5).map((visit) => (
+                    <div key={`${String(visit.wallId)}-${visit.visitedAt}`}>
+                      <strong>{visit.path}</strong>
+                      <span>{visit.userName} · {dateLabel(visit.visitedAt)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <div className="admin-analytics-section admin-analytics-section-wide">
+              <h3>Top converting cards</h3>
+              {analyticsCards.filter((c) => (c.conversions?.total ?? 0) > 0).length > 0 ? (
+                <ol className="admin-analytics-list">
+                  {analyticsCards
                     .filter((c) => (c.conversions?.total ?? 0) > 0)
                     .sort((a, b) => (b.conversions?.total ?? 0) - (a.conversions?.total ?? 0))
                     .slice(0, 10)
@@ -353,11 +466,13 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
                 </ol>
               ) : <p className="dashboard-empty">No conversion data yet.</p>}
             </div>
+            </div>
           </div>
         ) : null}
 
         {data && tab === "reports" ? (
           <div className="admin-list" role="tabpanel">
+            {panelSearch}
             {reports.map((report) => {
               const card = cardsById.get(String(report.cardId));
               const busy = busyId === String(report.id);
@@ -403,6 +518,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
 
         {data && tab === "bugs" ? (
           <div className="admin-list" role="tabpanel">
+            {panelSearch}
             {bugReports.map((bugReport) => {
               const busy = busyId === String(bugReport.id);
               return (
@@ -436,6 +552,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
 
         {data && tab === "contact" ? (
           <div className="admin-list" role="tabpanel">
+            {panelSearch}
             {contactMessages.map((contactMessage) => {
               const busy = busyId === String(contactMessage.id);
               return (
@@ -473,8 +590,32 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onDel
           </div>
         ) : null}
 
+        {data && tab === "maintenance" ? (
+          <div className="admin-maintenance-panel" role="tabpanel">
+            <div className="admin-maintenance-hero">
+              <div className="admin-maintenance-kicker">Maintenance</div>
+              <div className="admin-maintenance-copy">
+                <h3>Card cleanup</h3>
+                <p>Remove leftover rows for cards that no longer exist.</p>
+                <small>Cleanup removes reviews, saved cards, likes, stats, and daily stats only.</small>
+              </div>
+              <button className="secondary danger-action admin-maintenance-button" disabled={busyId === "purge-orphans"} onClick={() => void purgeOrphanCardData()}>
+                <Trash2 /> {busyId === "purge-orphans" ? "Purging…" : "Purge data"}
+              </button>
+            </div>
+            <div className="admin-maintenance-card">
+              <div className="admin-maintenance-copy">
+                <h3>Future tools</h3>
+                <p>Space for one-off moderation or cleanup actions.</p>
+              </div>
+              <div className="admin-maintenance-chip">Keep it short. Keep it scary.</div>
+            </div>
+          </div>
+        ) : null}
+
         {data && tab === "verification" ? (
           <div className="admin-list" role="tabpanel">
+            {panelSearch}
             {(data.verificationRequests ?? []).map((req) => {
               const busy = busyId === String(req.id);
               return (

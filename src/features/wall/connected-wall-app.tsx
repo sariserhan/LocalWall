@@ -10,13 +10,10 @@ import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/l
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import dynamic from "next/dynamic";
-import type { AdminDashboardData } from "./admin-panel";
 import { WallApp } from "./wall-app";
-
-const AdminPanel = dynamic(() => import("./admin-panel").then((m) => ({ default: m.AdminPanel })), { ssr: false, loading: () => null });
 import { getCardFormat, getImageCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 import { buildWallPath } from "@/lib/wall-slug";
+import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
 import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
 
@@ -151,32 +148,6 @@ export function ConnectedWallApp({
   const cardDailyStats = useQuery(api.cards.getMyCardDailyStats, isAuthenticated ? {} : "skip") as { dates: string[]; byCard: Record<string, number[]> } | null | undefined;
   const savedCards = useQuery(api.savedCards.list, isAuthenticated ? {} : "skip") as WallCard[] | undefined;
   const adminAccess = useQuery(api.admin.getAccess, isAuthenticated ? {} : "skip") as { isAdmin: boolean } | undefined;
-  const [adminOpen, setAdminOpen] = useState(false);
-
-  useEffect(() => {
-    if (!adminOpen) return;
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    const block = (e: WheelEvent | TouchEvent) => {
-      let el = e.target as HTMLElement | null;
-      while (el) {
-        if (el !== document.documentElement && el !== document.body && el.scrollHeight > el.clientHeight) return;
-        el = el.parentElement;
-      }
-      e.preventDefault();
-    };
-    document.addEventListener("wheel", block, { passive: false });
-    document.addEventListener("touchmove", block, { passive: false });
-    return () => {
-      document.documentElement.style.overflow = prev;
-      document.body.style.overflow = "";
-      document.removeEventListener("wheel", block);
-      document.removeEventListener("touchmove", block);
-    };
-  }, [adminOpen]);
-
-  const adminDashboard = useQuery(api.admin.getDashboard, adminOpen && adminAccess?.isAdmin ? {} : "skip") as AdminDashboardData | undefined;
   const profile = useQuery(api.cards.getMyProfile, isAuthenticated ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean; verificationStatus: "pending" | "approved" | "rejected" | null } | null | undefined;
   const updateProfileMutation = useMutation(api.cards.updateProfile);
   const generateUploadUrl = useMutation(api.cards.generateUploadUrl);
@@ -189,6 +160,7 @@ export function ConnectedWallApp({
   const updateCardPosition = useMutation(api.cards.updatePosition);
   const adminSetCardStatus = useMutation(api.admin.setCardStatus);
   const adminRemoveCard = useMutation(api.admin.removeCard);
+  const adminPurgeOrphanCardData = useMutation(api.admin.purgeOrphanCardData);
   const adminDeleteCardsByOwner = useMutation(api.admin.deleteAllCardsByOwner);
   const adminBlockUser = useMutation(api.admin.blockUser);
   const adminUnblockUser = useMutation(api.admin.unblockUser);
@@ -196,6 +168,7 @@ export function ConnectedWallApp({
   const adminResolveReport = useMutation(api.admin.resolveReport);
   const adminResolveBugReport = useMutation(api.admin.resolveBugReport);
   const adminResolveContactMessage = useMutation(api.admin.resolveContactMessage);
+  const recordLoginEvent = useMutation(api.authEvents.recordLogin);
   const recordWallVisit = useMutation(api.walls.recordVisit);
   const effectiveWallPath = isCardPage ? cardWallPath : (pathname && pathname !== "/" ? pathname : null);
   const wallData = useQuery(api.walls.getWall, effectiveWallPath ? { path: effectiveWallPath } : "skip");
@@ -228,6 +201,7 @@ export function ConnectedWallApp({
   const isProcessingCheckoutRef = useRef(false);
   const ownedCardIds = useMemo(() => new Set((ownerCards ?? []).map((card) => String(card.id))), [ownerCards]);
   const hasMergedLocalSavedCardsRef = useRef(false);
+  const hasRecordedLoginEventRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -257,6 +231,16 @@ export function ConnectedWallApp({
       resetAnalytics();
     }
   }, [isAuthenticated, isConvexAuthLoading, userId]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !userId) {
+      hasRecordedLoginEventRef.current = null;
+      return;
+    }
+    if (hasRecordedLoginEventRef.current === userId) return;
+    hasRecordedLoginEventRef.current = userId;
+    void recordLoginEvent().catch(() => {});
+  }, [isAuthenticated, userId, recordLoginEvent]);
 
   const hasRecordedCardWallRef = useRef(false);
 
@@ -563,7 +547,7 @@ export function ConnectedWallApp({
               <UserButton.Action
                 label="Admin"
                 labelIcon={<ShieldCheck size={16} />}
-                onClick={() => setAdminOpen(true)}
+                onClick={() => openAdminPanel()}
               />
             ) : null}
             <UserButton.Action
@@ -666,39 +650,6 @@ export function ConnectedWallApp({
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
       }}
       />
-      {adminOpen && adminAccess?.isAdmin ? (
-        <AdminPanel
-          data={adminDashboard}
-          onClose={() => setAdminOpen(false)}
-          onSetCardStatus={async (cardId, status) => {
-            await adminSetCardStatus({ cardId, status });
-            if (status === "hidden") setLayoutCards((current) => current?.filter((card) => String(card.id) !== String(cardId)) ?? current);
-          }}
-          onDeleteCard={async (cardId) => {
-            await adminRemoveCard({ cardId });
-            setLayoutCards((current) => current?.filter((card) => String(card.id) !== String(cardId)) ?? current);
-          }}
-          onDeleteCardsByOwner={async (userId) => {
-            await adminDeleteCardsByOwner({ userId });
-            setLayoutCards((current) => current?.filter((card) => String(card.ownerId) !== String(userId)) ?? current);
-          }}
-          onBlockUser={async (userId) => {
-            await adminBlockUser({ userId });
-            setLayoutCards((current) => current?.map((card) => String(card.ownerId) === String(userId) ? { ...card, status: "hidden" } : card) ?? current);
-          }}
-          onUnblockUser={async (userId, restoreCards) => {
-            await adminUnblockUser({ userId, restoreCards });
-            if (!restoreCards) return;
-            setLayoutCards(null);
-          }}
-          onVerifyUser={async (userId, verified) => { await adminVerifyUser({ userId, verified }); }}
-          onResolveReport={async (reportId) => { await adminResolveReport({ reportId }); }}
-          onResolveBugReport={async (bugReportId) => { await adminResolveBugReport({ bugReportId }); }}
-          onResolveContactMessage={async (contactMessageId) => { await adminResolveContactMessage({ contactMessageId }); }}
-          onApproveVerification={async (requestId) => { await adminApproveVerification({ requestId }); }}
-          onRejectVerification={async (requestId) => { await adminRejectVerification({ requestId }); }}
-        />
-      ) : null}
     </>
   );
 }

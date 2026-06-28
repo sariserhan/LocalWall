@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { deleteCardOwnedData } from "./cardCleanup";
 
 const category = v.union(
   v.literal("Services"),
@@ -630,6 +631,7 @@ export const remove = mutation({
     if (!card || card.ownerId !== user._id) throw new Error("You can only delete your own cards.");
     const storedImages = new Set<Id<"_storage">>([...card.imageIds, ...(card.thumbnailImageIds ?? [])]);
     await Promise.all([...storedImages].map((imageId) => ctx.storage.delete(imageId)));
+    await deleteCardOwnedData(ctx, card._id);
     await ctx.db.delete(card._id);
     return { success: true };
   },

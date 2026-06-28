@@ -9,7 +9,9 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as authEvents from "../authEvents.js";
 import type * as bugReports from "../bugReports.js";
+import type * as cardCleanup from "../cardCleanup.js";
 import type * as cards from "../cards.js";
 import type * as contactMessages from "../contactMessages.js";
 import type * as crons from "../crons.js";
@@ -34,7 +36,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  authEvents: typeof authEvents;
   bugReports: typeof bugReports;
+  cardCleanup: typeof cardCleanup;
   cards: typeof cards;
   contactMessages: typeof contactMessages;
   crons: typeof crons;
