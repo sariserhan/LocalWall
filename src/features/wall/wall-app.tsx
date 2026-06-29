@@ -226,6 +226,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     }
   }, [flipStorageKey, flippedCardIds]);
   const [listView, setListView] = useState(false);
+  const [ownCardsOnly, setOwnCardsOnly] = useState(false);
+  const [ownCardsOnlyReady, setOwnCardsOnlyReady] = useState(false);
   const [pendingCard, setPendingCard] = useState<CardDraft | null>(null);
   const [placement, setPlacement] = useState<Placement>({ x: 40, y: 170 });
   const [dragging, setDragging] = useState(false);
@@ -278,6 +280,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const moveOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const movePositionRef = useRef<Placement | null>(null);
   const closingCardRef = useRef<string | null>(null);
+  const syncedCardParamRef = useRef<string | null>(null);
   const autoOpenComposerRef = useRef(searchParams.get("post") === "1");
   const didTriggerSignInRef = useRef(false);
   const currentCardParam = initialCardId ?? searchParams.get("card");
@@ -289,18 +292,56 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = window.localStorage.getItem("localwall-own-cards-only-v1");
+      if (stored === "1") setOwnCardsOnly(true);
+    } catch {
+      // Storage is optional; the toggle still works for the current session.
+    }
+    setOwnCardsOnlyReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ownCardsOnlyReady) return;
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem("localwall-own-cards-only-v1", ownCardsOnly ? "1" : "0");
+    } catch {
+      // Storage is optional; the toggle still works for the current session.
+    }
+  }, [ownCardsOnly, ownCardsOnlyReady]);
+
+  useEffect(() => {
     if (cards.length === 0) return;
     const sharedCardId = currentCardParam;
     if (!sharedCardId) return;
     if (closingCardRef.current === sharedCardId) return;
+    if (syncedCardParamRef.current === sharedCardId) return;
+    const selectedCardId = selected?.id ? String(selected.id) : null;
+    if (selectedCardId && (selectedCardId === sharedCardId || selectedCardId.startsWith(sharedCardId) || sharedCardId.startsWith(selectedCardId))) {
+      syncedCardParamRef.current = sharedCardId;
+      return;
+    }
     const sharedCard = cards.find((card) => {
       const fullId = String(card.id);
       return fullId === sharedCardId || fullId.startsWith(sharedCardId);
     });
-    if (sharedCard && String(selected?.id) !== sharedCardId) {
+    if (sharedCard) {
+      if (ownCardsOnly && (!ownedCardIds || !ownedCardIds.has(String(sharedCard.id)))) {
+        syncedCardParamRef.current = sharedCardId;
+        return;
+      }
+      syncedCardParamRef.current = sharedCardId;
       setSelected(sharedCard);
     }
-  }, [cards, currentCardParam, selected?.id]);
+  }, [cards, currentCardParam, ownCardsOnly, ownedCardIds, selected?.id]);
+
+  useEffect(() => {
+    if (!ownCardsOnly || !selected || !ownedCardIds) return;
+    if (ownedCardIds.has(String(selected.id))) return;
+    setSelected(null);
+  }, [ownCardsOnly, ownedCardIds, selected]);
 
   const syncCardRoute = (cardId: string | null) => {
     const next = new URLSearchParams(window.location.search);
@@ -317,6 +358,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
 
   const closeCard = () => {
     closingCardRef.current = currentCardParam;
+    syncedCardParamRef.current = currentCardParam;
     setSelected(null);
     const next = new URLSearchParams(window.location.search);
     next.delete("card");
@@ -719,6 +761,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     if (!locationReady) return cards;
     const needle = deferredQuery.toLowerCase();
     const filtered = cards.filter((card) => {
+      if (ownCardsOnly && !ownedCardIds?.has(String(card.id))) return false;
       if (category !== "All" && card.category !== category) return false;
       if (subcategory && card.subcategory !== subcategory) return false;
       if (selectedCountry && card.country !== selectedCountry) return false;
@@ -743,12 +786,13 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       if (tierDiff !== 0) return tierDiff;
       return fresh ? a.createdAt - b.createdAt : b.createdAt - a.createdAt;
     });
-  }, [cards, category, subcategory, deferredQuery, fresh, sortBy, filterHasWebsite, filterHasPhotos, filterFeaturedOnly, selectedCountry, selectedState, selectedCity, selectedNeighborhood, locationReady]);
+  }, [cards, category, subcategory, deferredQuery, fresh, sortBy, filterHasWebsite, filterHasPhotos, filterFeaturedOnly, selectedCountry, selectedState, selectedCity, selectedNeighborhood, locationReady, ownCardsOnly, ownedCardIds]);
 
   const similarCards = useMemo(() => {
     if (!selected) return [];
     return visible.filter((c) => String(c.id) !== String(selected.id) && c.category === selected.category).slice(0, 3);
   }, [selected, visible]);
+  const ownCardsHint = ownCardsOnly ? "Showing only your cards on this wall." : "Show only your cards on this wall.";
 
   const pendingCardsOnSelectedWall = useMemo(() => {
     if (!locationReady) return 0;
@@ -1359,11 +1403,22 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   <div className="share-option-qr-header"><QrCode size={14} /><span>QR — scan from screen</span></div>
                   {inlineQR
                     ? <img src={inlineQR} alt="QR code" className="share-qr-img" />
-                    : <div className="share-qr-placeholder" />}
+                  : <div className="share-qr-placeholder" />}
                 </div>
               </div>
             )}
           </div>
+          {ownedCardIds ? (
+            <button
+              className={ownCardsOnly ? "is-active" : ""}
+              onClick={() => { setOwnCardsOnly((v) => !v); setMobileMenuOpen(false); }}
+              aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
+              title={ownCardsHint}
+            >
+              <Bookmark fill={ownCardsOnly ? "currentColor" : "none"} />
+              <span>My cards</span>
+            </button>
+          ) : null}
           {pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
@@ -1574,6 +1629,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   />
                 ))}
               </div>
+            ) : ownCardsOnly ? (
+              <div className="empty-note empty-note-first">
+                <strong>No cards from you on this wall.</strong>
+                <span>Turn off the filter to see everyone again.</span>
+                <button className="primary" onClick={() => setOwnCardsOnly(false)}>Show all cards</button>
+              </div>
             ) : cards.length === 0 ? (
               <div className="empty-note empty-note-first">
                 <strong>Be the first in {selectedCity || locationLabel()}!</strong>
@@ -1611,6 +1672,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   />
                 );
               })
+            ) : ownCardsOnly ? (
+              <div className="empty-note empty-note-first">
+                <strong>No cards from you on this wall.</strong>
+                <span>Turn off the filter to see everyone again.</span>
+                <button className="primary" onClick={() => setOwnCardsOnly(false)}>Show all cards</button>
+              </div>
             ) : cards.length === 0 ? (
               <div className="empty-note empty-note-first">
                 <strong>Be the first in {selectedCity || locationLabel()}!</strong>
@@ -1623,6 +1690,17 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           )
         )}
         <div className="wall-tools">
+          {ownedCardIds ? (
+            <button
+              aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
+              title={ownCardsHint}
+              onClick={() => setOwnCardsOnly((v) => !v)}
+              className={ownCardsOnly ? "is-active" : ""}
+            >
+              <Bookmark fill={ownCardsOnly ? "currentColor" : "none"} />
+              <span>My cards</span>
+            </button>
+          ) : null}
           <button aria-label={listView ? "Switch to wall view" : "Switch to list view"} onClick={() => setListView((v) => !v)}>
             {listView ? <LayoutGrid /> : <LayoutList />}
             <span>{listView ? "Wall" : "List"}</span>

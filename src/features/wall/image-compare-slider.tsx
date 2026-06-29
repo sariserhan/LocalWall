@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 
 type ImageSwapViewerProps = {
   frontSrc?: string;
@@ -24,14 +24,6 @@ export function ImageSwapViewer({
   const [side, setSide] = useState<"front" | "back" | null>(() => (frontSrc ? "front" : backSrc ? "back" : null));
   const [pan, setPan] = useState({ x: 50, y: 50 });
   const dragRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
-
-  useEffect(() => {
-    setSide(frontSrc ? "front" : backSrc ? "back" : null);
-  }, [frontSrc, backSrc]);
-
-  useEffect(() => {
-    setPan({ x: 50, y: 50 });
-  }, [side, layout, frontSrc, backSrc]);
 
   const handlePanPointerDown = (event: PointerEvent<HTMLImageElement>) => {
     event.preventDefault();
