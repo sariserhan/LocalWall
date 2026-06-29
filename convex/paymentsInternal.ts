@@ -73,6 +73,7 @@ export const completePaidCard = internalMutation({
       telegram: payload.telegram,
       theme: payload.theme,
       imageMode: payload.imageMode,
+      cardShape: payload.cardShape,
       imageX: payload.imageX,
       imageY: payload.imageY,
       imageWidth: payload.imageWidth,

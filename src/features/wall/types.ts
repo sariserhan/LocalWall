@@ -45,10 +45,12 @@ export const SUBCATEGORY_OPTIONS: Record<Exclude<(typeof categories)[number], "A
   "Vehicles": ["Cars", "Trucks", "SUVs", "Motorcycles", "RVs", "Boats", "Commercial Vehicles", "Parts & Accessories", "Auto Services", "Vehicle Rentals"],
 };
 export const cardThemes = ["yellow", "paper", "pink", "cyan", "dark", "cream", "biz", "kraft", "blueprint", "photo", "ticket"] as const;
+export const businessCardShapes = ["vertical", "horizontal", "square"] as const;
 
 export type CardCategory = Exclude<(typeof categories)[number], "All">;
 export type CardTheme = (typeof cardThemes)[number];
 export type CardImageMode = "photo" | "business-card";
+export type BusinessCardShape = (typeof businessCardShapes)[number];
 
 export const cardFormats: Record<CardTheme, { width: number; minHeight: number }> = {
   yellow: { width: 214, minHeight: 210 },
@@ -64,12 +66,19 @@ export const cardFormats: Record<CardTheme, { width: number; minHeight: number }
   ticket: { width: 318, minHeight: 184 },
 };
 
-export function getCardFormat(theme: CardTheme) {
+const businessCardFormats: Record<BusinessCardShape, { width: number; minHeight: number }> = {
+  vertical: { width: 240, minHeight: 336 },
+  horizontal: { width: 336, minHeight: 240 },
+  square: { width: 284, minHeight: 284 },
+};
+
+export function getCardFormat(theme: CardTheme, businessCardShape: BusinessCardShape = "horizontal") {
+  if (theme === "biz") return businessCardFormats[businessCardShape];
   return cardFormats[theme];
 }
 
-export function getImageCardFormat(theme: CardTheme, imageMode?: CardImageMode) {
-  const format = getCardFormat(theme);
+export function getImageCardFormat(theme: CardTheme, imageMode?: CardImageMode, businessCardShape: BusinessCardShape = "horizontal") {
+  const format = getCardFormat(theme, businessCardShape);
   if (imageMode !== "photo") return format;
   return {
     width: format.width + 18,
@@ -107,6 +116,7 @@ export interface WallCard {
   telegram?: string;
   theme: CardTheme;
   imageMode?: CardImageMode;
+  cardShape?: BusinessCardShape;
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
@@ -180,6 +190,7 @@ export interface CardDraft {
   telegram?: string;
   theme: CardTheme;
   imageMode: CardImageMode;
+  cardShape?: BusinessCardShape;
   imageX?: number;
   imageY?: number;
   imageWidth?: number;

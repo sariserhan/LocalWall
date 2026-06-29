@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, Check, Clock3, ImagePlus, MapPin, Sparkles, Trash2, X } from "lucide-react";
 import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import { Country, State, City } from "country-state-city";
-import { categories, SUBCATEGORY_OPTIONS, getCardFormat, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
+import { businessCardShapes, categories, SUBCATEGORY_OPTIONS, getCardFormat, type BusinessCardShape, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 import { ImageSwapViewer } from "./image-compare-slider";
 
 interface ComposerProps {
@@ -38,6 +38,7 @@ interface ComposerForm {
   telegram: string;
   theme: CardTheme;
   imageMode: CardImageMode;
+  cardShape: BusinessCardShape;
   imageX: number;
   imageY: number;
   imageWidth: number;
@@ -84,6 +85,7 @@ const initialForm: ComposerForm = {
   telegram: "",
   theme: "yellow",
   imageMode: "photo",
+  cardShape: "horizontal",
   imageX: 50,
   imageY: 35,
   imageWidth: 90,
@@ -112,6 +114,12 @@ const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description
   { theme: "ticket", label: "Ticket", description: "Perforated coupon" },
   { theme: "kraft", label: "Kraft note", description: "Warm recycled stock" },
   { theme: "blueprint", label: "Blueprint", description: "Technical grid" },
+];
+
+const businessCardShapeOptions: ReadonlyArray<{ value: BusinessCardShape; label: string; description: string }> = [
+  { value: "vertical", label: "Vertical", description: "Tall and narrow" },
+  { value: "horizontal", label: "Horizontal", description: "Classic wide card" },
+  { value: "square", label: "Square", description: "Balanced and even" },
 ];
 
 const paymentOptions: ReadonlyArray<{ value: ComposerForm["paymentOption"]; price: string; duration: string; description: string; featured?: boolean; badge?: string }> = [
@@ -258,7 +266,7 @@ function LiveCardPreview({
 }) {
   const resizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
-  const format = getCardFormat(form.theme);
+  const format = form.imageMode === "business-card" ? getCardFormat("biz", form.cardShape) : getCardFormat(form.theme);
   const previewWidth = format.width;
   const location = formatWallLocation(form.area, form.city, form.state, form.country);
   const imageTopLayout = Boolean(image && form.imageMode !== "business-card" && form.theme !== "biz" && form.theme !== "ticket");
@@ -289,12 +297,21 @@ function LiveCardPreview({
     try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* pointer already released by browser */ }
   };
 
-  if (form.imageMode === "business-card" && image) {
+  if (form.imageMode === "business-card") {
     return (
-      <div className="composer-biz-preview" style={{ "--tape-w": "62px", "--tape-r": "-2deg", "--tape-l": "38%" } as CSSProperties} aria-label="Live card preview">
+      <article className={`wall-card composer-live-card theme-biz image-business-card biz-shape-${form.cardShape}`} style={{ "--w": `${format.width}px`, "--h": `${format.minHeight}px` } as CSSProperties} aria-label="Live card preview">
         <span className="card-tape" aria-hidden="true" />
-        <img src={image} alt="" draggable={false} className="composer-biz-img" />
-      </div>
+        <div className="wall-card-biz-wrap">
+          {image ? (
+            <img src={image} alt="" draggable={false} className="wall-card-biz-photo composer-biz-img" />
+          ) : (
+            <div className="composer-biz-empty" aria-hidden="true">
+              <strong>{businessCardShapeOptions.find((option) => option.value === form.cardShape)?.label ?? "Card"}</strong>
+              <span>Upload your finished card</span>
+            </div>
+          )}
+        </div>
+      </article>
     );
   }
 
@@ -453,7 +470,7 @@ function BackCardPreview({
   onImageScaleChange?: (scale: number) => void;
   onImagePanChange?: (x: number, y: number) => void;
 }) {
-  const format = getCardFormat(form.theme);
+  const format = form.imageMode === "business-card" ? getCardFormat("biz", form.cardShape) : getCardFormat(form.theme);
   const backLayout = form.theme === "photo" ? "photo" : "full";
   const zoomRef = useRef<{ id: number; y: number; scale: number } | null>(null);
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
@@ -590,7 +607,7 @@ function CardSidesPreview({
     const observer = new ResizeObserver(update);
     observer.observe(node);
     return () => observer.disconnect();
-  }, [form.theme, form.imageMode, form.imageHeight, form.rotation, form.name, form.line, form.message, form.price, form.category, form.subcategory, form.area, form.city, form.state, form.country, form.zipcode, frontImage, mode, isVerified]);
+  }, [form.theme, form.cardShape, form.imageMode, form.imageHeight, form.rotation, form.name, form.line, form.message, form.price, form.category, form.subcategory, form.area, form.city, form.state, form.country, form.zipcode, frontImage, mode, isVerified]);
 
   return (
     <div className={`card-sides-preview${stacked ? " is-stacked" : ""}`}>
@@ -921,7 +938,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       setFiles((current) => current.slice(0, 1));
       setPreviews((current) => current.slice(0, 1));
     }
-    setForm((value) => ({ ...value, imageMode }));
+    setForm((value) => ({ ...value, imageMode, cardShape: imageMode === "business-card" ? value.cardShape || "horizontal" : value.cardShape }));
   };
 
   useEffect(() => {
@@ -942,7 +959,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
         return;
       }
     }
-    const backFrame = getCardFormat(form.theme);
+    const backFrame = form.imageMode === "business-card" ? getCardFormat("biz", form.cardShape) : getCardFormat(form.theme);
     const bakedBackFiles = backFiles[0]
       ? [await bakeImageCrop(backFiles[0], backFrame.width, backFrame.minHeight, form.backImageX, form.backImageY, form.backImageScale)]
       : [];
@@ -1103,6 +1120,16 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
           </div>
         ) : step === 1 ? (
           <div className="composer-body design-step">
+            <fieldset className="image-use-picker design-image-mode-picker">
+              <div role="radiogroup" aria-label="Choose how to display the uploaded image">
+                <button type="button" role="radio" aria-checked={form.imageMode === "photo"} className={form.imageMode === "photo" ? "selected" : ""} onClick={() => chooseImageMode("photo")}>
+                  <ImagePlus /><span><strong>Place image in a card template</strong><small>Choose this if your upload is just a photo, logo, artwork, or picture. You’ll pick a card style below, and place your image into that design.</small></span>{form.imageMode === "photo" ? <Check /> : null}
+                </button>
+                <button type="button" role="radio" aria-checked={form.imageMode === "business-card"} className={form.imageMode === "business-card" ? "selected" : ""} onClick={() => chooseImageMode("business-card")}>
+                  <span className="business-card-icon" aria-hidden="true" /><span><strong>My upload is already the card</strong><small>Choose this if your upload is already a complete business card, flyer, ID-style card, or finished design. We’ll use the full image exactly as the card, so you won’t need to choose a style below.</small></span>{form.imageMode === "business-card" ? <Check /> : null}
+                </button>
+              </div>
+            </fieldset>
             <div className="upload-grid">
               {canUseFrontImages ? (
                 <div className="upload-zone-wrap">
@@ -1139,40 +1166,46 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   </button>
                 ) : null}
               </div>
-              {previews.length ? (
-                <fieldset className="image-use-picker upload-grid-actions">
-                  <div role="radiogroup" aria-label="Choose how to display the uploaded image">
-                    <button type="button" role="radio" aria-checked={form.imageMode === "photo"} className={form.imageMode === "photo" ? "selected" : ""} onClick={() => chooseImageMode("photo")}>
-                      <ImagePlus /><span><strong>Place image in a card template</strong><small>Choose this if your upload is just a photo, logo, artwork, or picture. You’ll pick a card style below, and place your image into that design.</small></span>{form.imageMode === "photo" ? <Check /> : null}
-                    </button>
-                    <button type="button" role="radio" aria-checked={form.imageMode === "business-card"} className={form.imageMode === "business-card" ? "selected" : ""} onClick={() => chooseImageMode("business-card")}>
-                      <span className="business-card-icon" aria-hidden="true" /><span><strong>My upload is already the card</strong><small>Choose this if your upload is already a complete business card, flyer, ID-style card, or finished design. We’ll use the full image exactly as the card, so you won’t need to choose a style below.</small></span>{form.imageMode === "business-card" ? <Check /> : null}
-                    </button>
-                  </div>
-                </fieldset>
-              ) : null}
             </div>
             <div className="safety-status" data-status={moderationStatus}>{moderationStatus === "checking" ? "Checking images and text for unsafe content…" : moderationError ?? "Images are checked for nudity and adult content before publishing."}</div>
-            <fieldset className={form.imageMode === "business-card" ? "styles-disabled" : ""}>
+            <fieldset>
               <legend>Card style</legend>
-              {form.imageMode === "business-card" ? <p className="style-lock-note">Your finished design will be shown as the full card. Switch to “Picture in a WALL style” to choose a style.</p> : null}
-              <div className="style-options" role="radiogroup" aria-label="Choose a card style">
-                {themeOptions.map(({ theme, label, description }) => (
-                  <button
-                    type="button"
-                    key={theme}
-                    className={`style-option style-${theme} ${form.theme === theme && form.imageMode !== "business-card" ? "selected" : ""}`}
-                    onClick={() => setForm((value) => ({ ...value, theme }))}
-                    disabled={form.imageMode === "business-card"}
-                    role="radio"
-                    aria-checked={form.theme === theme}
-                  >
-                    <span className="style-option-sample" aria-hidden="true"><i /><b /></span>
-                    <span className="style-option-copy"><strong>{label}</strong><small>{description}</small></span>
-                    {form.theme === theme && form.imageMode !== "business-card" ? <Check className="style-option-check" /> : null}
-                  </button>
-                ))}
-              </div>
+              {form.imageMode === "business-card" ? <p className="style-lock-note">Pick the shape that matches your finished card.</p> : null}
+              {form.imageMode === "business-card" ? (
+                <div className="style-options shape-options" role="radiogroup" aria-label="Choose a business card shape">
+                  {businessCardShapeOptions.map(({ value, label, description }) => (
+                    <button
+                      type="button"
+                      key={value}
+                      className={`style-option shape-option shape-${value} ${form.cardShape === value ? "selected" : ""}`}
+                      onClick={() => setForm((current) => ({ ...current, cardShape: value }))}
+                      role="radio"
+                      aria-checked={form.cardShape === value}
+                    >
+                      <span className="style-option-sample business-shape-sample" aria-hidden="true"><i /><b /></span>
+                      <span className="style-option-copy"><strong>{label}</strong><small>{description}</small></span>
+                      {form.cardShape === value ? <Check className="style-option-check" /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="style-options" role="radiogroup" aria-label="Choose a card style">
+                  {themeOptions.map(({ theme, label, description }) => (
+                    <button
+                      type="button"
+                      key={theme}
+                      className={`style-option style-${theme} ${form.theme === theme ? "selected" : ""}`}
+                      onClick={() => setForm((value) => ({ ...value, theme }))}
+                      role="radio"
+                      aria-checked={form.theme === theme}
+                    >
+                      <span className="style-option-sample" aria-hidden="true"><i /><b /></span>
+                      <span className="style-option-copy"><strong>{label}</strong><small>{description}</small></span>
+                      {form.theme === theme ? <Check className="style-option-check" /> : null}
+                    </button>
+                  ))}
+                </div>
+              )}
             </fieldset>
             <div className="preview-stage">
               <span>Live preview</span>

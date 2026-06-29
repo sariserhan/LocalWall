@@ -651,6 +651,7 @@ const PG_ADMIN_CATEGORY = v.union(
 );
 const PG_ADMIN_THEME = v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream"), v.literal("biz"), v.literal("kraft"), v.literal("blueprint"), v.literal("photo"), v.literal("ticket"));
 const PG_ADMIN_IMAGE_MODE = v.union(v.literal("photo"), v.literal("business-card"));
+const PG_ADMIN_CARD_SHAPE = v.optional(v.union(v.literal("vertical"), v.literal("horizontal"), v.literal("square")));
 const PG_ADMIN_FEATURED_TIER = v.optional(v.union(v.literal("bronze"), v.literal("silver"), v.literal("gold")));
 const PG_ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -684,6 +685,7 @@ const PG_ADMIN_CARD_ARGS = {
   backThumbnailImageIds: v.optional(v.array(v.id("_storage"))),
   theme: PG_ADMIN_THEME,
   imageMode: v.optional(PG_ADMIN_IMAGE_MODE),
+  cardShape: PG_ADMIN_CARD_SHAPE,
   imageX: v.optional(v.number()),
   imageY: v.optional(v.number()),
   imageWidth: v.optional(v.number()),
@@ -742,6 +744,7 @@ type PlaygroundCardArgs = {
   backImageIds?: Id<"_storage">[];
   backThumbnailImageIds?: Id<"_storage">[];
   imageMode?: "photo" | "business-card";
+  cardShape?: "vertical" | "horizontal" | "square";
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
@@ -775,7 +778,7 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
   const user = await ctx.db.get(userId);
   const baseArea = (args.area?.trim() || args.neighborhood?.trim() || args.city.trim());
   const rotation = args.rotation ?? 0;
-  const cardWidth = args.width ?? (args.imageMode === "business-card" ? 300 : 220);
+  const cardWidth = args.width ?? (args.imageMode === "business-card" ? (args.cardShape === "vertical" ? 240 : args.cardShape === "square" ? 284 : 336) : 220);
   const x = args.x ?? (4 + Math.random() * 82);
   const y = args.y ?? (40 + Math.random() * 1400);
   const status = args.status ?? (args.pending ? "hidden" : "published");
@@ -821,6 +824,7 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     telegram: args.telegram?.trim() || undefined,
     theme: args.theme as any,
     imageMode: args.imageMode,
+    cardShape: args.cardShape,
     imageX: args.imageX,
     imageY: args.imageY,
     imageWidth: args.imageWidth,

@@ -429,6 +429,7 @@ export function ConnectedWallApp({
       featuredTier: featuredTierArg,
       theme: draft.theme,
       imageMode: draft.imageMode,
+      cardShape: draft.cardShape,
       imageX: draft.imageX,
       imageY: draft.imageY,
       imageWidth: draft.imageWidth,
@@ -443,7 +444,7 @@ export function ConnectedWallApp({
       x: placement.x,
       y: placement.y,
       rotation: draft.rotation ?? 0,
-      width: draft.imageMode === "business-card" ? getCardFormat("biz").width : getImageCardFormat(draft.theme, draft.imageMode).width,
+      width: draft.imageMode === "business-card" ? getCardFormat("biz", draft.cardShape).width : getImageCardFormat(draft.theme, draft.imageMode).width,
     };
     const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> } | CreateCardRateLimit;
     if ("kind" in result && result.kind === "rate_limited") {

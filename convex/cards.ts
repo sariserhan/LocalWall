@@ -28,6 +28,7 @@ const category = v.union(
 );
 const theme = v.union(v.literal("yellow"), v.literal("paper"), v.literal("pink"), v.literal("cyan"), v.literal("dark"), v.literal("cream"), v.literal("biz"), v.literal("kraft"), v.literal("blueprint"), v.literal("photo"), v.literal("ticket"));
 const imageMode = v.union(v.literal("photo"), v.literal("business-card"));
+const cardShape = v.optional(v.union(v.literal("vertical"), v.literal("horizontal"), v.literal("square")));
 const MAX_CARD_Y = 1500;
 
 async function requireIdentity(ctx: { auth: { getUserIdentity: () => Promise<{ tokenIdentifier: string; subject: string; name?: string; email?: string; pictureUrl?: string } | null> } }) {
@@ -246,6 +247,7 @@ export const listPublished = query({
         telegram: card.telegram,
         theme: card.theme,
         imageMode: card.imageMode,
+        cardShape: card.cardShape,
         images: urls.filter((url): url is string => url !== null),
         thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
         backImages: backUrls.filter((url): url is string => url !== null),
@@ -315,6 +317,7 @@ export const getPublishedById = query({
       telegram: card.telegram,
       theme: card.theme,
       imageMode: card.imageMode,
+      cardShape: card.cardShape,
       images: urls.filter((url): url is string => url !== null),
       thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
       backImages: backUrls.filter((url): url is string => url !== null),
@@ -365,6 +368,7 @@ export const getCardForEmbed = query({
       email: isLive ? (card.email ?? null) : null,
       website: isLive ? (card.website ?? null) : null,
       theme: card.theme,
+      cardShape: card.cardShape,
       images: urls.filter((u): u is string => u !== null),
       thumbnailImages: thumbnailUrls.filter((u): u is string => u !== null),
       backImages: backUrls.filter((u): u is string => u !== null),
@@ -486,6 +490,7 @@ export const listMine = query({
         telegram: card.telegram,
         theme: card.theme,
         imageMode: card.imageMode,
+        cardShape: card.cardShape,
         images: urls.filter((url): url is string => url !== null),
         thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
         backImages: backUrls.filter((url): url is string => url !== null),
@@ -721,6 +726,7 @@ export const create = mutation({
     featuredTier: v.optional(v.union(v.literal("bronze"), v.literal("silver"), v.literal("gold"))),
     theme,
     imageMode: v.optional(imageMode),
+    cardShape,
     imageX: v.optional(v.number()),
     imageY: v.optional(v.number()),
     imageWidth: v.optional(v.number()),
@@ -799,7 +805,7 @@ export const create = mutation({
 
     const createdAt = Date.now();
     const rotation = args.rotation ?? 0;
-    const cardWidth = args.imageMode === "business-card" ? 300 : args.width;
+    const cardWidth = args.width;
     const normalizedPayload = {
       ...args,
       name: args.name.trim(),
@@ -867,6 +873,7 @@ export const create = mutation({
       telegram: args.telegram?.trim() || undefined,
       theme: args.theme,
       imageMode: args.imageMode,
+      cardShape: args.cardShape,
       imageX: args.imageX,
       imageY: args.imageY,
       imageWidth: args.imageWidth,
@@ -929,6 +936,7 @@ export const create = mutation({
       telegram: args.telegram?.trim() || undefined,
       theme: args.theme,
       imageMode: args.imageMode,
+      cardShape: args.cardShape,
       imageX: args.imageX,
       imageY: args.imageY,
       imageWidth: args.imageWidth,

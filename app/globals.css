@@ -255,6 +255,39 @@ button { color: inherit; }
   filter: none;
   object-fit: cover;
 }
+.wall-card.image-business-card .wall-card-biz-photo,
+.composer-live-card.image-business-card .composer-biz-img {
+  inset: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover !important;
+  filter: none !important;
+}
+.composer-biz-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed #c8c2b8;
+  background: linear-gradient(135deg, #fff, #f4f0e7);
+  color: #444;
+  text-align: center;
+}
+.composer-biz-empty strong {
+  font: 900 18px var(--font-barlow-condensed);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.composer-biz-empty span {
+  font: 700 10px var(--font-inter);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
 .wall-card.theme-biz .wall-card-back-art:not(.layout-horizontal) > img {
   position: absolute;
   inset: 0;
@@ -269,7 +302,7 @@ button { color: inherit; }
 }
 .theme-biz footer { border-top: 1px solid #ececec; padding-top: 8px; font: 500 9px var(--font-inter); color: #888; letter-spacing: .04em; }
 .theme-biz footer strong { font: 600 12px var(--font-inter); color: #111; }
-.wall-card.image-business-card { width: 300px; height: 180px; min-height: 180px; padding: 0; border: 0; background: #fff; overflow: visible; }
+.wall-card.image-business-card { width: var(--w); height: var(--h); min-height: var(--h); padding: 0; border: 0; background: #fff; overflow: visible; }
 .wall-card.image-business-card .card-copy, .wall-card.image-business-card footer { display: none; }
 .wall-card-biz-wrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .wall-card-biz-wrap img { -webkit-user-drag: none; user-select: none; }
@@ -1100,6 +1133,7 @@ button { color: inherit; }
   margin-top: 9px;
 }
 .image-use-picker.upload-grid-actions > div { margin-top: 0; }
+.design-image-mode-picker { margin-bottom: 14px; }
 .image-use-picker button {
   flex: 1;
   min-height: 82px;
@@ -1124,6 +1158,19 @@ button { color: inherit; }
 .style-lock-note { margin: 8px 0 0; padding: 10px 12px; border-left: 4px solid #f43d38; background: #f3f0e9; color: #555; font: 600 10px/1.4 var(--font-inter); }
 .styles-disabled .style-options { opacity: .42; }
 .styles-disabled .style-option { cursor: not-allowed; }
+.shape-options .business-shape-sample {
+  display: grid;
+  place-items: center;
+}
+.shape-options .business-shape-sample i {
+  display: block;
+  border: 2px solid currentColor;
+  background: #fff;
+  box-shadow: inset 0 -4px #f43d38;
+}
+.shape-vertical .business-shape-sample i { width: 13px; height: 24px; }
+.shape-horizontal .business-shape-sample i { width: 26px; height: 16px; }
+.shape-square .business-shape-sample i { width: 20px; height: 20px; }
 .rotation-field { display: grid; gap: 9px; padding: 14px 16px; border: 1px solid #aaa; background: var(--ui-bg-2); font: 800 11px var(--font-inter); letter-spacing: .7px; text-transform: uppercase; }
 .rotation-field input[type="range"], .placement-rotation-control input[type="range"], .wall-card-tilt-control input[type="range"] { width: 100%; margin: 0; accent-color: #f43d38; }
 .rotation-scale { display: flex; justify-content: space-between; gap: 10px; font: 700 9px var(--font-inter); letter-spacing: .08em; color: #777; text-transform: uppercase; }
@@ -1798,6 +1845,7 @@ button { color: inherit; }
   .wall-card h2 { font-size: 23px; }
   .wall-card-img-wrap { width: calc(100% + 24px); margin-left: -12px; margin-right: -12px; height: 90px; }
   .wall-card.theme-biz, .wall-card.theme-ticket, .wall-card.theme-photo { height: var(--h); }
+  .wall-card.image-business-card { width: min(var(--w), calc(100vw - 24px)) !important; height: auto !important; min-height: 0 !important; aspect-ratio: var(--w) / var(--h); }
   .wall-card.theme-biz .wall-card-biz-photo,
   .wall-card.theme-biz .composer-biz-img { right: 12px; width: 84px; height: 76px; margin: 0; }
   .wall-card.theme-photo img { width: 100%; height: 132px; margin: 0 0 9px; }
@@ -1938,7 +1986,6 @@ button { color: inherit; }
   .image-lightbox-close { top: max(12px, env(safe-area-inset-top)); right: 12px; width: 48px; height: 48px; }
 }
 @media (max-width: 360px) {
-  .wall-card.image-business-card { width: calc(100vw - 24px); height: calc((100vw - 24px) * .6); min-height: calc((100vw - 24px) * .6); }
   .brand { font-size: 20px; }
   .brand span { display: none; }
   .composer-body { padding-inline: 12px; }

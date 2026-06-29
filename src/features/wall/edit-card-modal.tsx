@@ -8,6 +8,12 @@ const themeLabels: Record<CardTheme, string> = {
   yellow: "Sticky note", paper: "Flyer", pink: "Neon flyer", cyan: "Color card", dark: "Night card", cream: "Cream paper", biz: "Business card", kraft: "Kraft note", blueprint: "Blueprint", photo: "Photo print", ticket: "Ticket",
 };
 
+const shapeLabels: Record<NonNullable<OwnerCard["cardShape"]>, string> = {
+  vertical: "Vertical",
+  horizontal: "Horizontal",
+  square: "Square",
+};
+
 export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onClose: () => void; onSave: (card: OwnerCard, update: CardUpdate) => Promise<void> }) {
   const [form, setForm] = useState<CardUpdate>(() => ({
     name: card.name,
@@ -37,7 +43,7 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
   const tiltPointerRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
   const previewImage = card.thumbnailImages?.[0] ?? card.images[0];
   const previewImageTopLayout = Boolean(previewImage && card.imageMode !== "business-card" && card.theme !== "biz" && card.theme !== "ticket");
-  const format = card.imageMode === "business-card" ? getCardFormat("biz") : getImageCardFormat(form.theme, card.imageMode);
+  const format = card.imageMode === "business-card" ? getCardFormat("biz", card.cardShape) : getImageCardFormat(form.theme, card.imageMode);
 
   const setField = <Key extends keyof CardUpdate>(field: Key, value: CardUpdate[Key]) => setForm((current) => ({ ...current, [field]: value }));
 
@@ -158,6 +164,7 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
             <label>Price <span>(optional)</span><input maxLength={50} value={form.price ?? ""} onChange={(event) => setField("price", event.target.value || undefined)} /></label>
             <label>Card style<select value={form.theme} onChange={(event) => setField("theme", event.target.value as CardTheme)}>{cardThemes.map((theme) => <option key={theme} value={theme}>{themeLabels[theme]}</option>)}</select></label>
           </div>
+          {card.imageMode === "business-card" ? <p className="style-lock-note">Saved shape: {shapeLabels[card.cardShape ?? "horizontal"]}.</p> : null}
           <fieldset><legend>Contact</legend><div className="form-grid"><label>Phone<input type="tel" maxLength={30} value={form.phone ?? ""} onChange={(event) => setField("phone", event.target.value || undefined)} /></label><label>Email<input type="email" maxLength={120} value={form.email ?? ""} onChange={(event) => setField("email", event.target.value || undefined)} /></label></div><label>Website <span>(optional)</span><input inputMode="url" maxLength={240} value={form.website ?? ""} onChange={(event) => setField("website", event.target.value || undefined)} /></label><label>Google Maps location <span>(optional)</span><input maxLength={300} value={form.location ?? ""} onChange={(event) => setField("location", event.target.value || undefined)} /></label></fieldset>
           <fieldset><legend>Social media &amp; messaging <span>(optional)</span></legend><div className="form-grid"><label>Instagram<input maxLength={240} value={form.instagram ?? ""} onChange={(event) => setField("instagram", event.target.value || undefined)} /></label><label>Facebook<input maxLength={240} value={form.facebook ?? ""} onChange={(event) => setField("facebook", event.target.value || undefined)} /></label><label>TikTok<input maxLength={240} value={form.tiktok ?? ""} onChange={(event) => setField("tiktok", event.target.value || undefined)} /></label><label>LinkedIn<input maxLength={240} value={form.linkedin ?? ""} onChange={(event) => setField("linkedin", event.target.value || undefined)} /></label><label>WhatsApp<input type="tel" maxLength={30} value={form.whatsapp ?? ""} onChange={(event) => setField("whatsapp", event.target.value || undefined)} placeholder="+1 555 123 4567" /></label><label>Telegram<input maxLength={100} value={form.telegram ?? ""} onChange={(event) => setField("telegram", event.target.value || undefined)} placeholder="@yourusername" /></label></div></fieldset>
         </div>

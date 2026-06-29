@@ -46,7 +46,7 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
   const cardImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backImages?.[0] ?? card.backThumbnailImages?.[0];
-  const format = getCardFormat(displayTheme);
+  const format = card.imageMode === "business-card" ? getCardFormat("biz", card.cardShape) : getCardFormat(displayTheme);
   const imageTopLayout = Boolean(cardImage && card.imageMode !== "business-card" && displayTheme !== "biz" && displayTheme !== "ticket");
   const backLayout = displayTheme === "photo" ? "photo" : (displayTheme === "biz" || displayTheme === "ticket" ? "horizontal" : "full");
   const frontObjectPosition = `${card.imageX ?? 50}% ${card.imageY ?? 35}%`;

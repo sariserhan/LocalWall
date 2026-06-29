@@ -95,7 +95,7 @@ interface WallAppProps {
 const MAX_CARD_Y = 1500;
 
 function makeDemoCard(draft: CardDraft, placement: Placement, zIndex: number): WallCardModel {
-  const format = getImageCardFormat(draft.theme, draft.imageMode);
+  const format = draft.imageMode === "business-card" ? getCardFormat("biz", draft.cardShape) : getImageCardFormat(draft.theme, draft.imageMode);
   return {
     id: `demo-${Date.now()}`,
     name: draft.name,
@@ -118,11 +118,12 @@ function makeDemoCard(draft: CardDraft, placement: Placement, zIndex: number): W
     linkedin: draft.linkedin,
     theme: draft.theme,
     imageMode: draft.imageMode,
+    cardShape: draft.cardShape,
     images: draft.previews,
     x: placement.x,
     y: placement.y,
     rotation: draft.rotation ?? 0,
-    width: draft.imageMode === "business-card" ? getCardFormat("biz").width : format.width,
+    width: format.width,
     zIndex,
     positionLockedAt: Date.now(),
     createdAt: Date.now(),
@@ -1006,7 +1007,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     const wallRect = wallRef.current?.getBoundingClientRect();
     const wallWidth = wallRect?.width ?? window.innerWidth;
     const wallHeight = wallRect?.height ?? Math.max(500, window.innerHeight - 66);
-    const format = draft.imageMode === "business-card" ? getCardFormat("biz") : getImageCardFormat(draft.theme, draft.imageMode);
+    const format = draft.imageMode === "business-card" ? getCardFormat("biz", draft.cardShape) : getImageCardFormat(draft.theme, draft.imageMode);
     const margin = 18;
     const maxLeft = Math.max(margin, wallWidth - format.width - margin);
     const maxTop = Math.max(36, wallHeight - format.minHeight - 36);
@@ -1018,7 +1019,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const movePlacement = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragging || !wallRef.current) return;
     const rect = wallRef.current.getBoundingClientRect();
-    const cardWidth = pendingCard ? (pendingCard.imageMode === "business-card" ? getCardFormat("biz").width : getImageCardFormat(pendingCard.theme, pendingCard.imageMode).width) : (window.innerWidth < 780 ? 182 : 220);
+    const cardWidth = pendingCard ? (pendingCard.imageMode === "business-card" ? getCardFormat("biz", pendingCard.cardShape).width : getImageCardFormat(pendingCard.theme, pendingCard.imageMode).width) : (window.innerWidth < 780 ? 182 : 220);
     const maxLeft = Math.max(12, rect.width - cardWidth - 12);
     const left = Math.min(maxLeft, Math.max(12, event.clientX - rect.left - cardWidth / 2));
     const top = Math.min(rect.height - 250, Math.max(28, event.clientY - rect.top - 90));

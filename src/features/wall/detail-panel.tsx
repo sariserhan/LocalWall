@@ -35,6 +35,12 @@ const REPORT_REASONS: { value: ReportReason; label: string; description: string 
   { value: "other", label: "Other", description: "Something else not listed above" },
 ];
 
+const cardShapeLabels: Record<NonNullable<WallCard["cardShape"]>, string> = {
+  vertical: "Vertical",
+  horizontal: "Horizontal",
+  square: "Square",
+};
+
 export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSaveCard = true, saved = false, onSetSaved, onRequestSignIn, liked = false, canLike = true, onToggleLike, similarCards = [], onCardOpen }: {
   card: WallCard;
   onClose: () => void;
@@ -238,6 +244,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
           {(card.verified || card.imageMode === "business-card") ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
         </p>
       ) : (card.verified || card.imageMode === "business-card") ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
+      {card.imageMode === "business-card" ? <p className="sheet-byline">Shape: {cardShapeLabels[card.cardShape ?? "horizontal"]}</p> : null}
       <h2>{card.name}</h2>
       <div className="rule" />
       <p className="sheet-service">{card.line}</p>

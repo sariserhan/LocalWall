@@ -20,7 +20,7 @@ interface PlacementModeProps {
 
 export function PlacementMode({ card, position, dragging, onDragStart, onMove, onDragEnd, onCancel, onRandom, onConfirm, onRotate, isSaving }: PlacementModeProps) {
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
-  const format = card.imageMode === "business-card" ? getCardFormat("biz") : getImageCardFormat(card.theme, card.imageMode);
+  const format = card.imageMode === "business-card" ? getCardFormat("biz", card.cardShape) : getImageCardFormat(card.theme, card.imageMode);
   const imageTopLayout = Boolean(card.previews[0] && card.imageMode !== "business-card" && displayTheme !== "biz" && displayTheme !== "ticket");
   const tiltPointerRef = useRef<{ id: number; x: number; y: number; rotation: number } | null>(null);
 
