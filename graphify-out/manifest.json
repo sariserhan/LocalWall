@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "convex/cards.ts": {
-    "mtime": 1782670369.922672,
-    "ast_hash": "67dfdec18ba2d613c158e05630462f97",
+    "mtime": 1782708121.8283262,
+    "ast_hash": "3f1cc1d1dcd5a1e0582afc8800863e7d",
     "semantic_hash": ""
   },
   "convex/contactMessages.ts": {
@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782707224.9042475,
-    "ast_hash": "89ff58d2b1a0abed0207635ea5005fa6",
+    "mtime": 1782708710.1114252,
+    "ast_hash": "23c7ae771ef8f131ef961866fcc9e6f6",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
-    "mtime": 1782663584.0894442,
-    "ast_hash": "ffa2673b33cfd09c1290cb4e5bdf851b",
+    "mtime": 1782707621.509368,
+    "ast_hash": "d4f0c78d262d8c471d6ae205c4dad0b6",
     "semantic_hash": ""
   },
   "src/features/wall/edit-card-modal.tsx": {

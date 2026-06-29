@@ -96,6 +96,11 @@ const initialForm: ComposerForm = {
   featuredTier: "none",
 };
 
+function formatWallLocation(area: string, city: string, state: string, country: string) {
+  const countryName = Country.getCountryByCode(country.trim())?.name ?? country.trim();
+  return area.trim() || [city, state, countryName].map((part) => part.trim()).filter(Boolean).join(", ") || "Selected wall";
+}
+
 const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description: string }> = [
   { theme: "yellow", label: "Sticky note", description: "Handwritten yellow" },
   { theme: "paper", label: "Flyer", description: "Classic white paper" },
@@ -255,7 +260,7 @@ function LiveCardPreview({
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
   const format = getCardFormat(form.theme);
   const previewWidth = format.width;
-  const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
+  const location = formatWallLocation(form.area, form.city, form.state, form.country);
   const imageTopLayout = Boolean(image && form.imageMode !== "business-card" && form.theme !== "biz" && form.theme !== "ticket");
   const categoryLabel = form.category ? `${form.category}${form.subcategory ? ` · ${form.subcategory}` : ""}` : "Category";
   const messageLabel = form.message.trim() || "Your message";
@@ -357,7 +362,7 @@ function LiveCardPreview({
 }
 
 function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: ComposerForm; image?: string; backImage?: string; isVerified?: boolean }) {
-  const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
+  const location = formatWallLocation(form.area, form.city, form.state, form.country);
   const backLayout = form.theme === "photo" ? "photo" : "full";
   const categoryLabel = form.category ? `${form.category}${form.subcategory ? ` · ${form.subcategory}` : ""}` : "Category";
   const titleLabel = form.name.trim() || "Your business";
@@ -945,7 +950,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       ...form,
       category: form.category as CardCategory,
       subcategory: form.subcategory,
-      area: form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall",
+      area: formatWallLocation(form.area, form.city, form.state, form.country),
       message: form.message.trim() || undefined,
       neighborhood: form.neighborhood.trim() || undefined,
       price: form.price.trim() || undefined,
@@ -1064,7 +1069,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                 <div>
                   <span className="details-wall-location-label">Posting on</span>
                   <strong className="details-wall-location-name">
-                    {[form.city, form.state, form.country].filter(Boolean).join(", ") || "Selected wall"}
+                    {formatWallLocation(form.area, form.city, form.state, form.country)}
                   </strong>
                 </div>
               </div>

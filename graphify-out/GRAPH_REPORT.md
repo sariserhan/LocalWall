@@ -1,16 +1,16 @@
 # Graph Report - local-wall  (2026-06-29)
 
 ## Corpus Check
-- 221 files · ~439,659 words
+- 221 files · ~439,722 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1482 nodes · 2103 edges · 108 communities (95 shown, 13 thin omitted)
+- 1483 nodes · 2107 edges · 113 communities (100 shown, 13 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 38 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d041483d`
+- Built from commit: `760db71a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,6 +32,7 @@
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
@@ -86,6 +87,7 @@
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
 - [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
 - [[_COMMUNITY_Community 75|Community 75]]
@@ -99,8 +101,11 @@
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 113|Community 113]]
 - [[_COMMUNITY_Community 115|Community 115]]
 
@@ -131,19 +136,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (108 total, 13 thin omitted)
+## Communities (113 total, 13 thin omitted)
 
 ### Community 0 - "Rate Limiting & API Utilities"
 Cohesion: 0.10
-Nodes (18): BundleCity, clearImagesFromIDB(), ComposerForm, countries, defaultStates, DetailField, detailFieldLabels, featuredTierOptions (+10 more)
+Nodes (22): BundleCity, clearImagesFromIDB(), Composer(), ComposerForm, countries, defaultStates, DetailField, detailFieldLabels (+14 more)
 
 ### Community 1 - "Billing, Admin & Test Infrastructure"
-Cohesion: 0.08
-Nodes (18): _handler(), toast(), Toaster(), ToastFn, ToastType, CardEvent, DetailPanel(), REPORT_REASONS (+10 more)
+Cohesion: 0.09
+Nodes (13): CardEvent, DetailPanel(), REPORT_REASONS, ReportReason, websiteHref(), ImageSwapViewer(), ImageSwapViewerProps, ReviewsSection() (+5 more)
 
 ### Community 2 - "Geo-Routed Pages & RSS Feeds"
-Cohesion: 0.08
-Nodes (29): metadata, bundleCard, bundleCities, crons, adminEnv, adminIdentity, applyEnv(), makeT() (+21 more)
+Cohesion: 0.07
+Nodes (30): metadata, bundleCard, bundleCities, crons, adminEnv, adminIdentity, applyEnv(), makeT() (+22 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.12
@@ -151,11 +156,11 @@ Nodes (14): seedCards, cardFormats, Composer, defaultSeedLocation, DetailPanel, 
 
 ### Community 4 - "Community 4"
 Cohesion: 0.06
-Nodes (35): metadata, Props, RootPage(), BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES (+27 more)
+Nodes (40): metadata, Props, RootPage(), BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES (+32 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.16
-Nodes (14): CardVars, hashStr(), MiniCard(), Props, TrendingCardGrid(), DetailPanel, Props, TrendingCardModal() (+6 more)
+Cohesion: 0.22
+Nodes (7): AppProvidersProps, GlobalOwnerDashboard(), _handler(), toast(), Toaster(), ToastFn, ToastType
 
 ### Community 6 - "Community 6"
 Cohesion: 0.08
@@ -200,6 +205,10 @@ Nodes (28): Accessing PostHog, App router, Beta: integration via LLM, Bun, Bun, 
 ### Community 16 - "Community 16"
 Cohesion: 0.10
 Nodes (17): catalog, buildPlaygroundCsvTemplate(), COUNTRY_ALIASES, CSV_ALLOWED_HEADERS, CSV_OPTIONAL_HEADERS, CSV_REQUIRED_HEADERS, csvMaybeInteger(), csvMaybeNumber() (+9 more)
+
+### Community 17 - "Community 17"
+Cohesion: 0.20
+Nodes (6): HomeLocationPicker(), Level, Props, DetectedLoc, HomeSearch(), ResolvedLoc
 
 ### Community 18 - "Community 18"
 Cohesion: 0.08
@@ -314,8 +323,8 @@ Cohesion: 0.17
 Nodes (11): Adding a Required Field, Changing a Field Type, Cleaning Up Orphaned Documents, Deleting a Field, Dual Read, Dual Write (Preferred), Migration Patterns Reference, Small Table Shortcut (+3 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.27
-Nodes (11): BackCardPreview(), ComposerProps, LiveCardPreview(), EditCardModal(), PlacementMode(), PlacementModeProps, CardDraft, getCardFormat() (+3 more)
+Cohesion: 0.31
+Nodes (10): BackCardPreview(), ComposerProps, EditCardModal(), PlacementMode(), PlacementModeProps, CardDraft, getCardFormat(), getImageCardFormat() (+2 more)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.22
@@ -346,8 +355,8 @@ Cohesion: 0.18
 Nodes (10): Checklist, Concrete Steps, Files and Env Vars To Expect, Gotchas, Key Setup Areas, Production, Validation, What To Do (+2 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.06
-Nodes (30): metadata, Props, AppProviders(), AppProvidersProps, BugReportLink(), ContactLink(), GlobalBugReportModal(), GlobalContactModal() (+22 more)
+Cohesion: 0.18
+Nodes (8): metadata, Props, AppProviders(), cardStyle, Props, RenewPage(), TIERS, wrapStyle
 
 ### Community 55 - "Community 55"
 Cohesion: 0.28
@@ -413,9 +422,21 @@ Nodes (4): Convex, Route to the Right Skill, Start Here, When Not to Use
 Cohesion: 0.40
 Nodes (4): Agent skill, Next steps, PostHog post-wizard report, Verify before merging
 
+### Community 72 - "Community 72"
+Cohesion: 0.28
+Nodes (6): GlobalBugReportModal(), pushBugReportHandler(), stack, BUG_REASONS, BugReason, BugReportPage()
+
 ### Community 75 - "Community 75"
 Cohesion: 0.33
 Nodes (4): CardStyle, hashString(), WallCard(), WallCardProps
+
+### Community 106 - "Community 106"
+Cohesion: 0.36
+Nodes (6): BugReportLink(), openBugReport(), fetchTopCards(), fetchTopWalls(), metadata, TrendingPage()
+
+### Community 107 - "Community 107"
+Cohesion: 0.32
+Nodes (5): ContactLink(), HomeHowItWorksModal(), STEPS, HomePage(), openContact()
 
 ### Community 108 - "Community 108"
 Cohesion: 0.29
@@ -424,6 +445,10 @@ Nodes (3): list, mergeLocal, setSaved
 ### Community 109 - "Community 109"
 Cohesion: 0.29
 Nodes (6): backfillUsernames, purgeStale, quotas, scopeValidator, take, internalMutation
+
+### Community 110 - "Community 110"
+Cohesion: 0.32
+Nodes (5): GlobalContactModal(), pushContactHandler(), stack, ClerkContactUser, ContactPage()
 
 ### Community 113 - "Community 113"
 Cohesion: 0.50
@@ -441,17 +466,17 @@ Nodes (6): 3.1 Find failing tests, 3.2 Debug one failure, 3.3 Apply the fix, 3.4
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Community 64`, `Community 32`, `Community 34`, `Billing, Admin & Test Infrastructure`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 10`, `Community 11`, `Community 54`, `Community 23`?**
+- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Community 64`, `Community 32`, `Community 34`, `Billing, Admin & Test Infrastructure`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 72`, `Community 10`, `Community 11`, `Community 110`, `Community 17`, `Community 54`, `Community 23`?**
   _High betweenness centrality (0.059) - this node is a cross-community bridge._
-- **Why does `WallCard` connect `Community 23` to `Community 32`, `Billing, Admin & Test Infrastructure`, `Community 3`, `Community 5`, `Community 7`, `Community 75`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `PrivacySettingsLink()` connect `Community 9` to `Community 3`, `Community 4`, `Community 54`?**
+- **Why does `WallCard` connect `Community 23` to `Community 32`, `Billing, Admin & Test Infrastructure`, `Community 3`, `Community 4`, `Community 7`, `Community 75`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `PrivacySettingsLink()` connect `Community 9` to `Community 3`, `Community 106`, `Community 107`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `npx`, `Props`, `Props` to the rest of the system?**
   _829 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
-  _Cohesion score 0.09666666666666666 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09686609686609686 - nodes in this community are weakly interconnected._
 - **Should `Billing, Admin & Test Infrastructure` be split into smaller, more focused modules?**
-  _Cohesion score 0.07661290322580645 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09230769230769231 - nodes in this community are weakly interconnected._

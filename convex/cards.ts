@@ -755,9 +755,8 @@ export const create = mutation({
     if (args.message && args.message.length > 300) throw new Error("Message must be 300 characters or fewer.");
     if (blockedTextContent.test([args.name, args.line, args.message ?? ""].join(" "))) throw new Error("Profanity, adult, or sexual content is not allowed on WALL.");
     if (!args.area.trim() || args.area.length > 50) throw new Error("Neighborhood must be between 1 and 50 characters.");
-    const isBundlePending = args.paidAmount === 19.99;
-    if (!isBundlePending && (!args.city.trim() || args.city.length > 100)) throw new Error("City must be specified.");
-    if (!isBundlePending && (!args.state.trim() || args.state.length > 100)) throw new Error("State must be specified.");
+    if (args.city.length > 100) throw new Error("City must be 100 characters or fewer.");
+    if (args.state.length > 100) throw new Error("State must be 100 characters or fewer.");
     if (!args.country.trim() || args.country.length > 100) throw new Error("Country must be specified.");
     if (args.zipcode && args.zipcode.length > 20) throw new Error("Zip code must be shorter than 20 characters.");
     if (args.zipcode && !/^[A-Za-z0-9][A-Za-z0-9 -]{1,19}$/.test(args.zipcode.trim())) throw new Error("Enter a valid zip code.");
