@@ -165,10 +165,11 @@ export const getDashboard = query({
           area: card.area,
           city: card.city,
           state: card.state,
-          country: card.country,
-          status: card.status === "published" && card.expiresAt <= Date.now() ? "expired" as const : card.status,
-          ownerName: owner?.displayName,
-          ownerEmail: owner?.email,
+        country: card.country,
+        status: card.status === "published" && card.expiresAt <= Date.now() ? "expired" as const : card.status,
+        username: card.username ?? owner?.username,
+        ownerName: owner?.businessName || owner?.username || owner?.displayName || owner?.email,
+        ownerEmail: owner?.email,
           clicks: stats?.clicks ?? card.clicks,
           expiresAt: card.expiresAt,
           createdAt: card.createdAt,
@@ -207,7 +208,7 @@ export const getDashboard = query({
           page: bugReport.page,
           reason: bugReport.reason,
           details: bugReport.details,
-          reporterName: reporter?.displayName,
+          reporterName: reporter?.businessName || reporter?.username || reporter?.displayName || reporter?.email,
           reporterEmail: reporter?.email,
           createdAt: bugReport.createdAt,
         };
@@ -219,10 +220,10 @@ export const getDashboard = query({
           page: contactMessage.page,
           topic: contactMessage.topic,
           message: contactMessage.message,
-          reporterName: contactMessage.reporterDisplayName ?? reporter?.displayName,
-          reporterUsername: contactMessage.reporterUsername ?? reporter?.username,
-          reporterEmail: contactMessage.reporterEmail ?? reporter?.email,
-          reporterBusinessName: contactMessage.reporterBusinessName ?? reporter?.businessName,
+          reporterName: reporter?.businessName || reporter?.username || contactMessage.reporterDisplayName || reporter?.displayName,
+          reporterUsername: reporter?.username ?? contactMessage.reporterUsername ?? undefined,
+          reporterEmail: reporter?.email ?? contactMessage.reporterEmail ?? undefined,
+          reporterBusinessName: reporter?.businessName ?? contactMessage.reporterBusinessName ?? undefined,
           reporterPhone: contactMessage.reporterPhone ?? undefined,
           createdAt: contactMessage.createdAt,
         };
@@ -257,7 +258,7 @@ export const getDashboard = query({
           status: req.status,
           plan: req.plan,
           paidAmount: req.paidAmount,
-          userName: user?.displayName,
+          userName: user?.businessName || user?.username || user?.displayName || user?.email,
           userEmail: user?.email,
           createdAt: req.createdAt,
           reviewedAt: req.reviewedAt,
@@ -661,6 +662,10 @@ const PG_ADMIN_CARD_ARGS = {
   imageX: v.optional(v.number()),
   imageY: v.optional(v.number()),
   imageWidth: v.optional(v.number()),
+  imageHeight: v.optional(v.number()),
+  backImageX: v.optional(v.number()),
+  backImageY: v.optional(v.number()),
+  backImageScale: v.optional(v.number()),
   paidAmount: v.number(),
   featuredTier: PG_ADMIN_FEATURED_TIER,
   status: v.optional(PG_ADMIN_STATUS),
@@ -715,6 +720,10 @@ type PlaygroundCardArgs = {
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
+  imageHeight?: number;
+  backImageX?: number;
+  backImageY?: number;
+  backImageScale?: number;
   paidAmount: number;
   featuredTier?: "bronze" | "silver" | "gold";
   status?: "published" | "hidden" | "expired";
@@ -738,6 +747,7 @@ type PlaygroundCardArgs = {
 
 async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args: PlaygroundCardArgs) {
   const now = Date.now();
+  const user = await ctx.db.get(userId);
   const baseArea = (args.area?.trim() || args.neighborhood?.trim() || args.city.trim());
   const rotation = args.rotation ?? 0;
   const cardWidth = args.width ?? (args.imageMode === "business-card" ? 300 : 220);
@@ -771,6 +781,7 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     country: args.country.trim(),
     zipcode: args.zipcode?.trim() || undefined,
     neighborhood: args.neighborhood?.trim() || undefined,
+    username: user?.username ?? undefined,
     ownerName: args.ownerName?.trim() || undefined,
     price: args.price?.trim() || undefined,
     phone: args.phone?.trim() || undefined,
@@ -788,6 +799,10 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     imageX: args.imageX,
     imageY: args.imageY,
     imageWidth: args.imageWidth,
+    imageHeight: args.imageHeight,
+    backImageX: args.backImageX,
+    backImageY: args.backImageY,
+    backImageScale: args.backImageScale,
     imageIds: args.imageIds ?? [],
     thumbnailImageIds: args.thumbnailImageIds,
     backImageIds: args.backImageIds,

@@ -1,9 +1,11 @@
 "use client";
 
-import { ClerkProvider, useAuth } from "@clerk/nextjs";
+import { ClerkProvider, useAuth, useUser } from "@clerk/nextjs";
 import { ConvexReactClient } from "convex/react";
+import { useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "../../convex/_generated/api";
 import { Toaster } from "@/lib/toast";
 import { GlobalAdminPanel } from "./global-admin-panel";
 import { GlobalOwnerDashboard } from "./global-owner-dashboard";
@@ -46,6 +48,7 @@ function ConnectedProviders({ children, convexUrl }: { children: React.ReactNode
   const [convex] = useState(() => new ConvexReactClient(convexUrl));
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      <ClerkUsernameSync />
       {children}
       <GlobalAdminPanel />
       <GlobalBugReportModal />
@@ -54,4 +57,20 @@ function ConnectedProviders({ children, convexUrl }: { children: React.ReactNode
       <Toaster />
     </ConvexProviderWithClerk>
   );
+}
+
+function ClerkUsernameSync() {
+  const { isLoaded, user } = useUser();
+  const syncClerkUsername = useMutation(api.cards.syncClerkUsername);
+  const lastSynced = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    const username = user.username?.trim() || null;
+    if (lastSynced.current === username) return;
+    lastSynced.current = username;
+    void syncClerkUsername({ username: username ?? undefined });
+  }, [isLoaded, syncClerkUsername, user]);
+
+  return null;
 }

@@ -58,6 +58,7 @@ export const completePaidCard = internalMutation({
       country: payload.country,
       zipcode: payload.zipcode,
       neighborhood: payload.neighborhood,
+      username: owner.username ?? undefined,
       ownerName: owner.businessName || owner.username || undefined,
       price: payload.price,
       phone: payload.phone,
@@ -72,6 +73,13 @@ export const completePaidCard = internalMutation({
       telegram: payload.telegram,
       theme: payload.theme,
       imageMode: payload.imageMode,
+      imageX: payload.imageX,
+      imageY: payload.imageY,
+      imageWidth: payload.imageWidth,
+      imageHeight: payload.imageHeight,
+      backImageX: payload.backImageX,
+      backImageY: payload.backImageY,
+      backImageScale: payload.backImageScale,
       imageIds: payload.imageIds,
       thumbnailImageIds: payload.thumbnailImageIds,
       backImageIds: payload.backImageIds,
@@ -107,7 +115,7 @@ export const completePaidCard = internalMutation({
       Promise.all(backImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
       Promise.all(backThumbnailImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
     ]);
-    return { id: cardId, ...payload, rotation: payload.rotation ?? 0, ownerId: pending.ownerId, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), backImages: backUrls.filter((url): url is string => url !== null), backThumbnailImages: backThumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + packageDurations[basePaidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0, verified: owner.verified ?? false };
+    return { id: cardId, ...payload, rotation: payload.rotation ?? 0, ownerId: pending.ownerId, username: owner.username ?? undefined, ownerName: owner.businessName || owner.username || undefined, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), backImages: backUrls.filter((url): url is string => url !== null), backThumbnailImages: backThumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + packageDurations[basePaidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0, verified: owner.verified ?? false };
   },
 });
 
@@ -289,6 +297,7 @@ export const completeBundlePosting = internalMutation({
         country: loc.country,
         zipcode: payload.zipcode,
         neighborhood: payload.neighborhood,
+        username: owner.username ?? undefined,
         ownerName: owner.businessName || owner.username || undefined,
         price: payload.price,
         phone: payload.phone,
@@ -303,6 +312,13 @@ export const completeBundlePosting = internalMutation({
         telegram: payload.telegram,
         theme: payload.theme,
         imageMode: payload.imageMode,
+        imageX: payload.imageX,
+        imageY: payload.imageY,
+        imageWidth: payload.imageWidth,
+        imageHeight: payload.imageHeight,
+        backImageX: payload.backImageX,
+        backImageY: payload.backImageY,
+        backImageScale: payload.backImageScale,
         imageIds,
         thumbnailImageIds,
         backImageIds,

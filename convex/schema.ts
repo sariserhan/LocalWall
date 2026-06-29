@@ -65,6 +65,10 @@ export default defineSchema({
     imageX: v.optional(v.number()),
     imageY: v.optional(v.number()),
     imageWidth: v.optional(v.number()),
+    imageHeight: v.optional(v.number()),
+    backImageX: v.optional(v.number()),
+    backImageY: v.optional(v.number()),
+    backImageScale: v.optional(v.number()),
     imageIds: v.array(v.id("_storage")),
     thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
     backImageIds: v.optional(v.array(v.id("_storage"))),
@@ -87,6 +91,7 @@ export default defineSchema({
     zipcode: v.optional(v.string()),
     neighborhood: v.optional(v.string()),
     subcategory: v.optional(v.string()),
+    username: v.optional(v.string()),
     ownerName: v.optional(v.string()),
     clicks: v.number(),
     featuredTier: v.optional(v.union(v.literal("bronze"), v.literal("silver"), v.literal("gold"))),
@@ -140,6 +145,7 @@ export default defineSchema({
 
   rateLimits: defineTable({
     key: v.string(),
+    username: v.optional(v.string()),
     count: v.number(),
     resetAt: v.number(),
     updatedAt: v.number(),

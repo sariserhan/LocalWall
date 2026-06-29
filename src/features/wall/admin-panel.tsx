@@ -16,6 +16,7 @@ export interface AdminDashboardData {
     state: string;
     country: string;
     status: "published" | "hidden" | "expired";
+    username?: string;
     ownerName?: string;
     ownerEmail?: string;
     clicks: number;
@@ -94,7 +95,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPur
   const [error, setError] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
-  const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
+  const cards = useMemo(() => (data?.cards ?? []).filter((card) => !deferredQuery || [card.name, card.line, card.area, card.city, card.username, card.ownerName, card.ownerEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.cards, deferredQuery]);
   const users = useMemo(() => (data?.users ?? []).filter((user) => !deferredQuery || [user.displayName, user.username, user.businessName, user.email].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.users, deferredQuery]);
   const reports = useMemo(() => (data?.reports ?? []).filter((report) => !deferredQuery || [report.cardName, report.reason, report.details].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.reports, deferredQuery]);
   const bugReports = useMemo(() => (data?.bugReports ?? []).filter((bugReport) => !deferredQuery || [bugReport.page, bugReport.reason, bugReport.details, bugReport.reporterName, bugReport.reporterEmail].some((value) => value?.toLowerCase().includes(deferredQuery))), [data?.bugReports, deferredQuery]);
@@ -243,7 +244,7 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPur
                     <div><span className={`status-dot status-${card.status}`} />{card.status}<span>{dateLabel(card.createdAt)}</span></div>
                     <h3>{card.name}</h3>
                     <p>{card.line}</p>
-                    <small>{card.ownerName || card.ownerEmail || "Unknown owner"} · {card.city}, {card.state || card.country} · {card.clicks} opens</small>
+                    <small>{card.username ? `@${card.username}` : card.ownerName || card.ownerEmail || "Unknown owner"} · {card.city}, {card.state || card.country} · {card.clicks} opens</small>
                     {card.conversions && card.conversions.total > 0 ? (
                       <div className="admin-conversions">
                         {card.conversions.website > 0 ? <span title="Website clicks"><ExternalLink size={10} />{card.conversions.website}</span> : null}
@@ -274,10 +275,10 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPur
             <div className="admin-list">
             {users.map((user) => (
               <article className="admin-row admin-user-row" key={String(user.id)}>
-                <div className="admin-avatar">{(user.displayName || user.businessName || user.username || user.email || "U").slice(0, 1).toUpperCase()}</div>
+                <div className="admin-avatar">{(user.username || user.businessName || user.displayName || user.email || "U").slice(0, 1).toUpperCase()}</div>
                 <div className="admin-row-main">
-                  <h3>{user.displayName || user.businessName || user.username || "Unnamed user"}{user.verified ? <span className="admin-verified-badge">✓ Verified</span> : null}</h3>
-                  <p>{user.businessName || user.username ? [user.businessName, user.username ? `@${user.username}` : null].filter(Boolean).join(" · ") : user.email || "No public email"}</p>
+                  <h3>{user.username ? `@${user.username}` : user.businessName || user.displayName || "Unnamed user"}{user.verified ? <span className="admin-verified-badge">✓ Verified</span> : null}</h3>
+                  <p>{user.username || user.businessName ? [user.username ? `@${user.username}` : null, user.businessName].filter(Boolean).join(" · ") : user.displayName || user.email || "No public email"}</p>
                   <small>Joined {dateLabel(user.createdAt)} · {user.cardCount} recent cards{user.verifiedAt ? ` · Verified ${dateLabel(user.verifiedAt)}` : ""}</small>
                 </div>
                 <div className="admin-row-actions admin-row-actions-wide">

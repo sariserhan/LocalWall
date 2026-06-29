@@ -48,7 +48,10 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
   const format = getCardFormat(displayTheme);
   const imageTopLayout = Boolean(cardImage && card.imageMode !== "business-card" && displayTheme !== "biz" && displayTheme !== "ticket");
-  const backLayout = displayTheme === "photo" ? "photo" : displayTheme === "biz" || displayTheme === "ticket" ? "horizontal" : "full";
+  const backLayout = displayTheme === "photo" ? "photo" : "full";
+  const frontObjectPosition = `${card.imageX ?? 50}% ${card.imageY ?? 35}%`;
+  const backObjectPosition = "50% 50%";
+  const backScale = 1;
 
   useEffect(() => {
     setRotationDraft(card.rotation);
@@ -95,7 +98,7 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
       {imageTopLayout ? (
         <>
           <div className="wall-card-image-top-wrap">
-            <img src={cardImage} alt="" draggable={false} className="wall-card-image-top" />
+            <img src={cardImage} alt="" draggable={false} className="wall-card-image-top" style={{ objectPosition: frontObjectPosition, "--image-h": `${card.imageHeight ?? 156}px` } as CSSProperties} />
           </div>
           <div className="wall-card-content">
             <div className="card-copy">
@@ -137,7 +140,26 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
     <div className="wall-card-face wall-card-face-back">
       {backImage ? (
         <div className={`wall-card-back-art backside-art layout-${backLayout}`}>
-          <img src={backImage} alt="" draggable={false} className="wall-card-back-image" />
+          <img
+            src={backImage}
+            alt=""
+            draggable={false}
+            className="wall-card-back-image"
+            style={{
+              position: "absolute",
+              inset: 0,
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: backObjectPosition,
+              transform: `scale(${backScale})`,
+              transformOrigin: "center center",
+            }}
+          />
         </div>
       ) : (
         <div className={`wall-card-back-empty theme-${displayTheme}`}>

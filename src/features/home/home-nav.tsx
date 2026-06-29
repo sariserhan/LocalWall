@@ -1,17 +1,18 @@
 "use client";
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
-import { CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
-import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance } from "@/lib/clerk-appearance";
 import { api } from "../../../convex/_generated/api";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
-import { HomePostButton } from "./home-post-button";
+import { ClerkBusinessPage } from "../wall/clerk-business-page";
 import { ClerkMyDataPage } from "../wall/clerk-my-data-page";
+import { HomePostButton } from "./home-post-button";
 
 export function HomeNav() {
   const { isSignedIn } = useAuth();
@@ -20,6 +21,8 @@ export function HomeNav() {
   const pathname = usePathname();
   const isTrending = pathname === "/trending";
   const adminAccess = useQuery(api.admin.getAccess, isSignedIn ? {} : "skip") as { isAdmin: boolean } | undefined;
+  const profile = useQuery(api.cards.getMyProfile, isSignedIn ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean } | null | undefined;
+  const updateProfile = useMutation(api.cards.updateProfile);
 
   return (
     <header className={`home-nav${isTrending ? " home-nav--trending" : ""}`}>
@@ -36,8 +39,17 @@ export function HomeNav() {
         )}        
         <HomePostButton />
         {isSignedIn ? (
-          <UserButton appearance={getClerkUserButtonAppearance(isDark)} userProfileProps={{ appearance: getClerkUserProfileAppearance(isDark) }}>
-            <UserButton.UserProfilePage label="My data" url="my-data" labelIcon={<Download size={16} />}>
+          <UserButton
+            appearance={getClerkUserButtonAppearance(isDark)}
+          >
+            <UserButton.UserProfilePage key="home-business-profile" label="Business profile" url="business-profile" labelIcon={<BriefcaseBusiness size={16} />}>
+              <ClerkBusinessPage
+                profile={profile}
+                isReady={profile !== undefined}
+                onUpdateBusinessName={async (businessName) => { await updateProfile({ businessName }); }}
+              />
+            </UserButton.UserProfilePage>
+            <UserButton.UserProfilePage key="home-my-data" label="My data" url="my-data" labelIcon={<Download size={16} />}>
               <ClerkMyDataPage />
             </UserButton.UserProfilePage>
             <UserButton.MenuItems>

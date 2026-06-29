@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { internalMutation, mutation } from "./_generated/server";
 
 const scopeValidator = v.union(
   v.literal("moderation_5m"),
@@ -22,6 +22,8 @@ export const take = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Authentication is required.");
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    const username = user?.username ?? user?.businessName ?? user?.displayName ?? identity.name ?? undefined;
     const scopes = [...new Set(args.scopes)];
     if (scopes.length === 0 || scopes.length > 2) throw new Error("Invalid rate-limit scopes.");
 
@@ -40,8 +42,8 @@ export const take = mutation({
 
     await Promise.all(buckets.map(async (bucket) => {
       const next = { count: bucket.count + 1, resetAt: bucket.resetAt, updatedAt: now };
-      if (bucket.existing) await ctx.db.patch(bucket.existing._id, next);
-      else await ctx.db.insert("rateLimits", { key: bucket.key, ...next });
+      if (bucket.existing) await ctx.db.patch(bucket.existing._id, { ...next, username });
+      else await ctx.db.insert("rateLimits", { key: bucket.key, username, ...next });
     }));
 
     const tightest = buckets.reduce((current, bucket) => {
@@ -50,5 +52,22 @@ export const take = mutation({
       return remaining < currentRemaining ? bucket : current;
     });
     return { allowed: true, scope: tightest.scope, limit: tightest.quota.limit, remaining: tightest.quota.limit - tightest.count - 1, resetAt: tightest.resetAt };
+  },
+});
+
+export const backfillUsernames = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("rateLimits").collect();
+    for (const row of rows) {
+      const scopeSep = row.key.lastIndexOf(":");
+      const tokenIdentifier = scopeSep >= 0 ? row.key.slice(0, scopeSep) : row.key;
+      const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier)).unique();
+      const username = user?.username ?? user?.businessName ?? user?.displayName;
+      if (username !== row.username) {
+        await ctx.db.patch(row._id, { username });
+      }
+    }
+    return { updated: rows.length };
   },
 });

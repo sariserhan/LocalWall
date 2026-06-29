@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "convex/admin.ts": {
-    "mtime": 1782635092.1636937,
-    "ast_hash": "349aad166e85ab32641dd03715b27731",
+    "mtime": 1782669060.6313345,
+    "ast_hash": "cc56f6f8d3ceedf76105d11245d5b087",
     "semantic_hash": ""
   },
   "convex/auth.config.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "convex/cards.ts": {
-    "mtime": 1782633679.4690378,
-    "ast_hash": "5e1402d0d739f6834580aa97a6a4fa64",
+    "mtime": 1782670369.922672,
+    "ast_hash": "67dfdec18ba2d613c158e05630462f97",
     "semantic_hash": ""
   },
   "convex/contactMessages.ts": {
@@ -305,13 +305,13 @@
     "semantic_hash": ""
   },
   "convex/paymentsInternal.ts": {
-    "mtime": 1782587494.8747685,
-    "ast_hash": "81a9a6d33b0cd404e437c4ae67966528",
+    "mtime": 1782669000.6736877,
+    "ast_hash": "3e7f887089a0b141883121d03f049f68",
     "semantic_hash": ""
   },
   "convex/rateLimits.ts": {
-    "mtime": 1782441046.134345,
-    "ast_hash": "762e1f2a0e59c4c6d97d944eabc9011e",
+    "mtime": 1782666936.0517027,
+    "ast_hash": "ce9f33facbce94a3aab9d05f481a6cea",
     "semantic_hash": ""
   },
   "convex/reminders.ts": {
@@ -335,8 +335,8 @@
     "semantic_hash": ""
   },
   "convex/schema.ts": {
-    "mtime": 1782635004.9099772,
-    "ast_hash": "e9db9eff25eca8fa752e448b95a6e950",
+    "mtime": 1782668904.0910833,
+    "ast_hash": "bdb6c225c873743de84c2d35257bccdc",
     "semantic_hash": ""
   },
   "convex/tsconfig.json": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782637670.2345197,
-    "ast_hash": "11ab0d2165e2f21aaeef81392bde5298",
+    "mtime": 1782700853.6611152,
+    "ast_hash": "05119f8df4ab067aae7f45fe7ca6c518",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "src/components/global-owner-dashboard.tsx": {
-    "mtime": 1782401427.6764007,
-    "ast_hash": "9c62c187dea13d0902e802e17db51808",
+    "mtime": 1782670409.1165876,
+    "ast_hash": "003cbc53ca4f04b3ff0afabb758e3c78",
     "semantic_hash": ""
   },
   "src/components/privacy-settings-link.tsx": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "src/features/home/home-nav.tsx": {
-    "mtime": 1782637624.244328,
-    "ast_hash": "4bd43e3e4a8e0193133d4ba6693d99ff",
+    "mtime": 1782701383.2345552,
+    "ast_hash": "d7b6d2424041d6a8b043c2b8bbadc633",
     "semantic_hash": ""
   },
   "src/features/home/home-page.tsx": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/admin-panel.tsx": {
-    "mtime": 1782638120.8502402,
-    "ast_hash": "6c4a4200ef56d5f75aa7c00aa25dd5ff",
+    "mtime": 1782669037.5501995,
+    "ast_hash": "3dfd29ed20ba6104f65e2d0f5cd5f0c4",
     "semantic_hash": ""
   },
   "src/features/wall/admin-playground-csv.ts": {
@@ -559,29 +559,24 @@
     "ast_hash": "9912e2b9f3b154e65b82f2ea2a9c65d7",
     "semantic_hash": ""
   },
-  "src/features/wall/clerk-my-data-page.tsx": {
-    "mtime": 1782402476.8750594,
-    "ast_hash": "732bde35dfd9997c4cf61d1a9216df81",
-    "semantic_hash": ""
-  },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782631635.6400125,
-    "ast_hash": "87a4680ca31a77fd6ab89b3c67ab943f",
+    "mtime": 1782664825.9177375,
+    "ast_hash": "27e954560635a1883208d264edfbc0ce",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782637624.3659277,
-    "ast_hash": "0de6748cc1c9b08814992ad1c51e7c0f",
+    "mtime": 1782701383.329912,
+    "ast_hash": "33c5b93bdaa00e79823c81240edeeb04",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
-    "mtime": 1782631654.5139763,
-    "ast_hash": "c95a132caa85abcae22a451277c493f1",
+    "mtime": 1782663584.0894442,
+    "ast_hash": "ffa2673b33cfd09c1290cb4e5bdf851b",
     "semantic_hash": ""
   },
   "src/features/wall/edit-card-modal.tsx": {
-    "mtime": 1782584428.8128574,
-    "ast_hash": "730c8cad8a48e63f36cd781b7c9d18ad",
+    "mtime": 1782640706.220648,
+    "ast_hash": "d2a12eea88653a4c9debf1402b6e84cf",
     "semantic_hash": ""
   },
   "src/features/wall/image-compare-slider.tsx": {
@@ -595,13 +590,13 @@
     "semantic_hash": ""
   },
   "src/features/wall/owner-dashboard.tsx": {
-    "mtime": 1782516328.2202466,
-    "ast_hash": "2849a141b0127dc9644f7b9b85aac930",
+    "mtime": 1782670760.628513,
+    "ast_hash": "cbf58d83dbc09ea1ab1c6513175a9e37",
     "semantic_hash": ""
   },
   "src/features/wall/placement-mode.tsx": {
-    "mtime": 1782584413.1573663,
-    "ast_hash": "4fb06146b3a63869d319775c667cabac",
+    "mtime": 1782640702.2992764,
+    "ast_hash": "e1e7de378864a113242baa3eb3b2b1dd",
     "semantic_hash": ""
   },
   "src/features/wall/reviews-section.tsx": {
@@ -620,18 +615,18 @@
     "semantic_hash": ""
   },
   "src/features/wall/types.ts": {
-    "mtime": 1782587302.576868,
-    "ast_hash": "84a340f68f5f8b626de0340c8a059488",
+    "mtime": 1782668909.4282236,
+    "ast_hash": "da2a1c81cc6666148f400da754d9cef8",
     "semantic_hash": ""
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782630960.7384408,
-    "ast_hash": "e5d1e516d64ad8162f81300807444f1e",
+    "mtime": 1782670477.1902065,
+    "ast_hash": "541033127b7ac636c9248f0193fbc491",
     "semantic_hash": ""
   },
   "src/features/wall/wall-card.tsx": {
-    "mtime": 1782631670.4201329,
-    "ast_hash": "d9e43d4c27df89a18f2ffdd0500ba993",
+    "mtime": 1782664829.8962662,
+    "ast_hash": "95db39b45b655f8d57246baaf1a19ba7",
     "semantic_hash": ""
   },
   "src/features/wall/wall-minimap.tsx": {
@@ -1172,6 +1167,16 @@
   "src/lib/admin-signal.ts": {
     "mtime": 1782637623.8766851,
     "ast_hash": "8aef0cbf059e34d4d36d28ad5e0d757b",
+    "semantic_hash": ""
+  },
+  "src/features/wall/clerk-business-page.tsx": {
+    "mtime": 1782701342.629039,
+    "ast_hash": "8f5a34e217aeb55fe2e4c56c3ffc07fa",
+    "semantic_hash": ""
+  },
+  "src/features/wall/clerk-my-data-page.tsx": {
+    "mtime": 1782701342.718712,
+    "ast_hash": "3b72e5cb9e471e66a8250c9aa23c6e63",
     "semantic_hash": ""
   }
 }

@@ -3,18 +3,19 @@
 import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
-import { ClerkMyDataPage } from "./clerk-my-data-page";
+import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
-import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { WallApp } from "./wall-app";
-import { getCardFormat, getImageCardFormat, type CardDraft, type CardUpdate, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
+import { getCardFormat, getImageCardFormat, type CardDraft, type CardUpdate, type CreateCardRateLimit, type OwnerCard, type Placement, type RenewalAmount, type SavedWall, type WallCard } from "./types";
 import { buildWallPath } from "@/lib/wall-slug";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
+import { ClerkBusinessPage } from "./clerk-business-page";
+import { ClerkMyDataPage } from "./clerk-my-data-page";
 import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -148,7 +149,7 @@ export function ConnectedWallApp({
   const cardDailyStats = useQuery(api.cards.getMyCardDailyStats, isAuthenticated ? {} : "skip") as { dates: string[]; byCard: Record<string, number[]> } | null | undefined;
   const savedCards = useQuery(api.savedCards.list, isAuthenticated ? {} : "skip") as WallCard[] | undefined;
   const adminAccess = useQuery(api.admin.getAccess, isAuthenticated ? {} : "skip") as { isAdmin: boolean } | undefined;
-  const profile = useQuery(api.cards.getMyProfile, isAuthenticated ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean; verificationStatus: "pending" | "approved" | "rejected" | null } | null | undefined;
+  const profile = useQuery(api.cards.getMyProfile, isAuthenticated ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean } | null | undefined;
   const updateProfileMutation = useMutation(api.cards.updateProfile);
   const generateUploadUrl = useMutation(api.cards.generateUploadUrl);
   const createCard = useMutation(api.cards.create);
@@ -431,6 +432,10 @@ export function ConnectedWallApp({
       imageX: draft.imageX,
       imageY: draft.imageY,
       imageWidth: draft.imageWidth,
+      imageHeight: draft.imageHeight,
+      backImageX: draft.backImageX,
+      backImageY: draft.backImageY,
+      backImageScale: draft.backImageScale,
       imageIds,
       thumbnailImageIds,
       backImageIds,
@@ -440,7 +445,11 @@ export function ConnectedWallApp({
       rotation: draft.rotation ?? 0,
       width: draft.imageMode === "business-card" ? getCardFormat("biz").width : getImageCardFormat(draft.theme, draft.imageMode).width,
     };
-    const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> };
+    const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> } | CreateCardRateLimit;
+    if ("kind" in result && result.kind === "rate_limited") {
+      setCheckoutMessage(result.message);
+      return;
+    }
     if (totalPaidAmount > 0) {
       if (!("pendingCardId" in result)) throw new Error("The paid card could not be prepared.");
       const checkoutBody = isBundle
@@ -538,8 +547,17 @@ export function ConnectedWallApp({
         await reportCard({ cardId: card.id as Id<"cards">, reason, details });
       }}
       authControl={isClerkSignedIn ? (
-        <UserButton appearance={getClerkUserButtonAppearance(isDark)} userProfileProps={{ appearance: getClerkUserProfileAppearance(isDark) }}>
-          <UserButton.UserProfilePage label="My data" url="my-data" labelIcon={<Download size={16} />}>
+        <UserButton
+          appearance={getClerkUserButtonAppearance(isDark)}
+        >
+          <UserButton.UserProfilePage key="wall-business-profile" label="Business profile" url="business-profile" labelIcon={<BriefcaseBusiness size={16} />}>
+            <ClerkBusinessPage
+              profile={profile}
+              isReady={profile !== undefined}
+              onUpdateBusinessName={async (businessName) => { await updateProfileMutation({ businessName }); }}
+            />
+          </UserButton.UserProfilePage>
+          <UserButton.UserProfilePage key="wall-my-data" label="My data" url="my-data" labelIcon={<Download size={16} />}>
             <ClerkMyDataPage />
           </UserButton.UserProfilePage>
           <UserButton.MenuItems>
@@ -560,14 +578,14 @@ export function ConnectedWallApp({
               labelIcon={<TrendingUp size={16} />}
               onClick={() => router.push("/trending")}
             />
-              <UserButton.Action
-                label="Manage billing"
-                labelIcon={<CreditCard size={16} />}
-                onClick={() => router.push("/billing")}
-              />
-              <UserButton.Action label="manageAccount" />
-              <UserButton.Action label="signOut" />
-            </UserButton.MenuItems>
+            <UserButton.Action
+              label="Manage billing"
+              labelIcon={<CreditCard size={16} />}
+              onClick={() => router.push("/billing")}
+            />
+            <UserButton.Action label="manageAccount" />
+            <UserButton.Action label="signOut" />
+          </UserButton.MenuItems>
           </UserButton>
       ) : null}
       notice={checkoutMessage}
@@ -612,8 +630,7 @@ export function ConnectedWallApp({
           location_city: card.city,
         });
       } : undefined}
-      profile={profile ?? null}
-      onUpdateProfile={async (username, businessName) => { await updateProfileMutation({ username, businessName }); }}
+      profile={null}
       cardDailyStats={cardDailyStats ?? null}
       onRequestVerification={isAuthenticated ? async (plan) => {
         const response = await fetch("/api/stripe/checkout", {

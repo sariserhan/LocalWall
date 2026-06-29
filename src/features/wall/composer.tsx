@@ -42,6 +42,9 @@ interface ComposerForm {
   imageY: number;
   imageWidth: number;
   imageHeight: number;
+  backImageX: number;
+  backImageY: number;
+  backImageScale: number;
   rotation: number;
   paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   featuredTier: "none" | "bronze" | "silver" | "gold";
@@ -85,6 +88,9 @@ const initialForm: ComposerForm = {
   imageY: 35,
   imageWidth: 90,
   imageHeight: 156,
+  backImageX: 50,
+  backImageY: 35,
+  backImageScale: 1,
   rotation: 0,
   paymentOption: "free",
   featuredTier: "none",
@@ -195,10 +201,58 @@ function validSocialProfile(value: string) {
   return /^@?[A-Za-z0-9._-]{2,100}$/.test(value) || /^(https?:\/\/)?(www\.)?[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/\S*)?$/.test(value);
 }
 
-function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: ComposerForm; image?: string; onImageChange?: (height: number) => void; isVerified?: boolean }) {
+async function bakeImageCrop(file: File, frameWidth: number, frameHeight: number, objectX: number, objectY: number, scale = 1): Promise<File> {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const node = new window.Image();
+      node.onload = () => resolve(node);
+      node.onerror = () => reject(new Error("Could not load the image."));
+      node.src = url;
+    });
+    const naturalWidth = image.naturalWidth || frameWidth;
+    const naturalHeight = image.naturalHeight || frameHeight;
+    const coverScale = Math.max(frameWidth / naturalWidth, frameHeight / naturalHeight) * Math.max(scale, 0.01);
+    const drawWidth = naturalWidth * coverScale;
+    const drawHeight = naturalHeight * coverScale;
+    const offsetX = -(drawWidth - frameWidth) * (objectX / 100);
+    const offsetY = -(drawHeight - frameHeight) * (objectY / 100);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(frameWidth));
+    canvas.height = Math.max(1, Math.round(frameHeight));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas is unavailable.");
+    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((result) => {
+        if (!result) {
+          reject(new Error("Could not process the image."));
+          return;
+        }
+        resolve(result);
+      }, "image/png");
+    });
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + "-cropped.png", { type: "image/png" });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function LiveCardPreview({
+  form,
+  image,
+  onImageHeightChange,
+  onImagePanChange,
+  isVerified,
+}: {
+  form: ComposerForm;
+  image?: string;
+  onImageHeightChange?: (height: number) => void;
+  onImagePanChange?: (x: number, y: number) => void;
+  isVerified?: boolean;
+}) {
   const resizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
-  const [imagePan, setImagePan] = useState({ x: 50, y: 35 });
   const format = getCardFormat(form.theme);
   const previewWidth = format.width;
   const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
@@ -207,24 +261,20 @@ function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: Com
   const messageLabel = form.message.trim() || "Your message";
   const priceLabel = form.price.trim() || "Your price";
 
-  useEffect(() => {
-    setImagePan({ x: 50, y: 35 });
-  }, [image]);
-
   const handlePanPointerDown = (event: PointerEvent<HTMLImageElement>) => {
-    if (!imageTopLayout || !image) return;
+    if (!imageTopLayout || !image || !onImagePanChange) return;
     event.stopPropagation();
     event.preventDefault();
-    panRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: imagePan.x, originY: imagePan.y };
+    panRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: form.imageX, originY: form.imageY };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePanPointerMove = (event: PointerEvent<HTMLImageElement>) => {
     const start = panRef.current;
-    if (!start || start.id !== event.pointerId || !imageTopLayout || !image) return;
+    if (!start || start.id !== event.pointerId || !imageTopLayout || !image || !onImagePanChange) return;
     const nextX = Math.max(0, Math.min(100, Number((start.originX + ((event.clientX - start.x) / 4)).toFixed(1))));
     const nextY = Math.max(0, Math.min(100, Number((start.originY + ((event.clientY - start.y) / 4)).toFixed(1))));
-    setImagePan({ x: nextX, y: nextY });
+    onImagePanChange(nextX, nextY);
   };
 
   const handlePanPointerEnd = (event: PointerEvent<HTMLImageElement>) => {
@@ -255,13 +305,13 @@ function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: Com
               alt=""
               draggable={false}
               className="wall-card-image-top"
-              style={{ "--image-h": `${form.imageHeight}px`, objectPosition: `${imagePan.x}% ${imagePan.y}%` } as CSSProperties}
+              style={{ "--image-h": `${form.imageHeight}px`, objectPosition: `${form.imageX}% ${form.imageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
               onPointerUp={handlePanPointerEnd}
               onPointerCancel={handlePanPointerEnd}
             />
-            {onImageChange ? (
+            {onImageHeightChange ? (
               <div
                 className="img-resize-handle"
                 onPointerDown={(e) => {
@@ -272,7 +322,7 @@ function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: Com
                 onPointerMove={(e) => {
                   if (!resizeRef.current) return;
                   const nextHeight = Math.max(120, Math.min(360, resizeRef.current.startH + (e.clientY - resizeRef.current.startY)));
-                  onImageChange(nextHeight);
+                  onImageHeightChange(nextHeight);
                 }}
                 onPointerUp={() => { resizeRef.current = null; }}
                 onPointerCancel={() => { resizeRef.current = null; }}
@@ -308,7 +358,7 @@ function LiveCardPreview({ form, image, onImageChange, isVerified }: { form: Com
 
 function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: ComposerForm; image?: string; backImage?: string; isVerified?: boolean }) {
   const location = form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall";
-  const backLayout = form.theme === "photo" ? "photo" : form.theme === "biz" || form.theme === "ticket" ? "horizontal" : "full";
+  const backLayout = form.theme === "photo" ? "photo" : "full";
   const categoryLabel = form.category ? `${form.category}${form.subcategory ? ` · ${form.subcategory}` : ""}` : "Category";
   const titleLabel = form.name.trim() || "Your business";
   const lineLabel = form.line.trim() || "Your offer goes here.";
@@ -388,6 +438,7 @@ function BackCardPreview({
   imageScale = 1,
   isVerified,
   onImageScaleChange,
+  onImagePanChange,
 }: {
   form: ComposerForm;
   image?: string;
@@ -395,16 +446,12 @@ function BackCardPreview({
   imageScale?: number;
   isVerified?: boolean;
   onImageScaleChange?: (scale: number) => void;
+  onImagePanChange?: (x: number, y: number) => void;
 }) {
   const format = getCardFormat(form.theme);
-  const backLayout = form.theme === "photo" ? "photo" : form.theme === "biz" || form.theme === "ticket" ? "horizontal" : "full";
+  const backLayout = form.theme === "photo" ? "photo" : "full";
   const zoomRef = useRef<{ id: number; y: number; scale: number } | null>(null);
   const panRef = useRef<{ id: number; x: number; y: number; originX: number; originY: number } | null>(null);
-  const [backPan, setBackPan] = useState({ x: 50, y: 35 });
-
-  useEffect(() => {
-    setBackPan({ x: 50, y: 35 });
-  }, [image]);
 
   const handleZoomPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!onImageScaleChange || event.button !== 0) return;
@@ -429,19 +476,19 @@ function BackCardPreview({
   };
 
   const handlePanPointerDown = (event: PointerEvent<HTMLImageElement>) => {
-    if (!image) return;
+    if (!image || !onImagePanChange) return;
     event.stopPropagation();
     event.preventDefault();
-    panRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: backPan.x, originY: backPan.y };
+    panRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: form.backImageX, originY: form.backImageY };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePanPointerMove = (event: PointerEvent<HTMLImageElement>) => {
     const start = panRef.current;
-    if (!start || start.id !== event.pointerId || !image) return;
+    if (!start || start.id !== event.pointerId || !image || !onImagePanChange) return;
     const nextX = Math.max(0, Math.min(100, Number((start.originX + ((event.clientX - start.x) / 4)).toFixed(1))));
     const nextY = Math.max(0, Math.min(100, Number((start.originY + ((event.clientY - start.y) / 4)).toFixed(1))));
-    setBackPan({ x: nextX, y: nextY });
+    onImagePanChange(nextX, nextY);
   };
 
   const handlePanPointerEnd = (event: PointerEvent<HTMLImageElement>) => {
@@ -473,7 +520,7 @@ function BackCardPreview({
               alt=""
               draggable={false}
               className="details-back-image"
-              style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${backPan.x}% ${backPan.y}%` } as CSSProperties}
+              style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${form.backImageX}% ${form.backImageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
               onPointerUp={handlePanPointerEnd}
@@ -507,8 +554,10 @@ function CardSidesPreview({
   isVerified,
   mode,
   stacked = false,
-  onFrontImageChange,
+  onFrontImageHeightChange,
+  onFrontImagePanChange,
   onBackImageScaleChange,
+  onBackImagePanChange,
 }: {
   form: ComposerForm;
   frontImage?: string;
@@ -517,8 +566,10 @@ function CardSidesPreview({
   isVerified?: boolean;
   mode: "live" | "expanded";
   stacked?: boolean;
-  onFrontImageChange?: (height: number) => void;
+  onFrontImageHeightChange?: (height: number) => void;
+  onFrontImagePanChange?: (x: number, y: number) => void;
   onBackImageScaleChange?: (scale: number) => void;
+  onBackImagePanChange?: (x: number, y: number) => void;
 }) {
   const frontCanvasRef = useRef<HTMLDivElement | null>(null);
   const [matchedFrontHeight, setMatchedFrontHeight] = useState<number | undefined>(undefined);
@@ -542,7 +593,13 @@ function CardSidesPreview({
         <span>Front Card</span>
         <div className="card-side-preview-canvas" ref={frontCanvasRef}>
           {mode === "live" ? (
-            <LiveCardPreview form={form} image={frontImage} onImageChange={onFrontImageChange} isVerified={isVerified} />
+            <LiveCardPreview
+              form={form}
+              image={frontImage}
+              onImageHeightChange={onFrontImageHeightChange}
+              onImagePanChange={onFrontImagePanChange}
+              isVerified={isVerified}
+            />
           ) : (
             <ExpandedCardPreview form={form} image={frontImage} backImage={backImage} isVerified={isVerified} />
           )}
@@ -552,7 +609,15 @@ function CardSidesPreview({
       <div className="card-side-preview">
         <span>Back Card</span>
         <div className="card-side-preview-canvas">
-          <BackCardPreview form={form} image={backImage} matchHeight={matchedFrontHeight} imageScale={backImageScale} isVerified={isVerified} onImageScaleChange={onBackImageScaleChange} />
+          <BackCardPreview
+            form={form}
+            image={backImage}
+            matchHeight={matchedFrontHeight}
+            imageScale={backImageScale}
+            isVerified={isVerified}
+            onImageScaleChange={onBackImageScaleChange}
+            onImagePanChange={onBackImagePanChange}
+          />
         </div>
       </div>
     </div>
@@ -585,7 +650,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
   const [backFiles, setBackFiles] = useState<File[]>([]);
   const [backPreviews, setBackPreviews] = useState<string[]>([]);
   const backFileInputRef = useRef<HTMLInputElement>(null);
-  const [backImageScale, setBackImageScale] = useState(1);
+  const [backImageScale, setBackImageScale] = useState(() => form.backImageScale ?? 1);
   const [autoRenew, setAutoRenew] = useState(false);
   const [bundleCities, setBundleCities] = useState<BundleCity[]>(() => {
     const base: BundleCity = initialLocation
@@ -780,7 +845,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     previews.forEach(URL.revokeObjectURL);
     setFiles([]);
     setPreviews([]);
-    setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156 }));
+    setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
   }, [form.theme, files.length, previews]);
 
   useEffect(() => {
@@ -804,7 +869,8 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     previews.forEach(URL.revokeObjectURL);
     setFiles(nextFiles);
     setPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
-    if (!nextFiles.length) setForm((value) => ({ ...value, imageMode: "photo" }));
+    if (!nextFiles.length) setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
+    else setForm((value) => ({ ...value, imageHeight: 156, imageX: 50, imageY: 35 }));
     event.currentTarget.value = "";
   };
 
@@ -814,6 +880,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setBackFiles(nextFiles);
     setBackPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
     setBackImageScale(1);
+    setForm((value) => ({ ...value, backImageX: 50, backImageY: 35, backImageScale: 1 }));
     event.currentTarget.value = "";
   };
 
@@ -821,7 +888,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     previews.forEach(URL.revokeObjectURL);
     setFiles([]);
     setPreviews([]);
-    setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156 }));
+    setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
     fileInputRef.current?.value && (fileInputRef.current.value = "");
     void clearImagesFromIDB(DRAFT_IMAGES_KEY);
   };
@@ -831,6 +898,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setBackFiles([]);
     setBackPreviews([]);
     setBackImageScale(1);
+    setForm((value) => ({ ...value, backImageX: 50, backImageY: 35, backImageScale: 1 }));
     backFileInputRef.current?.value && (backFileInputRef.current.value = "");
     void clearImagesFromIDB(DRAFT_BACK_IMAGES_KEY);
   };
@@ -862,9 +930,12 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
         return;
       }
     }
-    const { imageHeight: _imageHeight, ...draft } = form;
+    const backFrame = getCardFormat(form.theme);
+    const bakedBackFiles = backFiles[0]
+      ? [await bakeImageCrop(backFiles[0], backFrame.width, backFrame.minHeight, form.backImageX, form.backImageY, form.backImageScale)]
+      : [];
     onReady({
-      ...draft,
+      ...form,
       category: form.category as CardCategory,
       subcategory: form.subcategory,
       area: form.area.trim() || [form.city.trim(), form.state.trim(), form.country.trim()].filter(Boolean).join(", ") || "Selected wall",
@@ -887,7 +958,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       bundleCities: form.paymentOption === "bundle" ? bundleCities : undefined,
       files,
       previews,
-      backFiles,
+      backFiles: bakedBackFiles,
       backPreviews,
     });
     try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* storage unavailable */ }
@@ -1002,16 +1073,18 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                 <span>Front and back card</span>
                 <div className="details-preview-canvas">
                   <CardSidesPreview
-                    stacked
-                    form={form}
-                    frontImage={previews[0]}
-                    backImage={backPreviews[0]}
-                    backImageScale={backImageScale}
-                    isVerified={isVerified}
-                    mode="live"
-                    onFrontImageChange={(height) => setForm((value) => ({ ...value, imageHeight: height }))}
-                    onBackImageScaleChange={backPreviews[0] ? setBackImageScale : undefined}
-                  />
+                  stacked
+                  form={form}
+                  frontImage={previews[0]}
+                  backImage={backPreviews[0]}
+                  backImageScale={backImageScale}
+                  isVerified={isVerified}
+                  mode="live"
+                  onFrontImageHeightChange={(height) => setForm((value) => ({ ...value, imageHeight: height }))}
+                  onFrontImagePanChange={(x, y) => setForm((value) => ({ ...value, imageX: x, imageY: y }))}
+                  onBackImageScaleChange={backPreviews[0] ? (scale) => { setBackImageScale(scale); setForm((value) => ({ ...value, backImageScale: scale })); } : undefined}
+                  onBackImagePanChange={(x, y) => setForm((value) => ({ ...value, backImageX: x, backImageY: y }))}
+                />
                 </div>
               </div>
             </aside>
@@ -1099,8 +1172,10 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   backImage={backPreviews[0]}
                   backImageScale={backImageScale}
                   isVerified={isVerified}
-                  onFrontImageChange={previews[0] && form.imageMode === "photo" ? (imageHeight) => setForm((f) => ({ ...f, imageHeight })) : undefined}
-                  onBackImageScaleChange={backPreviews[0] ? setBackImageScale : undefined}
+                  onFrontImageHeightChange={previews[0] && form.imageMode === "photo" ? (imageHeight) => setForm((f) => ({ ...f, imageHeight })) : undefined}
+                  onFrontImagePanChange={previews[0] && form.imageMode === "photo" ? (x, y) => setForm((f) => ({ ...f, imageX: x, imageY: y })) : undefined}
+                  onBackImageScaleChange={backPreviews[0] ? (scale) => { setBackImageScale(scale); setForm((value) => ({ ...value, backImageScale: scale })); } : undefined}
+                  onBackImagePanChange={backPreviews[0] ? (x, y) => setForm((value) => ({ ...value, backImageX: x, backImageY: y })) : undefined}
                 />
               </div>
               {previews[0] && form.imageMode === "photo" ? <small className="img-drag-hint">Drag to reposition · drag corner to resize</small> : null}

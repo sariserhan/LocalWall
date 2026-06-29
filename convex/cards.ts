@@ -78,6 +78,34 @@ function isValidWebUrl(value: string) {
   }
 }
 
+async function syncDerivedProfileFields(
+  ctx: MutationCtx,
+  user: { _id: Id<"users">; tokenIdentifier: string; displayName?: string | null; username?: string | null; businessName?: string | null },
+  args: { username?: string; businessName?: string },
+) {
+  const username = args.username ?? user.username ?? undefined;
+  const businessName = args.businessName ?? user.businessName ?? undefined;
+  const ownerName = businessName || username || undefined;
+  const reviewerName = businessName || username || user.displayName || undefined;
+  const [cards, reviews, contactMessages, rateLimits] = await Promise.all([
+    ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect(),
+    ctx.db.query("reviews").withIndex("by_user_and_card", (q) => q.eq("userId", user._id)).collect(),
+    ctx.db.query("contactMessages").collect(),
+    ctx.db.query("rateLimits").collect(),
+  ]);
+
+  await Promise.all([
+    ...cards.map((card) => ctx.db.patch(card._id, { username, ownerName })),
+    ...reviews.map((review) => ctx.db.patch(review._id, { reviewerName })),
+    ...contactMessages
+      .filter((message) => message.reporterId === user._id)
+      .map((message) => ctx.db.patch(message._id, { reporterUsername: username })),
+    ...rateLimits
+      .filter((row) => row.key.startsWith(`${user.tokenIdentifier}:`))
+      .map((row) => ctx.db.patch(row._id, { username })),
+  ]);
+}
+
 export const getMyProfile = query({
   args: {},
   handler: async (ctx) => {
@@ -126,14 +154,38 @@ export const updateProfile = mutation({
   args: { username: v.optional(v.string()), businessName: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const username = args.username?.trim() || undefined;
-    const businessName = args.businessName?.trim() || undefined;
+    const username = "username" in args ? (args.username?.trim() || undefined) : user.username ?? undefined;
+    const businessName = "businessName" in args ? (args.businessName?.trim() || undefined) : user.businessName ?? undefined;
     if (username && username.length > 40) throw new Error("Username must be 40 characters or fewer.");
     if (businessName && businessName.length > 60) throw new Error("Business name must be 60 characters or fewer.");
     await ctx.db.patch(user._id, { username, businessName });
-    const ownerName = businessName || username || undefined;
-    const myCards = await ctx.db.query("cards").withIndex("by_owner", (q) => q.eq("ownerId", user._id)).collect();
-    await Promise.all(myCards.map((card) => ctx.db.patch(card._id, { ownerName })));
+    await syncDerivedProfileFields(ctx, user, { username, businessName });
+  },
+});
+
+export const syncClerkUsername = mutation({
+  args: { username: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const username = args.username?.trim() || undefined;
+    if (username && username.length > 40) throw new Error("Username must be 40 characters or fewer.");
+    if (user.username === username) return;
+    await ctx.db.patch(user._id, { username });
+    await syncDerivedProfileFields(ctx, user, { username, businessName: user.businessName ?? undefined });
+  },
+});
+
+export const backfillDerivedProfileFields = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    for (const user of users) {
+      await syncDerivedProfileFields(ctx, user, {
+        username: user.username ?? undefined,
+        businessName: user.businessName ?? undefined,
+      });
+    }
+    return { updatedUsers: users.length };
   },
 });
 
@@ -179,6 +231,7 @@ export const listPublished = query({
         country: card.country,
         zipcode: card.zipcode,
         neighborhood: card.neighborhood,
+        username: card.username,
         ownerName: card.ownerName,
         price: card.price,
         phone: card.phone,
@@ -247,6 +300,7 @@ export const getPublishedById = query({
       country: card.country,
       zipcode: card.zipcode,
       neighborhood: card.neighborhood,
+      username: card.username,
       ownerName: card.ownerName,
       price: card.price,
       phone: card.phone,
@@ -316,6 +370,7 @@ export const getCardForEmbed = query({
       backImages: backUrls.filter((u): u is string => u !== null),
       backThumbnailImages: backThumbnailUrls.filter((u): u is string => u !== null),
       verified: isLive ? (owner?.verified ?? false) : false,
+      username: card.username ?? null,
       ownerName: card.ownerName ?? null,
       status: effectiveStatus as "live" | "expired" | "hidden",
       expiresAt: card.expiresAt,
@@ -416,6 +471,7 @@ export const listMine = query({
         country: card.country,
         zipcode: card.zipcode,
         neighborhood: card.neighborhood,
+        username: card.username,
         ownerName: card.ownerName,
         price: card.price,
         phone: card.phone,
@@ -668,6 +724,10 @@ export const create = mutation({
     imageX: v.optional(v.number()),
     imageY: v.optional(v.number()),
     imageWidth: v.optional(v.number()),
+    imageHeight: v.optional(v.number()),
+    backImageX: v.optional(v.number()),
+    backImageY: v.optional(v.number()),
+    backImageScale: v.optional(v.number()),
     imageIds: v.array(v.id("_storage")),
     thumbnailImageIds: v.optional(v.array(v.id("_storage"))),
     backImageIds: v.optional(v.array(v.id("_storage"))),
@@ -728,9 +788,14 @@ export const create = mutation({
     if (!user) throw new Error("Your profile could not be created.");
     if (user.blockedAt) throw new Error("Your account is blocked by WALL admin. Contact support for help.");
 
-    const cardCreationRateLimit = await ctx.runMutation(api.rateLimits.take, { scopes: ["card_create_hour"] });
+    const cardCreationRateLimit: { allowed: boolean; scope: string; limit: number; remaining: number; resetAt: number } = await ctx.runMutation(api.rateLimits.take, { scopes: ["card_create_hour"] });
     if (!cardCreationRateLimit.allowed) {
-      throw new Error("Too many cards created. Please wait an hour before posting again.");
+      return {
+        kind: "rate_limited" as const,
+        message: "You’ve reached the posting limit for now. Try again in about an hour.",
+        resetAt: cardCreationRateLimit.resetAt,
+        limit: cardCreationRateLimit.limit,
+      };
     }
 
     const createdAt = Date.now();
@@ -788,6 +853,7 @@ export const create = mutation({
       country: args.country.trim(),
       zipcode: args.zipcode?.trim() || undefined,
       neighborhood: args.neighborhood?.trim() || undefined,
+      username: user.username ?? undefined,
       ownerName: user.businessName || user.username || undefined,
       price: args.price?.trim() || undefined,
       phone: phone || undefined,
@@ -805,6 +871,10 @@ export const create = mutation({
       imageX: args.imageX,
       imageY: args.imageY,
       imageWidth: args.imageWidth,
+      imageHeight: args.imageHeight,
+      backImageX: args.backImageX,
+      backImageY: args.backImageY,
+      backImageScale: args.backImageScale,
       imageIds: args.imageIds,
       thumbnailImageIds: args.thumbnailImageIds,
       backImageIds: args.backImageIds,
@@ -845,6 +915,7 @@ export const create = mutation({
       country: args.country.trim(),
       zipcode: args.zipcode?.trim() || undefined,
       neighborhood: args.neighborhood?.trim() || undefined,
+      username: user.username ?? undefined,
       ownerName: user.businessName || user.username || undefined,
       price: args.price?.trim() || undefined,
       phone: phone || undefined,
@@ -862,6 +933,10 @@ export const create = mutation({
       imageX: args.imageX,
       imageY: args.imageY,
       imageWidth: args.imageWidth,
+      imageHeight: args.imageHeight,
+      backImageX: args.backImageX,
+      backImageY: args.backImageY,
+      backImageScale: args.backImageScale,
       images: urls.filter((url): url is string => url !== null),
       thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
       backImages: backUrls.filter((url): url is string => url !== null),

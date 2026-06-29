@@ -40,7 +40,7 @@ import { seedCards } from "./seed-cards";
 import { WallCard } from "./wall-card";
 import { WallMinimap } from "./wall-minimap";
 import { WallSkeletons } from "./wall-skeletons";
-import { categories, SUBCATEGORY_OPTIONS, getCardFormat, getImageCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
+import { categories, SUBCATEGORY_OPTIONS, getCardFormat, getImageCardFormat, type CardCategory, type CardDraft, type CardUpdate, type CreateCard, type CreateCardRateLimit, type OwnerCard, type Placement, type RenewalAmount, type WallCard as WallCardModel } from "./types";
 import { buildWallPath, toCategorySlug } from "@/lib/wall-slug";
 import { BugReportLink } from "@/components/bug-report-link";
 import { ContactLink } from "@/components/contact-link";
@@ -86,7 +86,6 @@ interface WallAppProps {
   savedWalls?: SavedWall[];
   onRemoveSavedWall?: (wall: SavedWall) => Promise<void>;
   profile?: { displayName: string | null; username: string | null; businessName: string | null; verified?: boolean; verificationStatus?: "pending" | "approved" | "rejected" | null } | null;
-  onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
   onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
   cardDailyStats?: { dates: string[]; byCard: Record<string, number[]> } | null;
   wallViewCount?: number;
@@ -139,7 +138,7 @@ const defaultSeedLocation = (() => {
   };
 })();
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onUpdateProfile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -987,22 +986,25 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     setIsSaving(true);
     setError(null);
     try {
-      let card: WallCardModel | void;
+      let card: WallCardModel | CreateCardRateLimit | void;
       if (mode === "demo") {
         card = makeDemoCard(pendingCard, placement, cards.length + 1);
         setDemoCards((current) => [...current, card as WallCardModel]);
       } else {
         card = await onCreateCard?.(pendingCard, placement);
       }
+      if (card && "kind" in card) { toast(card.message, "info"); return; }
+      const postedCard = card as WallCardModel | void;
       setPendingCard(null);
-      if (card) {
-        setLayers((current) => [...current, card.id]);
-        setSelected(card);
+      if (postedCard) {
+        setLayers((current) => [...current, postedCard.id]);
+        setSelected(postedCard);
       }
       setFresh(true);
       toast("Card posted!");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The card could not be posted.");
+      const message = cause instanceof Error ? cause.message : "";
+      setError(message || "The card could not be posted.");
     } finally {
       setIsSaving(false);
     }
@@ -1798,7 +1800,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           onRenew={onRenewCard}
           onCancelAutoRenew={onCancelAutoRenewCard}
           profile={profile ?? null}
-          onUpdateProfile={onUpdateProfile}
           onRequestVerification={onRequestVerification}
           cardDailyStats={cardDailyStats}
         />

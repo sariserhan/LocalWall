@@ -112,7 +112,13 @@ export function EditCardModal({ card, onClose, onSave }: { card: OwnerCard; onCl
               {previewImageTopLayout ? (
                 <>
                   <div className="wall-card-image-top-wrap">
-                    <img src={previewImage} alt="" draggable={false} className="wall-card-image-top" />
+                    <img
+                      src={previewImage}
+                      alt=""
+                      draggable={false}
+                      className="wall-card-image-top"
+                      style={{ objectPosition: `${card.imageX ?? 50}% ${card.imageY ?? 35}%`, "--image-h": `${card.imageHeight ?? 156}px` } as CSSProperties}
+                    />
                   </div>
                   <div className="wall-card-content">
                     <div className="card-copy">

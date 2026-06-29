@@ -92,6 +92,7 @@ export interface WallCard {
   country?: string;
   zipcode?: string;
   neighborhood?: string;
+  username?: string;
   ownerName?: string;
   price?: string;
   phone?: string;
@@ -109,6 +110,10 @@ export interface WallCard {
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
+  imageHeight?: number;
+  backImageX?: number;
+  backImageY?: number;
+  backImageScale?: number;
   images: string[];
   thumbnailImages?: string[];
   backImages?: string[];
@@ -178,6 +183,10 @@ export interface CardDraft {
   imageX?: number;
   imageY?: number;
   imageWidth?: number;
+  imageHeight?: number;
+  backImageX?: number;
+  backImageY?: number;
+  backImageScale?: number;
   backFiles: File[];
   backPreviews: string[];
   rotation?: number;
@@ -201,4 +210,11 @@ export interface SavedWall {
   createdAt: number;
 }
 
-export type CreateCard = (draft: CardDraft, placement: Placement) => Promise<WallCard | void>;
+export type CreateCardRateLimit = {
+  kind: "rate_limited";
+  message: string;
+  resetAt: number;
+  limit: number;
+};
+
+export type CreateCard = (draft: CardDraft, placement: Placement) => Promise<WallCard | CreateCardRateLimit | void>;

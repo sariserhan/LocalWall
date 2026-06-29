@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Code2, Copy, Eye, EyeOff, MapPin, MousePointerClick, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, User, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Bookmark, Check, Clock3, Code2, Copy, Eye, EyeOff, MapPin, MousePointerClick, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { EditCardModal } from "./edit-card-modal";
@@ -42,7 +42,6 @@ interface OwnerDashboardProps {
   onRenew: (card: OwnerCard, paidAmount: RenewalAmount, autoRenew: boolean) => Promise<void>;
   onCancelAutoRenew?: (card: OwnerCard) => Promise<void>;
   profile: { displayName: string | null; username: string | null; businessName: string | null; verified?: boolean; verificationStatus?: "pending" | "approved" | "rejected" | null } | null;
-  onUpdateProfile?: (username: string | undefined, businessName: string | undefined) => Promise<void>;
   onRequestVerification?: (plan: "monthly" | "annual") => Promise<void>;
   cardDailyStats?: { dates: string[]; byCard: Record<string, number[]> } | null;
 }
@@ -62,18 +61,13 @@ function expiryLabel(expiresAt: number) {
   return `${days} days left`;
 }
 
-export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, onCancelAutoRenew, profile, onUpdateProfile, onRequestVerification, cardDailyStats }: OwnerDashboardProps) {
+export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose, onCreate, onView, onRemoveSaved, onRemoveSavedWall, onNavigateToWall, onSetVisibility, onUpdate, onDelete, onRenew, onCancelAutoRenew, profile, onRequestVerification, cardDailyStats }: OwnerDashboardProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<OwnerCard | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OwnerCard | null>(null);
   const [renewTarget, setRenewTarget] = useState<OwnerCard | null>(null);
   const [renewalAmount, setRenewalAmount] = useState<RenewalAmount>(7.99);
-  const [usernameInput, setUsernameInput] = useState("");
-  const [businessNameInput, setBusinessNameInput] = useState(profile?.businessName ?? "");
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [profileSaved, setProfileSaved] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
   const [verificationBusy, setVerificationBusy] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [selectedVerificationPlan, setSelectedVerificationPlan] = useState<"monthly" | "annual" | null>("annual");
@@ -83,10 +77,6 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
   const [previewTarget, setPreviewTarget] = useState<OwnerCard | null>(null);
 
   const handleClose = () => {
-    setUsernameInput("");
-    setBusinessNameInput("");
-    setProfileSaved(false);
-    setProfileError(null);
     onClose();
   };
 
@@ -104,23 +94,6 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
     }
   };
 
-  const saveProfile = async () => {
-    if (!onUpdateProfile) return;
-    setProfileSaving(true);
-    setProfileError(null);
-    setProfileSaved(false);
-    try {
-      await onUpdateProfile(usernameInput.trim() || undefined, businessNameInput.trim() || undefined);
-      setUsernameInput("");
-      setBusinessNameInput("");
-      setProfileSaved(true);
-      setTimeout(() => setProfileSaved(false), 2500);
-    } catch (cause) {
-      setProfileError(cause instanceof Error ? cause.message : "Profile could not be saved.");
-    } finally {
-      setProfileSaving(false);
-    }
-  };
   const stats = useMemo(() => ({
     totalViews: cards.reduce((sum, card) => sum + card.clicks, 0),
     live: cards.filter((card) => card.status === "published").length,
@@ -200,55 +173,11 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
           <button className="icon-btn" onClick={handleClose} aria-label="Close dashboard"><X /></button>
         </header>
 
-        <div className="dashboard-profile">
-          <div className="dashboard-profile-header"><User size={14} /><strong>Profile</strong></div>
-          <div className="dashboard-profile-body">
-            {profile?.displayName ? (
-              <div className="dashboard-profile-row">
-                <span>Display name</span>
-                <p>{profile.displayName}</p>
-              </div>
-            ) : null}
-            <div className="dashboard-profile-row">
-              <label htmlFor="dashboard-username">Username <span>(optional)</span></label>
-              <div className="dashboard-profile-input-wrap">
-                <input
-                  id="dashboard-username"
-                  type="text"
-                  maxLength={40}
-                  placeholder={profile?.username ?? profile?.displayName ?? "Your name or handle"}
-                  value={usernameInput}
-                  onChange={(e) => { setUsernameInput(e.target.value); setProfileSaved(false); }}
-                />
-                {usernameInput ? (
-                  <button type="button" className="dashboard-input-clear" onClick={() => { setUsernameInput(""); setProfileSaved(false); }} aria-label="Clear username"><X size={12} /></button>
-                ) : null}
-              </div>
-            </div>
-            <div className="dashboard-profile-row">
-              <label htmlFor="dashboard-biz-name">Business name <span>(optional)</span></label>
-              <div className="dashboard-profile-input-wrap">
-                <input
-                  id="dashboard-biz-name"
-                  type="text"
-                  maxLength={60}
-                  placeholder="e.g. Serhan's Plumbing LLC"
-                  value={businessNameInput}
-                  onChange={(e) => { setBusinessNameInput(e.target.value); setProfileSaved(false); }}
-                />
-                {businessNameInput ? (
-                  <button type="button" className="dashboard-input-clear" onClick={() => { setBusinessNameInput(""); setProfileSaved(false); }} aria-label="Clear business name"><X size={12} /></button>
-                ) : null}
-              </div>
-            </div>
-            <div className="dashboard-profile-save-row">
-              <p className="dashboard-profile-hint">Cards show your business name if set, otherwise username, otherwise display name.</p>
-              <button className="primary" onClick={() => void saveProfile()} disabled={profileSaving}>
-                {profileSaved ? <><Check size={14} /> Saved</> : profileSaving ? "Saving…" : "Save profile"}
-              </button>
-            </div>
-            {profileError ? <p className="dashboard-profile-error">{profileError}</p> : null}
-          </div>
+        <div className="dashboard-stats">
+          <div><BarChart3 /><span>Total card opens</span><strong>{stats.totalViews}</strong></div>
+          <div><Eye /><span>Live cards</span><strong>{stats.live}</strong></div>
+          <div><MousePointerClick /><span>Contact actions</span><strong>{stats.actions}</strong></div>
+          <div><Bookmark /><span>Total card saved</span><strong>{stats.saved}</strong></div>
         </div>
 
         <div className="dashboard-verification">
@@ -304,13 +233,6 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
             </div>
           )}
           {verificationError ? <p className="dashboard-profile-error">{verificationError}</p> : null}
-        </div>
-
-        <div className="dashboard-stats">
-          <div><BarChart3 /><span>Total card opens</span><strong>{stats.totalViews}</strong></div>
-          <div><Eye /><span>Live cards</span><strong>{stats.live}</strong></div>
-          <div><MousePointerClick /><span>Contact actions</span><strong>{stats.actions}</strong></div>
-          <div><Bookmark /><span>Total card saved</span><strong>{stats.saved}</strong></div>
         </div>
 
         <div className="dashboard-toolbar">

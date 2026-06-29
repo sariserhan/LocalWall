@@ -75,7 +75,13 @@ export function PlacementMode({ card, position, dragging, onDragStart, onMove, o
         {imageTopLayout ? (
           <>
             <div className="wall-card-image-top-wrap">
-              <img src={card.previews[0]} alt="" draggable={false} className="wall-card-image-top" />
+              <img
+                src={card.previews[0]}
+                alt=""
+                draggable={false}
+                className="wall-card-image-top"
+                style={{ objectPosition: `${card.imageX ?? 50}% ${card.imageY ?? 35}%`, "--image-h": `${card.imageHeight ?? 156}px` } as CSSProperties}
+              />
             </div>
             <div className="wall-card-content">
               <div className="card-copy"><p className="card-category">{card.category}</p><h2>{card.name}</h2><p className="card-line">{card.line}</p></div>

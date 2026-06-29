@@ -32,7 +32,6 @@ export function GlobalOwnerDashboard() {
   const deleteCard = useMutation(api.cards.remove);
   const renewCard = useMutation(api.cards.renew);
   const cancelAutoRenewAction = useAction(api.payments.cancelAutoRenew);
-  const updateProfileMutation = useMutation(api.cards.updateProfile);
   const setSavedCard = useMutation(api.savedCards.setSaved);
   const setSavedWall = useMutation(api.savedWalls.setSaved);
   const finalizeVerification = useAction(api.payments.finalizeVerification);
@@ -77,7 +76,6 @@ export function GlobalOwnerDashboard() {
       onRenew={handleRenew}
       onCancelAutoRenew={async (card) => { await cancelAutoRenewAction({ cardId: card.id as Id<"cards"> }); }}
       profile={profile ?? null}
-      onUpdateProfile={async (username, businessName) => { await updateProfileMutation({ username, businessName }); }}
       onRequestVerification={async (plan) => {
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",

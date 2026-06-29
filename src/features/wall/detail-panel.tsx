@@ -73,7 +73,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const phoneRevealed = revealedPhoneFor === String(card.id);
   const frontImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
-  const backLayout = card.theme === "photo" ? "photo" : card.imageMode === "business-card" || card.theme === "biz" || card.theme === "ticket" ? "horizontal" : "full";
+  const backLayout = card.theme === "photo" ? "photo" : "full";
 
   useEffect(() => setOptimisticSaved(saved), [saved]);
   useEffect(() => { setOptimisticLiked(liked); }, [liked]);
