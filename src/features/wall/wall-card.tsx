@@ -45,13 +45,11 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const tapeLeft = 22 + ((seed >> 6) % 48); // 22% to 69%
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
   const cardImage = card.thumbnailImages?.[0] ?? card.images[0];
-  const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
+  const backImage = card.backImages?.[0] ?? card.backThumbnailImages?.[0];
   const format = getCardFormat(displayTheme);
   const imageTopLayout = Boolean(cardImage && card.imageMode !== "business-card" && displayTheme !== "biz" && displayTheme !== "ticket");
-  const backLayout = displayTheme === "photo" ? "photo" : "full";
+  const backLayout = displayTheme === "photo" ? "photo" : (displayTheme === "biz" || displayTheme === "ticket" ? "horizontal" : "full");
   const frontObjectPosition = `${card.imageX ?? 50}% ${card.imageY ?? 35}%`;
-  const backObjectPosition = "50% 50%";
-  const backScale = 1;
 
   useEffect(() => {
     setRotationDraft(card.rotation);
@@ -139,27 +137,15 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const backFace = (
     <div className="wall-card-face wall-card-face-back">
       {backImage ? (
-        <div className={`wall-card-back-art backside-art layout-${backLayout}`}>
-          <img
-            src={backImage}
-            alt=""
-            draggable={false}
-            className="wall-card-back-image"
-            style={{
-              position: "absolute",
-              inset: 0,
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: backObjectPosition,
-              transform: `scale(${backScale})`,
-              transformOrigin: "center center",
-            }}
-          />
+        <div className="wall-card-back-wrap">
+          <div className={`wall-card-back-art backside-art layout-${backLayout}`}>
+            <img
+              src={backImage}
+              alt=""
+              draggable={false}
+              className="wall-card-back-image"
+            />
+          </div>
         </div>
       ) : (
         <div className={`wall-card-back-empty theme-${displayTheme}`}>
