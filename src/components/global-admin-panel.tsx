@@ -34,6 +34,7 @@ export function GlobalAdminPanel() {
   const adminRemoveCard = useMutation(api.admin.removeCard);
   const adminPurgeOrphanCardData = useMutation(api.admin.purgeOrphanCardData);
   const adminDeleteCardsByOwner = useMutation(api.admin.deleteAllCardsByOwner);
+  const adminResetRateLimitsForUser = useMutation(api.admin.resetRateLimitsForUser);
   const adminBlockUser = useMutation(api.admin.blockUser);
   const adminUnblockUser = useMutation(api.admin.unblockUser);
   const adminVerifyUser = useMutation(api.admin.setUserVerified);
@@ -60,6 +61,9 @@ export function GlobalAdminPanel() {
       }}
       onDeleteCardsByOwner={async (userId) => {
         await adminDeleteCardsByOwner({ userId });
+      }}
+      onResetRateLimitsForUser={async (userId) => {
+        await adminResetRateLimitsForUser({ userId });
       }}
       onBlockUser={async (userId) => {
         await adminBlockUser({ userId });

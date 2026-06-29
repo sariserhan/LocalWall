@@ -9,13 +9,12 @@ function buildModules(rootDir: string) {
 
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name === "_generated") continue;
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(fullPath);
         continue;
       }
-      if (!entry.name.endsWith(".ts") || entry.name.endsWith(".d.ts")) continue;
+      if (!(entry.name.endsWith(".ts") || entry.name.endsWith(".js")) || entry.name.endsWith(".d.ts")) continue;
       const rel = relative(rootDir, fullPath).split(sep).join("/");
       modules[`./${rel}`] = () => import(pathToFileURL(fullPath).href);
     }

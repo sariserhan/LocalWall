@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BarChart2, Bookmark, Bug, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
+import { AlertTriangle, BarChart2, Bookmark, Bug, Check, Eye, EyeOff, ExternalLink, Flag, FlaskConical, Layers, Mail, MapPin, Phone, RefreshCcw, Search, ShieldCheck, Share2, Trash2, UserRound, X, XCircle } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { AdminPlayground } from "./admin-playground";
@@ -73,6 +73,7 @@ interface AdminPanelProps {
   onDeleteCard: (cardId: Id<"cards">) => Promise<void>;
   onPurgeOrphanCardData: () => Promise<void>;
   onDeleteCardsByOwner: (userId: Id<"users">) => Promise<void>;
+  onResetRateLimitsForUser: (userId: Id<"users">) => Promise<void>;
   onBlockUser: (userId: Id<"users">) => Promise<void>;
   onUnblockUser: (userId: Id<"users">, restoreCards: boolean) => Promise<void>;
   onVerifyUser: (userId: Id<"users">, verified: boolean) => Promise<void>;
@@ -87,7 +88,7 @@ function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
 }
 
-export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPurgeOrphanCardData, onDeleteCardsByOwner, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
+export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPurgeOrphanCardData, onDeleteCardsByOwner, onResetRateLimitsForUser, onBlockUser, onUnblockUser, onVerifyUser, onResolveReport, onResolveBugReport, onResolveContactMessage, onApproveVerification, onRejectVerification }: AdminPanelProps) {
   const [tab, setTab] = useState<"cards" | "users" | "reports" | "bugs" | "contact" | "analytics" | "verification" | "playground" | "maintenance">("cards");
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -307,6 +308,19 @@ export function AdminPanel({ data, onClose, onSetCardStatus, onDeleteCard, onPur
                       setBusyId(null);
                     }
                   }}><Trash2 /> Delete cards</button>
+                  <button className="secondary" disabled={busyId === String(user.id)} onClick={async () => {
+                    const confirmed = window.confirm(`Reset rate limits for ${user.displayName || user.businessName || user.username || user.email || "this user"}?`);
+                    if (!confirmed) return;
+                    setBusyId(String(user.id));
+                    setError(null);
+                    try {
+                      await onResetRateLimitsForUser(user.id);
+                    } catch (cause) {
+                      setError(cause instanceof Error ? cause.message : "The rate limits could not be reset.");
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}><RefreshCcw /> Reset rate limit</button>
                   <button className="secondary danger-action" disabled={busyId === String(user.id)} onClick={async () => {
                     setBusyId(String(user.id));
                     setError(null);

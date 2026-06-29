@@ -185,6 +185,42 @@ describe("deleteAllCardsByOwner", () => {
 });
 
 // ---------------------------------------------------------------------------
+// resetRateLimitsForUser
+// ---------------------------------------------------------------------------
+
+describe("resetRateLimitsForUser", () => {
+  test("admin can clear a user's card-create rate limit bucket", async () => {
+    const t = makeT();
+    await createCard(t);
+    const userId = await getUserId(t);
+
+    for (let attempt = 1; attempt < 10; attempt += 1) {
+      const result = await t.withIdentity(userIdentity).mutation(api.cards.create, {
+        ...validCard,
+        name: `Rate limit fill ${attempt}`,
+      }) as { id?: string };
+      expect(result).toHaveProperty("id");
+    }
+
+    const blocked = await t.withIdentity(userIdentity).mutation(api.cards.create, {
+      ...validCard,
+      name: "Rate limit blocked",
+    }) as { kind?: string; limit?: number };
+    expect(blocked.kind).toBe("rate_limited");
+    expect(blocked.limit).toBe(10);
+
+    const reset = await t.withIdentity(adminIdentity).mutation(api.admin.resetRateLimitsForUser, { userId });
+    expect(reset.deleted).toBeGreaterThan(0);
+
+    const afterReset = await t.withIdentity(userIdentity).mutation(api.cards.create, {
+      ...validCard,
+      name: "Rate limit after reset",
+    }) as { id?: string };
+    expect(afterReset).toHaveProperty("id");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // blockUser / unblockUser
 // ---------------------------------------------------------------------------
 

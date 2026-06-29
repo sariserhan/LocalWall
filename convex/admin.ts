@@ -42,6 +42,31 @@ export const getAccess = query({
   handler: async (ctx) => ({ isAdmin: Boolean(await getAdminIdentity(ctx)) }),
 });
 
+export const resetRateLimitsForUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const identity = await requireAdmin(ctx);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found.");
+
+    const keyPrefix = `${user.tokenIdentifier}:`;
+    const rateLimitRows = await ctx.db.query("rateLimits").take(1000);
+    let deleted = 0;
+    for (const row of rateLimitRows) {
+      if (!row.key.startsWith(keyPrefix)) continue;
+      await ctx.db.delete(row._id);
+      deleted += 1;
+    }
+
+    await audit(ctx, identity, "resetRateLimitsForUser", String(args.userId), {
+      deleted,
+      username: user.username ?? user.businessName ?? user.displayName ?? user.email ?? null,
+    });
+
+    return { deleted };
+  },
+});
+
 export const getDashboard = query({
   args: {},
   handler: async (ctx) => {

@@ -113,6 +113,33 @@ describe("create – paid card", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Rate limiting
+// ---------------------------------------------------------------------------
+
+describe("create – rate limiting", () => {
+  test("blocks the 11th card create attempt within an hour", async () => {
+    const t = makeT();
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const result = await t.withIdentity(userIdentity).mutation(api.cards.create, {
+        ...validCard,
+        name: `Rate limit test ${attempt + 1}`,
+      }) as { id?: string; kind?: string };
+      expect(result).toHaveProperty("id");
+    }
+
+    const blocked = await t.withIdentity(userIdentity).mutation(api.cards.create, {
+      ...validCard,
+      name: "Rate limit test 11",
+    }) as { kind?: string; message?: string; limit?: number };
+
+    expect(blocked.kind).toBe("rate_limited");
+    expect(blocked.limit).toBe(10);
+    expect(blocked.message).toMatch(/about an hour/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Input validation
 // ---------------------------------------------------------------------------
 

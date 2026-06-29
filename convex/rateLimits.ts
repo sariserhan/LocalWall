@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { internalMutation, mutation } from "./_generated/server";
 
 const scopeValidator = v.union(
@@ -69,5 +70,23 @@ export const backfillUsernames = internalMutation({
       }
     }
     return { updated: rows.length };
+  },
+});
+
+const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
+const PURGE_BATCH_SIZE = 200;
+
+export const purgeStale = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - STALE_AFTER_MS;
+    const staleRows = await ctx.db.query("rateLimits").withIndex("by_resetAt", (q) => q.lt("resetAt", cutoff)).take(PURGE_BATCH_SIZE);
+    for (const row of staleRows) {
+      await ctx.db.delete(row._id);
+    }
+    if (staleRows.length === PURGE_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(0, internal.rateLimits.purgeStale, {});
+    }
+    return { deleted: staleRows.length, scheduledMore: staleRows.length === PURGE_BATCH_SIZE };
   },
 });

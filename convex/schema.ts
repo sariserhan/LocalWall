@@ -149,7 +149,9 @@ export default defineSchema({
     count: v.number(),
     resetAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_key", ["key"]),
+  })
+    .index("by_key", ["key"])
+    .index("by_resetAt", ["resetAt"]),
 
   savedCards: defineTable({
     userId: v.id("users"),

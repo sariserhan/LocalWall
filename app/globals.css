@@ -1500,7 +1500,8 @@ button { color: inherit; }
 .admin-row-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .admin-row-actions .secondary { min-width: 100px; min-height: 42px; padding: 0 12px; }
 .admin-row-actions-wide { grid-template-columns: repeat(3, minmax(100px, 1fr)); }
-.admin-user-row .admin-row-actions { grid-template-columns: repeat(4, minmax(100px, 1fr)); }
+.admin-user-row .admin-row-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.admin-user-row .admin-row-actions .secondary { min-width: 0; }
 .admin-user-row .danger-action svg { animation: none !important; transform: none !important; }
 .admin-user-row .danger-action:hover svg,
 .admin-user-row .danger-action:focus-visible svg { animation: none !important; transform: none !important; }
