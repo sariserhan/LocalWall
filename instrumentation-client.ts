@@ -32,13 +32,16 @@ export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 
 import posthog from "posthog-js";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 posthog.init(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN!, {
   api_host: "/ingest",
   ui_host: "https://us.posthog.com",
   defaults: "2026-01-30",
-  capture_dead_clicks: true,
-  disable_session_recording: false,
+  capture_dead_clicks: isProduction,
+  disable_session_recording: !isProduction,
+  disable_external_dependency_loading: !isProduction,
   capture_exceptions: true,
   capture_performance: true,
-  debug: process.env.NODE_ENV === "development",
+  debug: !isProduction,
 });

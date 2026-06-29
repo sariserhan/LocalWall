@@ -12,6 +12,7 @@ let clientPromise: Promise<{ default: PostHogClient }> | null = null;
 let client: PostHogClient | null = null;
 let initPromise: Promise<void> | null = null;
 let pendingDistinctId: string | null = null;
+const isProduction = process.env.NODE_ENV === "production";
 
 function readStoredConsent(): AnalyticsConsent {
   if (typeof window === "undefined") return "unknown";
@@ -82,6 +83,9 @@ export async function initAnalytics() {
         api_host: host,
         capture_pageview: false,
         autocapture: true,
+        capture_dead_clicks: isProduction,
+        disable_session_recording: !isProduction,
+        disable_external_dependency_loading: !isProduction,
       });
       if (getAnalyticsConsent() !== "accepted") return;
       if (pendingDistinctId) {
