@@ -53,10 +53,15 @@ function profileAppearance(isDark: boolean) {
         boxShadow: isDark ? "14px 18px 0 #0a0a0a" : "14px 18px 0 #151515",
         border: `1px solid ${border}`,
         borderRadius: "0",
+        width: "min(980px, calc(100vw - 24px))",
+        maxWidth: "min(980px, calc(100vw - 24px))",
+        minHeight: "min(720px, calc(100vh - 24px))",
+        overflow: "hidden",
       },
       navbar: {
         background: bg3,
         borderRight: `1px solid ${border}`,
+        width: "220px",
       },
       navbarButton: {
         ...barlowUpper,
@@ -64,10 +69,14 @@ function profileAppearance(isDark: boolean) {
         fontSize: "13px",
         borderRadius: "0",
         color: isDark ? "#aaa" : "#555",
+        minHeight: "42px",
+        padding: "10px 14px",
+        justifyContent: "flex-start",
+        width: "100%",
       },
       navbarButtonActive__active: {
         color: text,
-        background: bg,
+        background: bg2,
       },
       navbarButtonIcon: {
         color: "inherit",
@@ -94,6 +103,7 @@ function profileAppearance(isDark: boolean) {
       },
       pageScrollBox: {
         background: bg,
+        padding: "12px 16px 16px",
       },
       profileSectionTitleText: {
         ...barlowUpper,
@@ -107,6 +117,11 @@ function profileAppearance(isDark: boolean) {
         fontSize: "12px",
         color: "#f43d38",
         borderRadius: "0",
+      },
+      pageScrollBoxHeader: {
+        paddingBottom: "10px",
+        marginBottom: "8px",
+        borderBottom: `1px solid ${border}`,
       },
       formFieldLabel: {
         fontFamily: "var(--font-inter, Inter, sans-serif)",
@@ -132,6 +147,7 @@ function profileAppearance(isDark: boolean) {
         fontSize: "13px",
         borderRadius: "0",
         boxShadow: "none",
+        minHeight: "38px",
       },
       formButtonReset: {
         fontFamily: "var(--font-inter, Inter, sans-serif)",

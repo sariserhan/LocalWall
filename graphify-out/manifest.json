@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "src/features/home/home-nav.tsx": {
-    "mtime": 1782701383.2345552,
-    "ast_hash": "d7b6d2424041d6a8b043c2b8bbadc633",
+    "mtime": 1782702938.9727225,
+    "ast_hash": "f7cf39a8492b6359cd462c19e08d5698",
     "semantic_hash": ""
   },
   "src/features/home/home-page.tsx": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782701383.329912,
-    "ast_hash": "33c5b93bdaa00e79823c81240edeeb04",
+    "mtime": 1782702947.5772645,
+    "ast_hash": "f542167aa558e339520e63a6bfee3f40",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "src/lib/clerk-appearance.ts": {
-    "mtime": 1782442729.7009695,
-    "ast_hash": "55aed8d84b6d18e86d5cb7f2cfcfae05",
+    "mtime": 1782702739.9066463,
+    "ast_hash": "bc85f6477d8bd1bcef57fe46df68697a",
     "semantic_hash": ""
   },
   "src/lib/contact-signal.ts": {

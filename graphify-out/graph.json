@@ -7496,7 +7496,7 @@
       "label": "userButtonAppearance()",
       "file_type": "code",
       "source_file": "src/lib/clerk-appearance.ts",
-      "source_location": "L155",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "lib_clerk_appearance_userbuttonappearance",
       "community": 32,
@@ -7506,7 +7506,7 @@
       "label": "getClerkUserProfileAppearance()",
       "file_type": "code",
       "source_file": "src/lib/clerk-appearance.ts",
-      "source_location": "L198",
+      "source_location": "L214",
       "_origin": "ast",
       "id": "lib_clerk_appearance_getclerkuserprofileappearance",
       "community": 32,
@@ -7516,7 +7516,7 @@
       "label": "getClerkUserButtonAppearance()",
       "file_type": "code",
       "source_file": "src/lib/clerk-appearance.ts",
-      "source_location": "L199",
+      "source_location": "L215",
       "_origin": "ast",
       "id": "lib_clerk_appearance_getclerkuserbuttonappearance",
       "community": 32,
@@ -19103,9 +19103,9 @@
       "source_file": "src/features/wall/clerk-my-data-page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_my_data_page",
-      "target": "generated_api",
-      "confidence_score": 1.0
+      "target": "generated_api"
     },
     {
       "relation": "imports_from",
@@ -23728,9 +23728,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_nav",
-      "target": "wall_clerk_business_page",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page"
     },
     {
       "relation": "imports",
@@ -23739,9 +23739,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_nav",
-      "target": "wall_clerk_business_page_clerkbusinesspage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page_clerkbusinesspage"
     },
     {
       "relation": "imports_from",
@@ -23750,9 +23750,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_nav",
-      "target": "wall_clerk_my_data_page",
-      "confidence_score": 1.0
+      "target": "wall_clerk_my_data_page"
     },
     {
       "relation": "imports",
@@ -23761,9 +23761,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_nav",
-      "target": "wall_clerk_my_data_page_clerkmydatapage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_my_data_page_clerkmydatapage"
     },
     {
       "relation": "imports_from",
@@ -25540,9 +25540,9 @@
       "source_file": "src/features/wall/clerk-business-page.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_business_page",
-      "target": "wall_clerk_business_page_businessprofile",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page_businessprofile"
     },
     {
       "relation": "contains",
@@ -25550,9 +25550,9 @@
       "source_file": "src/features/wall/clerk-business-page.tsx",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_business_page",
-      "target": "wall_clerk_business_page_clerkbusinesspage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page_clerkbusinesspage"
     },
     {
       "relation": "contains",
@@ -25560,9 +25560,9 @@
       "source_file": "src/features/wall/clerk-business-page.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_business_page",
-      "target": "wall_clerk_business_page_clerkbusinesspageprops",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page_clerkbusinesspageprops"
     },
     {
       "relation": "imports_from",
@@ -25571,9 +25571,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_connected_wall_app",
-      "target": "wall_clerk_business_page",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page"
     },
     {
       "relation": "imports",
@@ -25582,9 +25582,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_connected_wall_app",
-      "target": "wall_clerk_business_page_clerkbusinesspage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_business_page_clerkbusinesspage"
     },
     {
       "relation": "imports",
@@ -25593,9 +25593,9 @@
       "source_file": "src/features/wall/clerk-my-data-page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_my_data_page",
-      "target": "generated_api_api",
-      "confidence_score": 1.0
+      "target": "generated_api_api"
     },
     {
       "relation": "contains",
@@ -25603,9 +25603,9 @@
       "source_file": "src/features/wall/clerk-my-data-page.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_clerk_my_data_page",
-      "target": "wall_clerk_my_data_page_clerkmydatapage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_my_data_page_clerkmydatapage"
     },
     {
       "relation": "imports_from",
@@ -25614,9 +25614,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_connected_wall_app",
-      "target": "wall_clerk_my_data_page",
-      "confidence_score": 1.0
+      "target": "wall_clerk_my_data_page"
     },
     {
       "relation": "imports",
@@ -25625,9 +25625,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_connected_wall_app",
-      "target": "wall_clerk_my_data_page_clerkmydatapage",
-      "confidence_score": 1.0
+      "target": "wall_clerk_my_data_page_clerkmydatapage"
     },
     {
       "relation": "contains",
@@ -36579,5 +36579,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "19626775d83c4f6748a18214f9cdead9d95f4dcf"
+  "built_at_commit": "f0e1a10b1b6274727167c4c15d55ff3cf5f410ad"
 }

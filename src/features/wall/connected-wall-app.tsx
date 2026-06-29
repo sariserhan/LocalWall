@@ -5,7 +5,7 @@ import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
-import { getClerkUserButtonAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -549,6 +549,10 @@ export function ConnectedWallApp({
       authControl={isClerkSignedIn ? (
         <UserButton
           appearance={getClerkUserButtonAppearance(isDark)}
+          userProfileProps={{
+            appearance: getClerkUserProfileAppearance(isDark),
+            apiKeysProps: { hide: true },
+          }}
         >
           <UserButton.UserProfilePage key="wall-business-profile" label="Business profile" url="business-profile" labelIcon={<BriefcaseBusiness size={16} />}>
             <ClerkBusinessPage

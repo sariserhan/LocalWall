@@ -6,7 +6,7 @@ import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/use-theme";
-import { getClerkUserButtonAppearance } from "@/lib/clerk-appearance";
+import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { api } from "../../../convex/_generated/api";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
@@ -41,6 +41,10 @@ export function HomeNav() {
         {isSignedIn ? (
           <UserButton
             appearance={getClerkUserButtonAppearance(isDark)}
+            userProfileProps={{
+              appearance: getClerkUserProfileAppearance(isDark),
+              apiKeysProps: { hide: true },
+            }}
           >
             <UserButton.UserProfilePage key="home-business-profile" label="Business profile" url="business-profile" labelIcon={<BriefcaseBusiness size={16} />}>
               <ClerkBusinessPage
