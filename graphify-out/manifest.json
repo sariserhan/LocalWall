@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782793036.5591805,
-    "ast_hash": "30a1a031861ce55cd8e801392ca9bc29",
+    "mtime": 1782836548.05578,
+    "ast_hash": "821c6581428825d6bfe9a35c3cc7bb9a",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
