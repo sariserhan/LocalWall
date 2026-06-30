@@ -30,7 +30,7 @@ function BillingCard({ stamp, eyebrow, headline, body }: {
         <p className="nf-body">{body}</p>
 
         <div className="nf-actions">
-          <Link href="/" className="nf-btn-primary" style={{ marginRight: "180px",  }}>Back to LocalWall</Link>
+          <Link href="/" className="nf-btn-primary">Back to LocalWall</Link>
         </div>
 
         <footer className="nf-card-footer">

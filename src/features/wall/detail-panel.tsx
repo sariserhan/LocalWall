@@ -2,6 +2,7 @@
 
 import { Bookmark, Copy, ExternalLink, Eye, Flag, Heart, Mail, Phone, QrCode, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import type { TouchEvent } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import type { WallCard } from "./types";
@@ -60,8 +61,6 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
-  const swipeX = useRef(0);
-  const swipeY = useRef(0);
   const [qrOpen, setQrOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
@@ -69,8 +68,13 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const [reportDetails, setReportDetails] = useState("");
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportDone, setReportDone] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [draggingSheet, setDraggingSheet] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
   const reportFirstRef = useRef<HTMLButtonElement>(null);
+  const dragStartX = useRef(0);
+  const dragStartY = useRef(0);
+  const dragActive = useRef(false);
   const phoneRevealed = revealedPhoneFor === String(card.id);
   const frontImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
@@ -104,7 +108,85 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
     const sheet = sheetRef.current;
     if (!sheet) return;
     sheet.scrollTop = 0;
+    setDragOffset(0);
+    setDraggingSheet(false);
+    dragActive.current = false;
   }, [card.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 780px)").matches) return;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, [card.id]);
+
+  const resetDrag = () => {
+    setDragOffset(0);
+    setDraggingSheet(false);
+    dragActive.current = false;
+  };
+
+  const handleTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 780px)").matches) return;
+    if (event.touches.length !== 1) return;
+    dragStartX.current = event.touches[0].clientX;
+    dragStartY.current = event.touches[0].clientY;
+    dragActive.current = false;
+    setDraggingSheet(false);
+  };
+
+  const handleTouchMove = (event: TouchEvent<HTMLElement>) => {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 780px)").matches) return;
+    if (event.touches.length !== 1) return;
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+
+    const x = event.touches[0].clientX;
+    const y = event.touches[0].clientY;
+    const dx = x - dragStartX.current;
+    const dy = y - dragStartY.current;
+
+    if (!dragActive.current) {
+      const atTop = sheet.scrollTop <= 0;
+      if (!atTop || dy <= 8 || Math.abs(dy) <= Math.abs(dx)) return;
+      dragActive.current = true;
+      setDraggingSheet(true);
+    }
+
+    if (!dragActive.current) return;
+
+    if (dy < 0) {
+      setDragOffset(0);
+      return;
+    }
+
+    setDragOffset(Math.min(160, dy));
+    if (event.cancelable) event.preventDefault();
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    if (dragActive.current) {
+      const shouldClose = dragOffset > 90;
+      resetDrag();
+      if (shouldClose) onClose();
+      return;
+    }
+
+    const dx = event.changedTouches[0].clientX - dragStartX.current;
+    const dy = event.changedTouches[0].clientY - dragStartY.current;
+    if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 60) {
+      resetDrag();
+      return;
+    }
+    resetDrag();
+    if (dx > 0 && canSaveCard && !optimisticSaved) void toggleSaved();
+    else if (dx < 0) onClose();
+  };
 
   const handleToggleLike = async () => {
     if (!onToggleLike || liking) return;
@@ -220,17 +302,18 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
       ref={sheetRef}
       className="detail-sheet"
       aria-label={`${card.name} details`}
-      onTouchStart={(e) => { swipeX.current = e.touches[0].clientX; swipeY.current = e.touches[0].clientY; }}
-      onTouchEnd={(e) => {
-        const dx = e.changedTouches[0].clientX - swipeX.current;
-        const dy = e.changedTouches[0].clientY - swipeY.current;
-        if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 60) return;
-        if (dx > 0 && canSaveCard && !optimisticSaved) void toggleSaved();
-        else if (dx < 0) onClose();
-      }}
+      style={dragOffset > 0 ? { transform: `translateY(${dragOffset}px)`, transition: draggingSheet ? "none" : "transform 180ms cubic-bezier(.2,.8,.2,1)" } : undefined}
     >
-      <div className="sheet-pin" />
-      <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
+      <div
+        className="sheet-drag-handle"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={resetDrag}
+      >
+        <div className="sheet-pin" />
+        <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
+      </div>
       <p className="sheet-category">{card.category} · {card.area}</p>
       {card.ownerName ? (
         <p className="sheet-byline">

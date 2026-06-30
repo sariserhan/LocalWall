@@ -71,7 +71,7 @@ export function TrendingTabs({ walls, liked, reviewed, contacted, shared }: Prop
       </div>
 
       {/* Full-screen content — both tabs share the wall background */}
-      <div className="trending-wall-view">
+      <div className={`trending-wall-view${selectedCardId ? " has-modal" : ""}`}>
         {active === "walls" ? (
           walls.length === 0 ? (
             <p className="trending-empty">No wall visits recorded yet.</p>

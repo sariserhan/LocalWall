@@ -791,6 +791,8 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     return [base, { country: "", state: "", city: "" }, { country: "", state: "", city: "" }];
   });
   const [bundleCityError, setBundleCityError] = useState<string | null>(null);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
+  const [detailsPreviewOpen, setDetailsPreviewOpen] = useState(true);
   const [step, setStep] = useState(1);
   const [draftBanner, setDraftBanner] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -987,6 +989,19 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setPreviews([]);
     setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
   }, [form.theme, files.length, previews]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 780px)");
+    const update = () => setIsMobilePreview(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (step !== 2) return;
+    setDetailsPreviewOpen(!isMobilePreview);
+  }, [step, isMobilePreview]);
 
   useEffect(() => {
     if (!form.phone.trim() && !form.email.trim()) return;
@@ -1189,7 +1204,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
               </div>
             </fieldset>
             </div>
-            <aside className="details-live-preview">
+            <aside className={`details-live-preview${detailsPreviewOpen ? "" : " is-collapsed"}`}>
               <div className="details-wall-location">
                 <MapPin size={13} aria-hidden="true" />
                 <div>
@@ -1206,25 +1221,40 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   <ExpandedCardPreview form={form} image={previews[0]} backImage={backPreviews[0]} isVerified={isVerified} />
                 </div>
               </div>
-              <div className="details-preview-divider" aria-hidden="true" />
-              <div className="details-preview-block">
-                <span>Front and back card</span>
-                <div className="details-preview-canvas">
-                  <CardSidesPreview
-                  stacked
-                  form={form}
-                  frontImage={previews[0]}
-                  backImage={backPreviews[0]}
-                  backImageScale={backImageScale}
-                  isVerified={isVerified}
-                  mode="live"
-                  onFrontImageHeightChange={(height) => setForm((value) => ({ ...value, imageHeight: height }))}
-                  onFrontImagePanChange={(x, y) => setForm((value) => ({ ...value, imageX: x, imageY: y }))}
-                  onBackImageScaleChange={backPreviews[0] ? (scale) => { setBackImageScale(scale); setForm((value) => ({ ...value, backImageScale: scale })); } : undefined}
-                  onBackImagePanChange={(x, y) => setForm((value) => ({ ...value, backImageX: x, backImageY: y }))}
-                />
-                </div>
-              </div>
+              <button
+                type="button"
+                className="details-preview-toggle"
+                onClick={() => setDetailsPreviewOpen((value) => !value)}
+                aria-expanded={detailsPreviewOpen}
+                aria-label={detailsPreviewOpen ? "Hide live preview" : "Show live preview"}
+              >
+                {detailsPreviewOpen ? "Hide live preview" : "Show live preview"}
+              </button>
+              {detailsPreviewOpen ? (
+                <>
+                  <div className="details-preview-divider" aria-hidden="true" />
+                  <div className="details-preview-block">
+                    <span>Front and back card</span>
+                    <div className="details-preview-canvas">
+                      <CardSidesPreview
+                        stacked
+                        form={form}
+                        frontImage={previews[0]}
+                        backImage={backPreviews[0]}
+                        backImageScale={backImageScale}
+                        isVerified={isVerified}
+                        mode="live"
+                        onFrontImageHeightChange={(height) => setForm((value) => ({ ...value, imageHeight: height }))}
+                        onFrontImagePanChange={(x, y) => setForm((value) => ({ ...value, imageX: x, imageY: y }))}
+                        onBackImageScaleChange={backPreviews[0] ? (scale) => { setBackImageScale(scale); setForm((value) => ({ ...value, backImageScale: scale })); } : undefined}
+                        onBackImagePanChange={(x, y) => setForm((value) => ({ ...value, backImageX: x, backImageY: y }))}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="details-preview-collapsed-note">Live preview hidden. Tap the button above to expand it.</p>
+              )}
             </aside>
           </div>
         ) : step === 1 ? (
@@ -1327,6 +1357,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   frontImageScale={frontImageScale}
                   backImageScale={backImageScale}
                   isVerified={isVerified}
+                  stacked={isMobilePreview}
                   onFrontImageHeightChange={previews[0] && form.imageMode === "photo" ? (imageHeight) => setForm((f) => ({ ...f, imageHeight })) : undefined}
                   onFrontImagePanChange={previews[0] && form.imageMode === "photo" ? (x, y) => setForm((f) => ({ ...f, imageX: x, imageY: y })) : undefined}
                   onFrontImageScaleChange={previews[0] && form.imageMode === "business-card" ? (scale) => setFrontImageScale(scale) : undefined}

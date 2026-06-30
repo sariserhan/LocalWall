@@ -323,6 +323,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [pendingHasEmail, setPendingHasEmail] = useState(false);
   const [pendingHasPhotos, setPendingHasPhotos] = useState(false);
   const [pendingFeaturedOnly, setPendingFeaturedOnly] = useState(false);
+  const [navReady, setNavReady] = useState(false);
   const wallRef = useRef<HTMLElement>(null);
   const moveOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const movePositionRef = useRef<Placement | null>(null);
@@ -389,6 +390,10 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     if (ownedCardIds.has(String(selected.id))) return;
     setSelected(null);
   }, [ownCardsOnly, ownedCardIds, selected]);
+
+  useEffect(() => {
+    setNavReady(true);
+  }, []);
 
   const syncCardRoute = (cardId: string | null) => {
     const next = new URLSearchParams(window.location.search);
@@ -1296,7 +1301,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         </button>
         {mobileMenuOpen && <div className="mobile-menu-backdrop" onClick={() => setMobileMenuOpen(false)} />}
         <nav className={mobileMenuOpen ? "mobile-open" : ""}>
-          {pathname !== "/" ? <Link href="/trending" className="topbar-trending-mobile">Trending</Link> : null}
           <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, business or creator" aria-label="Search advertisements" /></div>
           <div className="filter-wrap">
             {filterOpen && <div className="filter-backdrop" onClick={() => setFilterOpen(false)} />}
@@ -1399,7 +1403,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           </div>
           {shareOpen && <div className="share-backdrop" onClick={() => setShareOpen(false)} />}
           <div className="share-wall-wrap" ref={shareRef}>
-            <button onClick={() => { setShareOpen((p) => !p); setMobileMenuOpen(false); }}><Link2 />Share Wall</button>
+            <button onClick={() => { setShareOpen((p) => !p); }}><Link2 />Share Wall</button>
             {shareOpen && (
               <div className="share-popover">
                 <div className="share-popover-header">
@@ -1421,18 +1425,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
             )}
           </div>
-          {isSignedIn && ownedCardIds ? (
-            <button
-              className={ownCardsOnly ? "is-active" : ""}
-              onClick={() => { setOwnCardsOnly((v) => !v); setMobileMenuOpen(false); }}
-              aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
-              title={ownCardsHint}
-            >
-              <Bookmark fill={ownCardsOnly ? "currentColor" : "none"} />
-              <span>My cards</span>
-            </button>
-          ) : null}
-          {isSignedIn && pathname && pathname !== "/" ? (
+          {navReady && isSignedIn && pathname && pathname !== "/" && ownedCardIds ? <span className="mobile-menu-divider" aria-hidden="true" /> : null}
+          {navReady && isSignedIn && pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
               onClick={() => {
@@ -1441,10 +1435,22 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                 setMobileMenuOpen(false);
               }}
               aria-label={savedWall ? "Unsave this wall" : "Save this wall"}
-            >
+              >
               <Bookmark />{savedWall ? "Wall saved" : "Save wall"}
             </button>
           ) : null}
+          {navReady && isSignedIn && ownedCardIds ? (
+            <button
+              className={ownCardsOnly ? "is-active" : ""}
+              onClick={() => { setOwnCardsOnly((v) => !v); setMobileMenuOpen(false); }}
+              aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
+              title={ownCardsHint}
+            >
+              <LayoutGrid />
+              <span>My cards</span>
+            </button>
+          ) : null}
+          {pathname !== "/" ? <Link href="/trending" className="topbar-trending-mobile text-center"><TrendingUp size={12} aria-hidden="true" />Trending</Link> : null}
 
           <button className="mobile-nav-post" onClick={() => { openComposer(); setMobileMenuOpen(false); }}><Plus />Post your card</button>
         </nav>
@@ -1735,14 +1741,14 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               <LogIn />
             </button>
           ) : null}
-          {isSignedIn && ownedCardIds ? (
+          {navReady && isSignedIn && ownedCardIds ? (
             <button
               aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
               title={ownCardsHint}
               onClick={() => setOwnCardsOnly((v) => !v)}
               className={ownCardsOnly ? "is-active" : ""}
             >
-              <Bookmark fill={ownCardsOnly ? "currentColor" : "none"} />
+              <LayoutGrid />
               <span>My cards</span>
             </button>
           ) : null}
