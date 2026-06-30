@@ -6,6 +6,7 @@ import { Country, State, City } from "country-state-city";
 import { businessCardShapes, categories, SUBCATEGORY_OPTIONS, getCardFormat, type BusinessCardShape, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 import { ImageSwapViewer } from "./image-compare-slider";
 import { buildModerationBatches } from "./image-moderation";
+import { createPreviewUrl } from "./image-preview";
 import { getVisibleFeaturedTierOptions, type FeaturedTierOption, type FeaturedTierValue } from "./wall-helpers";
 
 interface ComposerProps {
@@ -285,6 +286,7 @@ function LiveCardPreview({
               alt=""
               draggable={false}
               className="wall-card-biz-photo composer-biz-img"
+              decoding="async"
               style={{ transform: `scale(${imageScale})` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -325,6 +327,7 @@ function LiveCardPreview({
               alt=""
               draggable={false}
               className="wall-card-image-top"
+              decoding="async"
               style={{ "--image-h": `${form.imageHeight}px`, objectPosition: `${form.imageX}% ${form.imageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -544,6 +547,7 @@ function BackCardPreview({
               alt=""
               draggable={false}
               className="wall-card-biz-photo composer-biz-img composer-biz-back-img"
+              decoding="async"
               style={{ transform: `scale(${imageScale})`, objectPosition: `${form.backImageX}% ${form.backImageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -594,6 +598,7 @@ function BackCardPreview({
               alt=""
               draggable={false}
               className="details-back-image"
+              decoding="async"
               style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${form.backImageX}% ${form.backImageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -934,21 +939,25 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     });
   }, [form.phone, form.email]);
 
-  const onImages = (event: ChangeEvent<HTMLInputElement>) => {
+  const onImages = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files ?? []).slice(0, 2);
     previews.forEach(URL.revokeObjectURL);
     setFiles(nextFiles);
-    setPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
+    setPreviews([]);
+    const nextPreviews = await Promise.all(nextFiles.map((file) => createPreviewUrl(file)));
+    setPreviews(nextPreviews);
     if (!nextFiles.length) setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
     else setForm((value) => ({ ...value, imageHeight: 156, imageX: 50, imageY: 35 }));
     event.currentTarget.value = "";
   };
 
-  const onBackImages = (event: ChangeEvent<HTMLInputElement>) => {
+  const onBackImages = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files ?? []).slice(0, 1);
     backPreviews.forEach(URL.revokeObjectURL);
     setBackFiles(nextFiles);
-    setBackPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
+    setBackPreviews([]);
+    const nextPreviews = await Promise.all(nextFiles.map((file) => createPreviewUrl(file)));
+    setBackPreviews(nextPreviews);
     setBackImageScale(1);
     setForm((value) => ({ ...value, backImageX: 50, backImageY: 35, backImageScale: 1 }));
     event.currentTarget.value = "";
@@ -1212,7 +1221,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   <span className="upload-zone-label">Front image</span>
                   <label className="upload-zone">
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onImages} />
-                    {previews.length ? <div className="preview-row">{previews.map((src) => <img src={src} key={src} alt="Front upload preview" />)}</div> : <><ImagePlus /><strong>Upload front image</strong><span>JPG, PNG or WEBP · 8MB each</span></>}
+                    {previews.length ? <div className="preview-row">{previews.map((src) => <img src={src} key={src} alt="Front upload preview" decoding="async" />)}</div> : <><ImagePlus /><strong>Upload front image</strong><span>JPG, PNG or WEBP · 8MB each</span></>}
                   </label>
                   {previews.length ? (
                     <button type="button" className="upload-zone-clear" onClick={clearImages} aria-label="Delete front image">
@@ -1234,7 +1243,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                 <span className="upload-zone-label">Back image</span>
                 <label className="upload-zone upload-zone-back">
                   <input ref={backFileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onBackImages} />
-                  {backPreviews.length ? <div className="preview-row">{backPreviews.map((src) => <img src={src} key={src} alt="Back upload preview" />)}</div> : <><ImagePlus /><strong>Upload back image</strong><span>Shown when the card flips</span></>}
+                  {backPreviews.length ? <div className="preview-row">{backPreviews.map((src) => <img src={src} key={src} alt="Back upload preview" decoding="async" />)}</div> : <><ImagePlus /><strong>Upload back image</strong><span>Shown when the card flips</span></>}
                 </label>
                 {backPreviews.length ? (
                   <button type="button" className="upload-zone-clear" onClick={clearBackImages} aria-label="Delete back image">

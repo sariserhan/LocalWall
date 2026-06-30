@@ -68,6 +68,7 @@ export function ImageSwapViewer({
           alt={visibleAlt}
           draggable={false}
           className="image-swap-image"
+          decoding="async"
           style={{ objectPosition: `${pan.x}% ${pan.y}%` }}
           onPointerDown={handlePanPointerDown}
           onPointerMove={handlePanPointerMove}

@@ -1,16 +1,16 @@
 # Graph Report - local-wall  (2026-06-30)
 
 ## Corpus Check
-- 230 files · ~443,197 words
+- 230 files · ~442,894 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1520 nodes · 2211 edges · 113 communities (101 shown, 12 thin omitted)
+- 1516 nodes · 2204 edges · 112 communities (98 shown, 14 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 39 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d74149a8`
+- Built from commit: `e8959cb5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -107,7 +107,6 @@
 - [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
-- [[_COMMUNITY_Community 112|Community 112]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `api` - 31 edges
@@ -136,27 +135,27 @@
 ## Import Cycles
 - None detected.
 
-## Communities (113 total, 12 thin omitted)
+## Communities (112 total, 14 thin omitted)
 
 ### Community 0 - "Rate Limiting & API Utilities"
 Cohesion: 0.08
-Nodes (26): BackCardPreview(), BundleCity, businessCardShapeOptions, clearImagesFromIDB(), Composer(), countries, defaultStates, DetailField (+18 more)
+Nodes (28): BundleCity, businessCardShapeOptions, Composer(), ComposerForm, countries, defaultStates, DetailField, detailFieldLabels (+20 more)
 
 ### Community 1 - "Billing, Admin & Test Infrastructure"
 Cohesion: 0.08
 Nodes (16): _handler(), toast(), Toaster(), ToastFn, ToastType, CardEvent, DetailPanel(), REPORT_REASONS (+8 more)
 
 ### Community 2 - "Geo-Routed Pages & RSS Feeds"
-Cohesion: 0.05
-Nodes (53): metadata, ClerkAvatarMenu(), ClerkAvatarMenuProps, ClerkProfile, AdminPanel, GlobalAdminPanel(), bundleCard, bundleCities (+45 more)
+Cohesion: 0.13
+Nodes (19): DurableRateLimitScope, bundleCard, bundleCities, adminEnv, adminIdentity, applyEnv(), makeT(), modules (+11 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.36
-Nodes (6): ContactLink(), TrendingTabs(), fetchTopCards(), fetchTopWalls(), metadata, TrendingPage()
+Cohesion: 0.43
+Nodes (5): ContactLink(), fetchTopCards(), fetchTopWalls(), metadata, TrendingPage()
 
 ### Community 4 - "Community 4"
 Cohesion: 0.06
-Nodes (36): metadata, Props, RootPage(), Props, WallLocationCategoryPage(), ICONS, Props, HomeHowItWorksModal() (+28 more)
+Nodes (40): metadata, Props, RootPage(), BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES (+32 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.21
@@ -164,7 +163,7 @@ Nodes (9): AppProviders(), getClerkPublishableKey(), config, signInAppearance, S
 
 ### Community 6 - "Community 6"
 Cohesion: 0.08
-Nodes (32): DurableRateLimitScope, durableUserRateLimit(), observe(), buckets, isSameOriginRequest(), pruneBuckets(), rateLimit(), handleCheckout() (+24 more)
+Nodes (31): durableUserRateLimit(), observe(), buckets, isSameOriginRequest(), pruneBuckets(), rateLimit(), handleCheckout(), isValidAmount() (+23 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.16
@@ -176,7 +175,7 @@ Nodes (40): approveVerification, blockUser, configuredAdminEmails(), deleteAllCa
 
 ### Community 9 - "Community 9"
 Cohesion: 0.09
-Nodes (25): metadata, AnalyticsConsent, AnalyticsConsentContext, AnalyticsConsentContextValue, AnalyticsConsentProvider(), useAnalyticsConsent(), AnalyticsConsentToast(), AnalyticsTracker() (+17 more)
+Nodes (24): metadata, AnalyticsConsent, AnalyticsConsentContext, AnalyticsConsentContextValue, AnalyticsConsentProvider(), useAnalyticsConsent(), AnalyticsConsentToast(), AnalyticsTracker() (+16 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.05
@@ -231,8 +230,8 @@ Cohesion: 0.08
 Nodes (23): 1\. Call `identify` as soon as you're able to, 2\. Use unique strings for distinct IDs, 3\. Reset after logout, 4\. Person profiles and properties, 5\. Use deep links between platforms, Android, Android, Android (+15 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.15
-Nodes (12): seedCards, CreateCard, Composer, defaultSeedLocation, DetailPanel, OwnerDashboard, PlacementMode, WallApp() (+4 more)
+Cohesion: 0.12
+Nodes (18): seedCards, cardFormats, WallCard, Composer, defaultSeedLocation, DetailPanel, OwnerDashboard, PlacementMode (+10 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.10
@@ -243,8 +242,8 @@ Cohesion: 0.10
 Nodes (20): 1. Use point-in-time reads when live updates are not valuable, 2. Batch related data into fewer queries, 3. Use skip to avoid unnecessary subscriptions, 4. Isolate frequently-updated fields into separate documents, 5. Use the aggregate component for counts and sums, 6. Narrow query read sets, 7. Remove `Date.now()` from queries, 8. Consider pagination strategy (+12 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.13
-Nodes (15): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, A/B Testing Sessions, Best Practices, Browser Session Commands, Browser Session Configuration, Browser Session Isolation Properties (+7 more)
+Cohesion: 0.18
+Nodes (11): A/B Testing Sessions, Browser Session Commands, Browser Session Configuration, Browser Session Isolation Properties, Browser Session Management, Common Patterns, Concurrent Scraping, Default Browser Session (+3 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.10
@@ -265,10 +264,6 @@ Nodes (18): 1.1 Prerequisite: workspace, 1.2 Prerequisite: seed test, 1.3 Explor
 ### Community 31 - "Community 31"
 Cohesion: 0.12
 Nodes (16): Advanced Patterns, Authentication and environment access, Checklist, Choose the Shape, Client-facing API, Component Skeleton, Convex Create Component, Critical Rules (+8 more)
-
-### Community 32 - "Community 32"
-Cohesion: 0.25
-Nodes (8): buildReminderEmail(), escapeHtml(), findCardsNeedingReminders, markReminderSent, RENEWAL_TIERS, sendExpirationReminders, internalAction, internalQuery
 
 ### Community 33 - "Community 33"
 Cohesion: 0.12
@@ -307,8 +302,8 @@ Cohesion: 0.15
 Nodes (13): Clipboard, Complex Workflows, Error Handling, File Downloads, Frames and Iframes, Geolocation, JavaScript Execution, Media Emulation (+5 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.15
-Nodes (12): 1. Start Tracing Before the Problem, 2. Clean Up Old Traces, Analyzing Performance, Basic Usage, Best Practices, Capturing Evidence, Debugging Failed Actions, Limitations (+4 more)
+Cohesion: 0.12
+Nodes (16): 1. Start Tracing Before the Problem, 2. Clean Up Old Traces, Analyzing Performance, Basic Usage, Best Practices, Capturing Evidence, Debugging Failed Actions, Limitations (+8 more)
 
 ### Community 43 - "Community 43"
 Cohesion: 0.17
@@ -323,16 +318,16 @@ Cohesion: 0.17
 Nodes (11): Adding a Required Field, Changing a Field Type, Cleaning Up Orphaned Documents, Deleting a Field, Dual Read, Dual Write (Preferred), Migration Patterns Reference, Small Table Shortcut (+3 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.19
-Nodes (12): ComposerForm, ImageSwapViewer(), ImageSwapViewerProps, businessCardFormats, BusinessCardShape, businessCardShapes, CardCategory, CardImageMode (+4 more)
+Cohesion: 0.24
+Nodes (8): openDashboard(), pushDashboardHandler(), stack, allowedImageTypes, createImageVariants(), encodeWebpVariant(), ImageVariants, CreateCardRateLimit
 
 ### Community 47 - "Community 47"
 Cohesion: 0.22
 Nodes (10): buildCardRow(), buildDigestEmail(), DigestCard, escapeHtml(), findCitiesWithSubscribers, findNewCardsForLocation, markDigestSent, sendWeeklyDigests (+2 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.18
-Nodes (10): cancelAutoRenewOnCard, clearAutoRenew, completeBundlePosting, completePaidCard, completePaidRenewal, completeSubscriptionRenewal, completeVerificationRequest, handleStripeWebhook (+2 more)
+Cohesion: 0.08
+Nodes (23): cancelAutoRenewOnCard, clearAutoRenew, completeBundlePosting, completePaidCard, completePaidRenewal, completeSubscriptionRenewal, completeVerificationRequest, handleStripeWebhook (+15 more)
 
 ### Community 49 - "Community 49"
 Cohesion: 0.18
@@ -355,20 +350,20 @@ Cohesion: 0.18
 Nodes (10): Checklist, Concrete Steps, Files and Env Vars To Expect, Gotchas, Key Setup Areas, Production, Validation, What To Do (+2 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.25
-Nodes (7): cancelAutoRenew, finalizeBundlePosting, finalizePaidCard, finalizePaidRenewal, finalizeSubscriptionPosting, finalizeSubscriptionRenewal, finalizeVerification
+Cohesion: 0.15
+Nodes (10): crons, cancelAutoRenew, finalizeBundlePosting, finalizePaidCard, finalizePaidRenewal, finalizeSubscriptionPosting, finalizeSubscriptionRenewal, finalizeVerification (+2 more)
 
 ### Community 55 - "Community 55"
 Cohesion: 0.25
-Nodes (7): deleteCardOwnedData(), deleteAccount, _deleteMyData, exportMyData, _gatherMyData, GdprExport, action
+Nodes (7): deleteCardOwnedData(), deleteAccount, _deleteMyData, exportMyData, _gatherMyData, GdprExport, internalQuery
 
 ### Community 56 - "Community 56"
 Cohesion: 0.20
 Nodes (8): metadata, Props, RenewCardPage(), cardStyle, Props, RenewPage(), TIERS, wrapStyle
 
 ### Community 57 - "Community 57"
-Cohesion: 0.25
-Nodes (5): AdminPanelProps, AdminPlayground(), LocationCombobox(), Option, Props
+Cohesion: 0.07
+Nodes (31): ClerkAvatarMenu(), ClerkAvatarMenuProps, ClerkProfile, AdminPanel, GlobalAdminPanel(), HomeNav(), HomePostButton(), Loc (+23 more)
 
 ### Community 58 - "Community 58"
 Cohesion: 0.22
@@ -395,8 +390,8 @@ Cohesion: 0.25
 Nodes (8): 1. Use Semantic Locators, 2. Explore Before Recording, 3. Add Assertions Manually, Best Practices, Building a Test File, Example Workflow, How It Works, Test Generation
 
 ### Community 64 - "Community 64"
-Cohesion: 0.14
-Nodes (16): CardVars, hashStr(), MiniCard(), Props, TrendingCardGrid(), DetailPanel, Props, TrendingCardModal() (+8 more)
+Cohesion: 0.13
+Nodes (17): CardVars, hashStr(), MiniCard(), Props, TrendingCardGrid(), DetailPanel, Props, TrendingCardModal() (+9 more)
 
 ### Community 65 - "Community 65"
 Cohesion: 0.29
@@ -423,64 +418,56 @@ Cohesion: 0.40
 Nodes (4): Agent skill, Next steps, PostHog post-wizard report, Verify before merging
 
 ### Community 72 - "Community 72"
-Cohesion: 0.19
-Nodes (7): AppProvidersProps, GlobalContactModal(), openContact(), pushContactHandler(), stack, ClerkContactUser, ContactPage()
+Cohesion: 0.18
+Nodes (8): AppProvidersProps, GlobalContactModal(), GlobalOwnerDashboard(), openContact(), pushContactHandler(), stack, ClerkContactUser, ContactPage()
 
 ### Community 75 - "Community 75"
-Cohesion: 0.16
-Nodes (11): cardFormats, WallCard, CardStyle, hashString(), WallCard(), WallCardProps, Dims, Props (+3 more)
+Cohesion: 0.33
+Nodes (4): CardStyle, hashString(), WallCard(), WallCardProps
 
 ### Community 81 - "Community 81"
-Cohesion: 0.16
-Nodes (17): GlobalOwnerDashboard(), OwnerDashboard, pushDashboardHandler(), EditCardModal(), shapeLabels, themeLabels, OwnerDashboardProps, renewalOptions (+9 more)
+Cohesion: 0.17
+Nodes (17): OwnerDashboard, captureAnalytics(), shapeLabels, themeLabels, OwnerDashboardProps, renewalOptions, businessCardFormats, CardTheme (+9 more)
 
 ### Community 106 - "Community 106"
-Cohesion: 0.29
-Nodes (7): BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES, fetchPublishedCardIds(), categories
+Cohesion: 0.50
+Nodes (4): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, Best Practices
 
 ### Community 107 - "Community 107"
 Cohesion: 0.33
 Nodes (4): DataModel, Doc, Id, TableNames
-
-### Community 108 - "Community 108"
-Cohesion: 0.29
-Nodes (6): backfillUsernames, purgeStale, quotas, scopeValidator, take, internalMutation
 
 ### Community 109 - "Community 109"
 Cohesion: 0.40
 Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
 
 ### Community 110 - "Community 110"
-Cohesion: 0.60
-Nodes (4): ComposerProps, PlacementModeProps, CardDraft, Placement
+Cohesion: 0.31
+Nodes (10): BackCardPreview(), ComposerProps, EditCardModal(), PlacementMode(), PlacementModeProps, CardDraft, getCardFormat(), getImageCardFormat() (+2 more)
 
 ### Community 111 - "Community 111"
 Cohesion: 0.50
 Nodes (4): EmailTestSection(), SubscriptionSection(), useAsync(), VerificationSection()
 
-### Community 112 - "Community 112"
-Cohesion: 0.50
-Nodes (4): `resources/`, Trace Output Files, `trace-{timestamp}.network`, `trace-{timestamp}.trace`
-
 ## Knowledge Gaps
 - **843 isolated node(s):** `BundleCity`, `countries`, `defaultStates`, `initialForm`, `themeOptions` (+838 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Community 64`, `Billing, Admin & Test Infrastructure`, `Community 34`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 72`, `Community 8`, `Community 10`, `Community 11`, `Community 81`, `Community 17`, `Community 56`?**
-  _High betweenness centrality (0.056) - this node is a cross-community bridge._
-- **Why does `WallCard` connect `Community 75` to `Community 64`, `Billing, Admin & Test Infrastructure`, `Geo-Routed Pages & RSS Feeds`, `Community 7`, `Community 46`, `Community 81`, `Community 23`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Community 32`, `Community 64`, `Community 34`, `Billing, Admin & Test Infrastructure`, `Community 4`, `Community 5`, `Community 7`, `Community 72`, `Community 8`, `Community 10`, `Community 11`, `Community 108`, `Community 46`, `Community 81`, `Community 17`, `Community 56`, `Community 57`?**
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `WallCard` connect `Community 23` to `Community 64`, `Billing, Admin & Test Infrastructure`, `Community 7`, `Community 75`, `Community 46`, `Community 81`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `BundleCity`, `countries`, `defaultStates` to the rest of the system?**
   _843 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
-  _Cohesion score 0.08021390374331551 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07657657657657657 - nodes in this community are weakly interconnected._
 - **Should `Billing, Admin & Test Infrastructure` be split into smaller, more focused modules?**
   _Cohesion score 0.08374384236453201 - nodes in this community are weakly interconnected._
 - **Should `Geo-Routed Pages & RSS Feeds` be split into smaller, more focused modules?**
-  _Cohesion score 0.05311542390194075 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13076923076923078 - nodes in this community are weakly interconnected._
