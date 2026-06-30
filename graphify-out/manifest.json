@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1782770562.982933,
-    "ast_hash": "945dd5e3b79bd3d26327446e691fbbb0",
+    "mtime": 1782835393.4008608,
+    "ast_hash": "5ce354da01b2a8d3708dca3db5a2ddba",
     "semantic_hash": ""
   },
   "package.json": {
@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782833611.5955675,
-    "ast_hash": "c2d808002b743d6cddca0bfe5734e508",
+    "mtime": 1782835455.949354,
+    "ast_hash": "e6999c165ddb599e3b6b9c15c743e25f",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
