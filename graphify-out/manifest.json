@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782794194.4835415,
-    "ast_hash": "395b0b8ffd254b4c3d64b72fe315a9a6",
+    "mtime": 1782795462.360844,
+    "ast_hash": "b8934330a3c832ae5838977bbd94762f",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
-    "mtime": 1782787931.4363773,
-    "ast_hash": "0d22dab8b09cda31e9dda3c6ee07cab7",
+    "mtime": 1782795923.0591407,
+    "ast_hash": "50caaee42f5c3182d83203f98f4f8570",
     "semantic_hash": ""
   },
   "src/features/wall/edit-card-modal.tsx": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/image-compare-slider.tsx": {
-    "mtime": 1782763278.3184483,
-    "ast_hash": "efd69a0b44cfa97572436d93dbc89ba4",
+    "mtime": 1782795919.1837945,
+    "ast_hash": "cd6d512541fab725f3e1580077e65c93",
     "semantic_hash": ""
   },
   "src/features/wall/location-combobox.tsx": {

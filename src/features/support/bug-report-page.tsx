@@ -49,19 +49,22 @@ export function BugReportPage({ from, onClose }: { from?: string; onClose: () =>
 
   return (
     <div className="dashboard-confirm-backdrop bug-report-page" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="dashboard-confirm report-modal bug-report-modal" role="dialog" aria-modal="true" aria-labelledby="bug-report-title">
+      <div className="dashboard-confirm report-modal bug-report-modal nf-card support-card" role="dialog" aria-modal="true" aria-labelledby="bug-report-title">
+        <div className="nf-tape" aria-hidden="true" />
+        <div className="nf-stamp" aria-hidden="true">FIX IT</div>
+        <p className="nf-eyebrow">Support · Bug report</p>
         <Bug size={34} />
-        <h3 id="bug-report-title">Report a bug</h3>
+        <h3 id="bug-report-title" className="nf-headline">Report a bug</h3>
         {done ? (
           <>
-            <p style={{ textAlign: "center" }}>Thanks, we got it. We’ll review the bug and fix it where we can.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr" }}>
-              <button style={{ width: "50%", margin: "auto", padding: "0.5rem 1rem" }} className="primary" onClick={onClose}>Back to page</button>
+            <p className="support-card-body">Thanks, we got it. We’ll review the bug and fix it where we can.</p>
+            <div className="support-card-actions">
+              <button className="primary" onClick={onClose}>Back to page</button>
             </div>
           </>
         ) : (
           <>
-            <p style={{ textAlign: "center" }}>Tell us what broke so we can fix it quickly.</p>
+            <p className="support-card-body">Tell us what broke so we can fix it quickly.</p>
             <div className="report-modal-reasons" role="radiogroup" aria-label="Bug reason">
               {BUG_REASONS.map(({ value, label, description }) => (
                 <button
@@ -93,7 +96,7 @@ export function BugReportPage({ from, onClose }: { from?: string; onClose: () =>
                 onChange={(e) => setDetails(e.target.value)}
               />
             </label>
-            <div>
+            <div className="support-card-actions">
               <button className="secondary" onClick={onClose}>Cancel</button>
               <button className="primary danger-confirm" onClick={() => void submit()} disabled={submitting}>
                 {submitting ? "Sending…" : "Send bug report"}
@@ -101,6 +104,10 @@ export function BugReportPage({ from, onClose }: { from?: string; onClose: () =>
             </div>
           </>
         )}
+        <footer className="nf-card-footer">
+          <span>LocalWall</span>
+          <span>report a bug</span>
+        </footer>
         <button className="icon-btn qr-modal-close" type="button" onClick={onClose} aria-label="Close">
           <X />
         </button>

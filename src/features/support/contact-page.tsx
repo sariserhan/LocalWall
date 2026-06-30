@@ -80,19 +80,22 @@ export function ContactPage({ from, onClose }: { from?: string; onClose: () => v
 
   return (
     <div className="dashboard-confirm-backdrop bug-report-page contact-page" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="dashboard-confirm report-modal bug-report-modal contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div className="dashboard-confirm report-modal bug-report-modal contact-modal nf-card support-card" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+        <div className="nf-tape" aria-hidden="true" />
+        <div className="nf-stamp" aria-hidden="true">MAIL</div>
+        <p className="nf-eyebrow">Support · Contact</p>
         <Mail size={34} />
-        <h3 id="contact-title">Contact</h3>
+        <h3 id="contact-title" className="nf-headline">Contact</h3>
         {done ? (
           <>
-            <p style={{ textAlign: "center" }}>Thanks, your message is in. We will see it in the contact inbox.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr" }}>
-              <button style={{ width: "50%", margin: "auto", padding: "0.5rem 1rem" }} className="primary" onClick={onClose}>Close</button>
+            <p className="support-card-body">Thanks, your message is in. We will see it in the contact inbox.</p>
+            <div className="support-card-actions">
+              <button className="primary" onClick={onClose}>Close</button>
             </div>
           </>
         ) : (
           <>
-            <p style={{ textAlign: "center" }}>Tell us what you need. Keep it short or long, we’ll save the full message for review.</p>
+            <p className="support-card-body">Tell us what you need. Keep it short or long, we’ll save the full message for review.</p>
             <label className="report-details-label">
               Topic
               <span>(what is this about?)</span>
@@ -128,7 +131,7 @@ export function ContactPage({ from, onClose }: { from?: string; onClose: () => v
               <span>(where you opened this from)</span>
               <div className="bug-report-page-path">{page}</div>
             </label>
-            <div>
+            <div className="support-card-actions">
               <button className="secondary" onClick={onClose}>Cancel</button>
               <button className="primary danger-confirm" onClick={() => void submit()} disabled={submitting}>
                 {submitting ? "Sending…" : "Send message"}
@@ -136,6 +139,10 @@ export function ContactPage({ from, onClose }: { from?: string; onClose: () => v
             </div>
           </>
         )}
+        <footer className="nf-card-footer">
+          <span>LocalWall</span>
+          <span>contact support</span>
+        </footer>
         <button className="icon-btn qr-modal-close" type="button" onClick={onClose} aria-label="Close">
           <X />
         </button>
