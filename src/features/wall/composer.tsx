@@ -869,6 +869,12 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     moderationBody.set("line", form.line);
     moderationBody.set("message", form.message);
     if (includeImages) files.forEach((file) => moderationBody.append("images", file));
+    const timeoutMs = includeImages ? 15_000 : 8_000;
+    let timedOut = false;
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
     try {
       const response = await fetch("/api/moderate", { method: "POST", body: moderationBody, signal: controller.signal });
       const result = await response.json() as { safe?: boolean; error?: string; matches?: ModerationMatch[] };
@@ -892,10 +898,19 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       moderationRequestRef.current = null;
       return true;
     } catch (cause) {
-      if (cause instanceof DOMException && cause.name === "AbortError") return false;
+      if (cause instanceof DOMException && cause.name === "AbortError") {
+        if (timedOut && moderationRequestRef.current === controller) {
+          setModerationStatus("blocked");
+          setModerationError("The safety check took too long. Please try again.");
+          moderationRequestRef.current = null;
+        }
+        return false;
+      }
       setModerationStatus("blocked");
       setModerationError("The safety check is temporarily unavailable. Please try again.");
       return false;
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   };
 

@@ -59,7 +59,12 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   serverExternalPackages: ["onnxruntime-node", "sharp", "tesseract.js"],
   outputFileTracingIncludes: {
-    "/api/moderate": ["./models/image-safety.onnx", "./models/eng.traineddata.gz"],
+    "/api/moderate": [
+      "./models/image-safety.onnx",
+      "./models/eng.traineddata.gz",
+      "./node_modules/tesseract.js-core/*.wasm",
+      "./node_modules/tesseract.js-core/*.wasm.js",
+    ],
   },
   images: {
     remotePatterns: [
