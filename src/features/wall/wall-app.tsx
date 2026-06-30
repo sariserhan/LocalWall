@@ -1637,9 +1637,9 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         )}
         <div className="wall-tools">
           {showSignedOutAuth ? (
-            <Link href="/sign-in" className="wall-tools-link" aria-label="Open sign in">
+            <button type="button" className="wall-tools-link" aria-label="Open sign in" onClick={() => onRequestSignIn?.()}>
               <LogIn />
-            </Link>
+            </button>
           ) : null}
           {isSignedIn && ownedCardIds ? (
             <button

@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782772224.66972,
-    "ast_hash": "9f30e3d2ff7ab3dea16e9d69cdc850f1",
+    "mtime": 1782782079.3617692,
+    "ast_hash": "65394ee17bce8f0cfa2f59e3db62fc1c",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "src/features/home/home-nav.tsx": {
-    "mtime": 1782775660.3613546,
-    "ast_hash": "71592db20e61ee271b03ba27bf4b95b4",
+    "mtime": 1782782255.3261013,
+    "ast_hash": "51ce016ccafbc4022d1032ccd4a62249",
     "semantic_hash": ""
   },
   "src/features/home/home-page.tsx": {
@@ -530,8 +530,8 @@
     "semantic_hash": ""
   },
   "src/features/renew/renew-page.tsx": {
-    "mtime": 1782194956.8409834,
-    "ast_hash": "37746bcae078faeb674c6fce5087ac31",
+    "mtime": 1782781219.5854104,
+    "ast_hash": "ab745bdf0267ea6e5b917622df00e51c",
     "semantic_hash": ""
   },
   "src/features/support/bug-report-page.tsx": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782780729.981225,
-    "ast_hash": "252622e4dc7e62aee08acfb99c2de4a6",
+    "mtime": 1782784560.4078045,
+    "ast_hash": "5a48faa73417ce5baeea204190441f1e",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
@@ -600,8 +600,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/reviews-section.tsx": {
-    "mtime": 1782140153.4645717,
-    "ast_hash": "1fdcd55640d65a7f568df3342db06b05",
+    "mtime": 1782781219.6834793,
+    "ast_hash": "ea484e2aa872b4793d3468dc1b1b5548",
     "semantic_hash": ""
   },
   "src/features/wall/seed-cards.ts": {
@@ -620,8 +620,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782780573.5822072,
-    "ast_hash": "d4a93f2d13d951e5f44eaa8e2e0f407a",
+    "mtime": 1782785792.2354412,
+    "ast_hash": "c250e1a6ef51afacac85b6219f699597",
     "semantic_hash": ""
   },
   "src/features/wall/wall-card.tsx": {
@@ -1190,13 +1190,18 @@
     "semantic_hash": ""
   },
   "app/sign-in/[[...sign-in]]/page.tsx": {
-    "mtime": 1782780075.2794423,
-    "ast_hash": "99fc2c76dacbcdc20166a9c4bf2f0330",
+    "mtime": 1782784501.995817,
+    "ast_hash": "5c7d91188f66ec8500572b649dc2a41b",
     "semantic_hash": ""
   },
   "src/components/clerk-avatar-menu.tsx": {
     "mtime": 1782775603.5044136,
     "ast_hash": "93ee11401835862d345b332dd96b560c",
+    "semantic_hash": ""
+  },
+  "app/sign-up/[[...sign-up]]/page.tsx": {
+    "mtime": 1782781219.9961476,
+    "ast_hash": "7ae442499c40d4e4f974fb31dcec80d5",
     "semantic_hash": ""
   }
 }

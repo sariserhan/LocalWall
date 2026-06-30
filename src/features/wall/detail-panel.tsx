@@ -258,6 +258,7 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
       />
       {card.message ? <div className="note-copy">{card.message}</div> : null}
       {card.price ? <div className="sheet-price">Starting at <strong>{card.price}</strong></div> : null}
+      <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
       {hasContact ? (
         <div className="contact-actions" aria-label={`Contact ${card.name}`}>
           {card.phone ? <button type="button" className={`primary contact-action call-desktop${phoneRevealed ? " is-revealed" : ""}`} onClick={() => { setRevealedPhoneFor(String(card.id)); onEvent?.("phone"); }}><Phone /> {phoneRevealed ? card.phone : "Show phone"}</button> : null}
@@ -266,7 +267,6 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
           {card.website ? <a className="secondary contact-action" href={websiteHref(card.website)} target="_blank" rel="noreferrer" onClick={() => onEvent?.("website")}><ExternalLink /> Website</a> : null}
         </div>
       ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
-      <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
       <div className="detail-card-actions">
         {canSaveCard ? <button className={`secondary ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save"}</button> : null}
         {canLike ? <button className={`secondary like-btn${optimisticLiked ? " is-liked" : ""}`} onClick={() => { if (!onToggleLike) { onRequestSignIn?.(); return; } void handleToggleLike(); }} aria-pressed={optimisticLiked} disabled={liking}><Heart fill={optimisticLiked ? "currentColor" : "none"} /> {optimisticLikeCount > 0 ? optimisticLikeCount : "Like"}</button> : null}

@@ -100,7 +100,7 @@ const initialForm: ComposerForm = {
 
 function formatWallLocation(area: string, city: string, state: string, country: string) {
   const countryName = Country.getCountryByCode(country.trim())?.name ?? country.trim();
-  return area.trim() || [city, state, countryName].map((part) => part.trim()).filter(Boolean).join(", ") || "Selected wall";
+  return [city, state, countryName].map((part) => part.trim()).filter(Boolean).join(", ") || "Selected wall";
 }
 
 const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description: string }> = [
@@ -394,6 +394,8 @@ function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: Com
     { label: form.facebook.trim() || "Facebook", value: form.facebook.trim() },
     { label: form.tiktok.trim() || "TikTok", value: form.tiktok.trim() },
     { label: form.linkedin.trim() || "LinkedIn", value: form.linkedin.trim() },
+    { label: form.whatsapp.trim() || "WhatsApp", value: form.whatsapp.trim() },
+    { label: form.telegram.trim() || "Telegram", value: form.telegram.trim() },
   ];
   const actionLabels = [
     { label: "Save", value: false },
@@ -427,9 +429,9 @@ function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: Com
           <div className="note-copy">{messageLabel}</div>
           <div className="sheet-price">Starting at <strong>{priceLabel}</strong></div>
           <div className="preview-contact-actions" aria-hidden="true">
-            <button type="button" className="preview-contact-pill">{phoneLabel}</button>
-            <button type="button" className="preview-contact-pill">{emailLabel}</button>
-            <button type="button" className="preview-contact-pill">{websiteLabel}</button>
+            <button type="button" className="preview-contact-pill"><span className="preview-contact-pill-text">{phoneLabel}</span></button>
+            <button type="button" className="preview-contact-pill"><span className="preview-contact-pill-text">{emailLabel}</span></button>
+            <button type="button" className="preview-contact-pill"><span className="preview-contact-pill-text">{websiteLabel}</span></button>
           </div>
           <div className="detail-card-actions detail-card-actions-preview" aria-hidden="true">
             {actionLabels.map((item) => (
@@ -443,7 +445,9 @@ function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: Com
           </div>
           <div className="details-expanded-socials" aria-hidden="true">
             {socialLabels.map((item) => (
-              <span key={item.label} className={`details-expanded-social-pill${item.value ? " has-value" : ""}`}>{item.label}</span>
+              <span key={item.label} className={`details-expanded-social-pill${item.value ? " has-value" : ""}`}>
+                <span className="details-expanded-social-pill-text">{item.label}</span>
+              </span>
             ))}
           </div>
           <div className="sheet-meta"><span>{location}</span><span>CARD #PREVIEW</span></div>

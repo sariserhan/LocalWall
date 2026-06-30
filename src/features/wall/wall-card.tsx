@@ -153,7 +153,6 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
         </div>
       ) : (
         <div className={`wall-card-back-empty theme-${displayTheme}`}>
-          <strong>Back side</strong>
           <span>No back image yet.</span>
         </div>
       )}

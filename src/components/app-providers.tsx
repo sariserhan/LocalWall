@@ -5,6 +5,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { Toaster } from "@/lib/toast";
 import { GlobalAdminPanel } from "./global-admin-panel";
@@ -21,6 +22,9 @@ interface AppProvidersProps {
 
 export function AppProviders({ children, clerkPublishableKey, convexUrl, withClerk = true }: AppProvidersProps) {
   const [convex] = useState(() => (convexUrl ? new ConvexReactClient(convexUrl) : null));
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const afterSignOutUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   if (!clerkPublishableKey) {
     return (
@@ -50,6 +54,7 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
         publishableKey={clerkPublishableKey}
         signInUrl="/sign-in"
         signUpUrl="/sign-up"
+        afterSignOutUrl={afterSignOutUrl}
         localization={{
           signIn: {
             start: {
@@ -75,6 +80,7 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
       publishableKey={clerkPublishableKey}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
+      afterSignOutUrl={afterSignOutUrl}
       localization={{
         signIn: {
           start: {
