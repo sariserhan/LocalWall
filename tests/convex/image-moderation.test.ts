@@ -2,39 +2,31 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { bakeImageForModeration } from "../../src/features/wall/image-moderation";
 
 describe("image moderation helper", () => {
-  let createdImage: MockImage | null = null;
+  let createdBitmap: MockBitmap | null = null;
   let drawImage: ReturnType<typeof vi.fn>;
   let toBlob: ReturnType<typeof vi.fn>;
+  let canvasContext: { drawImage: ReturnType<typeof vi.fn>; imageSmoothingEnabled?: boolean; imageSmoothingQuality?: string } | null = null;
 
-  class MockImage {
-    naturalWidth = 4000;
-    naturalHeight = 2000;
-    onload: (() => void) | null = null;
-    onerror: (() => void) | null = null;
-
-    set src(_value: string) {
-      queueMicrotask(() => this.onload?.());
-    }
+  class MockBitmap {
+    width = 4000;
+    height = 2000;
+    close = vi.fn();
   }
 
   beforeEach(() => {
-    createdImage = null;
+    createdBitmap = null;
     drawImage = vi.fn();
     toBlob = vi.fn((callback: (blob: Blob | null) => void, type: string, quality: number) => {
       callback(new Blob(["mock"], { type }));
       return undefined;
     });
 
-    Object.defineProperty(globalThis, "window", {
+    Object.defineProperty(globalThis, "createImageBitmap", {
       configurable: true,
-      value: {
-        Image: class extends MockImage {
-          constructor() {
-            super();
-            createdImage = this;
-          }
-        },
-      },
+      value: vi.fn(async () => {
+        createdBitmap = new MockBitmap();
+        return createdBitmap;
+      }),
     });
 
     Object.defineProperty(globalThis, "document", {
@@ -42,42 +34,34 @@ describe("image moderation helper", () => {
       value: {
         createElement: (tag: string) => {
           expect(tag).toBe("canvas");
+          canvasContext = { drawImage };
           return {
             width: 0,
             height: 0,
-            getContext: () => ({ drawImage }),
+            getContext: () => canvasContext,
             toBlob,
           };
         },
       },
     });
-
-    Object.defineProperty(URL, "createObjectURL", {
-      configurable: true,
-      value: vi.fn(() => "blob:mock"),
-    });
-    Object.defineProperty(URL, "revokeObjectURL", {
-      configurable: true,
-      value: vi.fn(),
-    });
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, "window");
+    Reflect.deleteProperty(globalThis, "createImageBitmap");
     Reflect.deleteProperty(globalThis, "document");
     vi.restoreAllMocks();
   });
 
-  test("shrinks large images and outputs jpeg", async () => {
+  test("shrinks large images and outputs webp", async () => {
     const file = new File([new Uint8Array([1, 2, 3])], "example.png", { type: "image/png" });
 
     const result = await bakeImageForModeration(file);
 
-    expect(result.name).toBe("example-moderation.jpg");
-    expect(result.type).toBe("image/jpeg");
-    expect(URL.createObjectURL).toHaveBeenCalledWith(file);
-    expect(drawImage).toHaveBeenCalledWith(createdImage, 0, 0, 1600, 800);
-    expect(toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.82);
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+    expect(result.name).toBe("example-moderation.webp");
+    expect(result.type).toBe("image/webp");
+    expect(globalThis.createImageBitmap).toHaveBeenCalledWith(file);
+    expect(drawImage).toHaveBeenCalledWith(createdBitmap, 0, 0, 1600, 800);
+    expect(toBlob).toHaveBeenCalledWith(expect.any(Function), "image/webp", 0.78);
+    expect(createdBitmap?.close).toHaveBeenCalled();
   });
 });
