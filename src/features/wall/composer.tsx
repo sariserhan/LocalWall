@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type
 import { Country, State, City } from "country-state-city";
 import { businessCardShapes, categories, SUBCATEGORY_OPTIONS, getCardFormat, type BusinessCardShape, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 import { ImageSwapViewer } from "./image-compare-slider";
-import { bakeImageForModeration } from "./image-moderation";
+import { buildModerationBatches } from "./image-moderation";
 import { getVisibleFeaturedTierOptions, type FeaturedTierOption, type FeaturedTierValue } from "./wall-helpers";
 
 interface ComposerProps {
@@ -867,9 +867,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setModerationError(null);
     setModerationMatches([]);
     try {
-      const moderationFiles = includeImages ? await Promise.all(files.slice(0, 2).map((file) => bakeImageForModeration(file))) : [];
-      const moderationBackFiles = includeImages && backFiles[0] ? [await bakeImageForModeration(backFiles[0])] : [];
-      const batches = [moderationFiles, moderationBackFiles].filter((batch) => batch.length > 0);
+      const batches = includeImages ? buildModerationBatches(files, backFiles) : [];
       const runBatch = async (batch: File[]) => {
         const moderationBody = new FormData();
         moderationBody.set("name", form.name);
