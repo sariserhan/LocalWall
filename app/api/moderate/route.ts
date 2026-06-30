@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import path from "node:path";
+import os from "node:os";
 import * as ort from "onnxruntime-node";
 import sharp from "sharp";
 import { createWorker, type Worker } from "tesseract.js";
@@ -39,7 +40,8 @@ function getSafetyModel() {
 function getOcrWorker() {
   ocrWorkerPromise ??= createWorker("eng", undefined, {
     langPath: path.join(process.cwd(), "models"),
-    cachePath: path.join(process.cwd(), ".next", "cache", "tesseract"),
+    // Vercel's filesystem is read-only outside temp storage, so keep OCR cache in /tmp.
+    cachePath: path.join(os.tmpdir(), "localwall-tesseract"),
   });
   return ocrWorkerPromise;
 }
