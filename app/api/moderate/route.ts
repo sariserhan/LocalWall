@@ -30,19 +30,39 @@ function findBlockedText(field: string, value: string) {
 }
 
 function getSafetyModel() {
-  safetyModelPromise ??= ort.InferenceSession.create(path.join(process.cwd(), "models", "image-safety.onnx"), {
-    executionProviders: ["cpu"],
-    graphOptimizationLevel: "all",
-  });
+  if (!safetyModelPromise) {
+    const startedAt = performance.now();
+    log({ event: "moderation.stage", stage: "safety_model.load.start" });
+    safetyModelPromise = ort.InferenceSession.create(path.join(process.cwd(), "models", "image-safety.onnx"), {
+      executionProviders: ["cpu"],
+      graphOptimizationLevel: "all",
+    }).then((session) => {
+      log({ event: "moderation.stage", stage: "safety_model.load.done", durationMs: Math.round(performance.now() - startedAt) });
+      return session;
+    }).catch((cause) => {
+      log({ event: "moderation.stage", level: "error", stage: "safety_model.load.error", durationMs: Math.round(performance.now() - startedAt), error: cause instanceof Error ? cause.message : String(cause) });
+      throw cause;
+    });
+  }
   return safetyModelPromise;
 }
 
 function getOcrWorker() {
-  ocrWorkerPromise ??= createWorker("eng", undefined, {
-    langPath: path.join(process.cwd(), "models"),
-    // Vercel's filesystem is read-only outside temp storage, so keep OCR cache in /tmp.
-    cachePath: path.join(os.tmpdir(), "localwall-tesseract"),
-  });
+  if (!ocrWorkerPromise) {
+    const startedAt = performance.now();
+    log({ event: "moderation.stage", stage: "ocr_worker.load.start" });
+    ocrWorkerPromise = createWorker("eng", undefined, {
+      langPath: path.join(process.cwd(), "models"),
+      // Vercel's filesystem is read-only outside temp storage, so keep OCR cache in /tmp.
+      cachePath: path.join(os.tmpdir(), "localwall-tesseract"),
+    }).then((worker) => {
+      log({ event: "moderation.stage", stage: "ocr_worker.load.done", durationMs: Math.round(performance.now() - startedAt) });
+      return worker;
+    }).catch((cause) => {
+      log({ event: "moderation.stage", level: "error", stage: "ocr_worker.load.error", durationMs: Math.round(performance.now() - startedAt), error: cause instanceof Error ? cause.message : String(cause) });
+      throw cause;
+    });
+  }
   return ocrWorkerPromise;
 }
 
@@ -84,6 +104,15 @@ async function moderateImage(image: File, imageIndex: number) {
   if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_IMAGE_PIXELS) {
     throw new Error("Image dimensions are too large.");
   }
+  log({
+    event: "moderation.stage",
+    stage: "image.begin",
+    image: imageIndex + 1,
+    bytes: buffer.length,
+    width: metadata.width,
+    height: metadata.height,
+    type: image.type,
+  });
   const ocrImage = await sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS })
     .rotate()
     .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
@@ -96,6 +125,13 @@ async function moderateImage(image: File, imageIndex: number) {
     (async () => { const t = performance.now(); const r = await readImageText(ocrImage); return { r, ms: Math.round(performance.now() - t) }; })(),
   ]);
   void t0;
+  log({
+    event: "moderation.stage",
+    stage: "image.done",
+    image: imageIndex + 1,
+    classifyMs: visualResult.ms,
+    ocrMs: ocrResult.ms,
+  });
 
   const flags: Array<{ image: number; label: string; score?: number }> = [];
   if (visualResult.r.adult >= 0.6) flags.push({ image: imageIndex + 1, label: "adult or sexual content", score: visualResult.r.adult });

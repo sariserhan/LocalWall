@@ -285,8 +285,8 @@
     "semantic_hash": ""
   },
   "convex/digest.ts": {
-    "mtime": 1782793297.738857,
-    "ast_hash": "5af701031a3da4f8d0bd5e0ff1dc14ec",
+    "mtime": 1782834367.3658466,
+    "ast_hash": "ed7be2a66de326debe59d53534c15fc0",
     "semantic_hash": ""
   },
   "convex/gdpr.ts": {
@@ -770,8 +770,8 @@
     "semantic_hash": ""
   },
   "tests/convex/stress.test.ts": {
-    "mtime": 1782335260.0699105,
-    "ast_hash": "5cd7bc1ce21cb3eacda12cb61c85ff26",
+    "mtime": 1782834457.379498,
+    "ast_hash": "3ad725df9677fb09e23567693f652494",
     "semantic_hash": ""
   },
   "tests/convex/wall-slug.test.ts": {
