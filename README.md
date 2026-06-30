@@ -22,6 +22,7 @@ The schema stores users, cards, up to two image storage IDs, normalized wall pla
 ## Connect Clerk
 
 1. Create a Clerk application and copy its publishable and secret keys into `.env.local`.
+   Prefer `CLERK_PUBLISHABLE_KEY` for production deployments; `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is still accepted as a fallback.
 2. Activate Clerk's Convex integration/JWT template.
 3. Set `CLERK_JWT_ISSUER_DOMAIN` in the Convex deployment environment.
 4. Run `npx convex dev` again to deploy the auth configuration.

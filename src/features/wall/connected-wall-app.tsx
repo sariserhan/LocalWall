@@ -1,11 +1,10 @@
 "use client";
 
-import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
+import { SignIn, useAuth } from "@clerk/nextjs";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "@/lib/use-theme";
-import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -14,9 +13,8 @@ import { getCardFormat, getImageCardFormat, type CardDraft, type CardUpdate, typ
 import { buildWallPath } from "@/lib/wall-slug";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
-import { ClerkBusinessPage } from "./clerk-business-page";
-import { ClerkMyDataPage } from "./clerk-my-data-page";
 import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
+import { ClerkAvatarMenu } from "@/components/clerk-avatar-menu";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -197,10 +195,14 @@ export function ConnectedWallApp({
   const finalizeVerification = useAction(api.payments.finalizeVerification);
   const adminApproveVerification = useMutation(api.admin.approveVerification);
   const adminRejectVerification = useMutation(api.admin.rejectVerification);
-  const { openSignUp } = useClerk();
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [postAuthOpen, setPostAuthOpen] = useState(false);
   const isProcessingCheckoutRef = useRef(false);
   const ownedCardIds = useMemo(() => new Set((ownerCards ?? []).map((card) => String(card.id))), [ownerCards]);
+  const currentUrl = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
   const hasMergedLocalSavedCardsRef = useRef(false);
   const hasRecordedLoginEventRef = useRef<string | null>(null);
 
@@ -292,6 +294,10 @@ export function ConnectedWallApp({
 
   useEffect(() => {
     if (isAuthenticated) setCheckoutMessage((message) => message?.startsWith("Finishing sign-in") ? null : message);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated) setPostAuthOpen(false);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -533,7 +539,7 @@ export function ConnectedWallApp({
           return;
         }
         if (isClerkSignedIn) return;
-        void openSignUp();
+        setPostAuthOpen(true);
       }}
       onCreateCard={handleCreate}
       onCardOpen={(card) => {
@@ -548,50 +554,16 @@ export function ConnectedWallApp({
         await reportCard({ cardId: card.id as Id<"cards">, reason, details });
       }}
       authControl={isClerkSignedIn ? (
-        <UserButton
-          appearance={getClerkUserButtonAppearance(isDark)}
-          userProfileProps={{
-            appearance: getClerkUserProfileAppearance(isDark),
-            apiKeysProps: { hide: true },
-          }}
-        >
-          <UserButton.UserProfilePage key="wall-business-profile" label="Business profile" url="business-profile" labelIcon={<BriefcaseBusiness size={16} />}>
-            <ClerkBusinessPage
-              profile={profile}
-              isReady={profile !== undefined}
-              onUpdateBusinessName={async (businessName) => { await updateProfileMutation({ businessName }); }}
-            />
-          </UserButton.UserProfilePage>
-          <UserButton.UserProfilePage key="wall-my-data" label="My data" url="my-data" labelIcon={<Download size={16} />}>
-            <ClerkMyDataPage />
-          </UserButton.UserProfilePage>
-          <UserButton.MenuItems>
-            {adminAccess?.isAdmin ? (
-              <UserButton.Action
-                label="Admin"
-                labelIcon={<ShieldCheck size={16} />}
-                onClick={() => openAdminPanel()}
-              />
-            ) : null}
-            <UserButton.Action
-              label="My board"
-              labelIcon={<LayoutDashboard size={16} />}
-              onClick={() => openDashboard()}
-            />
-            <UserButton.Action
-              label="Trending"
-              labelIcon={<TrendingUp size={16} />}
-              onClick={() => router.push("/trending")}
-            />
-            <UserButton.Action
-              label="Manage billing"
-              labelIcon={<CreditCard size={16} />}
-              onClick={() => router.push("/billing")}
-            />
-            <UserButton.Action label="manageAccount" />
-            <UserButton.Action label="signOut" />
-          </UserButton.MenuItems>
-          </UserButton>
+        <ClerkAvatarMenu
+          isDark={isDark}
+          profile={profile}
+          isReady={profile !== undefined}
+          onUpdateBusinessName={async (businessName) => { await updateProfileMutation({ businessName }); }}
+          onOpenAdminPanel={adminAccess?.isAdmin ? () => openAdminPanel() : undefined}
+          onOpenDashboard={() => openDashboard()}
+          onOpenTrending={() => router.push("/trending")}
+          onOpenBilling={() => router.push("/billing")}
+        />
       ) : null}
       notice={checkoutMessage}
       ownerCards={isAuthenticated ? (ownerCards ?? []) : undefined}
@@ -672,6 +644,37 @@ export function ConnectedWallApp({
         setLayoutCards((current) => current?.map((item) => String(item.id) === String(card.id) ? { ...item, ...placement, positionLockedAt: Date.now() } : item) ?? current);
       }}
       />
+      {postAuthOpen ? (
+        <div
+          className="post-auth-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setPostAuthOpen(false);
+          }}
+        >
+          <div className="nf-card post-auth-card" role="dialog" aria-modal="true" aria-labelledby="post-auth-title">
+            <div className="nf-tape" aria-hidden="true" />
+            <div className="nf-stamp" aria-hidden="true">SIGN IN</div>
+
+            <p className="nf-eyebrow">Notice · LocalWall access</p>
+            <h2 className="nf-headline" id="post-auth-title">Sign in to LocalWall</h2>
+            <p className="nf-body">Sign in to post and manage your local listings</p>
+
+            <div className="sign-in-panel post-auth-panel">
+              <SignIn routing="hash" withSignUp signUpUrl="/sign-up" forceRedirectUrl={currentUrl} fallbackRedirectUrl={currentUrl} />
+            </div>
+
+            <p className="post-auth-signup">
+              Don&apos;t have an account yet? <Link href="/sign-up">Sign up</Link>
+            </p>
+
+            <footer className="nf-card-footer">
+              <span>LocalWall</span>
+              <span>your local bulletin board</span>
+            </footer>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

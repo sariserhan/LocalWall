@@ -1,7 +1,7 @@
 "use client";
 
 import { ClerkProvider, useAuth, useUser } from "@clerk/nextjs";
-import { ConvexReactClient } from "convex/react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useRef, useState } from "react";
@@ -16,14 +16,65 @@ interface AppProvidersProps {
   children: React.ReactNode;
   clerkPublishableKey?: string;
   convexUrl?: string;
+  withClerk?: boolean;
 }
 
-export function AppProviders({ children, clerkPublishableKey, convexUrl }: AppProvidersProps) {
-  if (!clerkPublishableKey || !convexUrl) return <>{children}<Toaster /></>;
+export function AppProviders({ children, clerkPublishableKey, convexUrl, withClerk = true }: AppProvidersProps) {
+  const [convex] = useState(() => (convexUrl ? new ConvexReactClient(convexUrl) : null));
+
+  if (!clerkPublishableKey) {
+    return (
+      <>
+        {convex ? <ConvexProvider client={convex}>{children}</ConvexProvider> : children}
+        <GlobalBugReportModal />
+        <GlobalContactModal />
+        <Toaster />
+      </>
+    );
+  }
+
+  if (!withClerk) {
+    return (
+      <>
+        {convex ? <ConvexProvider client={convex}>{children}</ConvexProvider> : children}
+        <GlobalBugReportModal />
+        <GlobalContactModal />
+        <Toaster />
+      </>
+    );
+  }
+
+  if (!convex) {
+    return (
+      <ClerkProvider
+        publishableKey={clerkPublishableKey}
+        signInUrl="/sign-in"
+        signUpUrl="/sign-up"
+        localization={{
+          signIn: {
+            start: {
+              title: "Sign in to LocalWall",
+              subtitle: "Sign in to post and manage your local listings",
+            },
+          },
+          signUp: {
+            start: {
+              title: "Join LocalWall",
+              subtitle: "Create an account to post listings and track your reach",
+            },
+          },
+        }}
+      >
+        {children}
+      </ClerkProvider>
+    );
+  }
 
   return (
     <ClerkProvider
       publishableKey={clerkPublishableKey}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
       localization={{
         signIn: {
           start: {
@@ -39,13 +90,12 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl }: AppPr
         },
       }}
     >
-      <ConnectedProviders convexUrl={convexUrl}>{children}</ConnectedProviders>
+      <ConnectedProviders convex={convex}>{children}</ConnectedProviders>
     </ClerkProvider>
   );
 }
 
-function ConnectedProviders({ children, convexUrl }: { children: React.ReactNode; convexUrl: string }) {
-  const [convex] = useState(() => new ConvexReactClient(convexUrl));
+function ConnectedProviders({ children, convex }: { children: React.ReactNode; convex: ConvexReactClient }) {
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <ClerkUsernameSync />

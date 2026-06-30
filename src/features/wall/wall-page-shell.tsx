@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { AppProviders } from "@/components/app-providers";
 import { ConnectedWallApp } from "./connected-wall-app";
 import { WallApp } from "./wall-app";
+import { getClerkPublishableKey } from "@/lib/clerk";
 import type { WallCard } from "./types";
 
 interface WallPageShellProps {
@@ -18,9 +19,9 @@ export function WallPageShell({
   initialCardId,
   initialKeyword,
   initialCards,
-}: WallPageShellProps) {
+  }: WallPageShellProps) {
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPublishableKey = getClerkPublishableKey();
   const isConnected = Boolean(convexUrl && clerkPublishableKey);
 
   return (

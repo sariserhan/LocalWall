@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { toCitySlug, toCategorySlug } from "@/lib/wall-slug";
 import { AppProviders } from "@/components/app-providers";
 import { HomePage } from "@/features/home/home-page";
+import { getClerkPublishableKey } from "@/lib/clerk";
 
 export const metadata: Metadata = {
   title: "LocalWall — Your local community board",
@@ -27,6 +29,7 @@ interface Props {
 
 export default async function RootPage({ searchParams }: Props) {
   const params = await searchParams;
+  const { userId } = await auth();
 
   // Redirect legacy ?country= URLs to path-based routes
   if (params.country) {
@@ -44,10 +47,10 @@ export default async function RootPage({ searchParams }: Props) {
   }
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPublishableKey = getClerkPublishableKey();
   return (
     <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
-      <HomePage />
+      <HomePage isSignedIn={Boolean(userId)} />
     </AppProviders>
   );
 }

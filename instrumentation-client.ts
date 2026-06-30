@@ -4,44 +4,30 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: "https://d9ee7df566c11cf3d23f2ab4ba53cbac@o4511623712276480.ingest.us.sentry.io/4511623713521664",
-
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
-
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
-});
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
-
-import posthog from "posthog-js";
-
 const isProduction = process.env.NODE_ENV === "production";
 
-posthog.init(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN!, {
-  api_host: "/ingest",
-  ui_host: "https://us.posthog.com",
-  defaults: "2026-01-30",
-  capture_dead_clicks: isProduction,
-  disable_session_recording: !isProduction,
-  disable_external_dependency_loading: !isProduction,
-  capture_exceptions: true,
-  capture_performance: true,
-  debug: !isProduction,
-});
+if (isProduction) {
+  Sentry.init({
+    dsn: "https://d9ee7df566c11cf3d23f2ab4ba53cbac@o4511623712276480.ingest.us.sentry.io/4511623713521664",
+
+    // Add optional integrations for additional features
+    integrations: [Sentry.replayIntegration()],
+
+    // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+    tracesSampleRate: 1,
+    // Enable logs to be sent to Sentry
+    enableLogs: true,
+
+    // Define how likely Replay events are sampled.
+    replaysSessionSampleRate: 0.1,
+
+    // Define how likely Replay events are sampled when an error occurs.
+    replaysOnErrorSampleRate: 1.0,
+
+    // Enable sending user PII (Personally Identifiable Information)
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
+    sendDefaultPii: true,
+  });
+}
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

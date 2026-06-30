@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Pencil, Trash2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
@@ -177,9 +178,14 @@ export function ReviewsSection({ cardId, onRequestSignIn }: {
 
       {/* Sign-in prompt */}
       {!isAuthenticated ? (
-        <button className="review-sign-in-prompt" onClick={onRequestSignIn}>
-          Sign in to leave a review
-        </button>
+        <div className="review-sign-in-cta">
+          <button className="review-sign-in-prompt" onClick={onRequestSignIn}>
+            Sign in to leave a review
+          </button>
+          <p className="auth-cta-hint">
+            Don&apos;t have an account yet? <Link href="/sign-up" className="auth-cta-link">Sign up</Link>
+          </p>
+        </div>
       ) : null}
 
       {/* Review list (others' reviews) */}

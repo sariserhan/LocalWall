@@ -6,7 +6,7 @@ import { ChevronDown, LocateFixed, Loader2, Plus, X } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 import { buildWallPath } from "@/lib/wall-slug";
 
-const CACHE_KEY = "wall-ip-location-v2";
+const CACHE_KEY = "wall-location-v2";
 type Loc = { country: string; state: string; city: string };
 
 async function resolveIpLocation(): Promise<Loc | null> {
@@ -16,22 +16,10 @@ async function resolveIpLocation(): Promise<Loc | null> {
       const entry = JSON.parse(raw) as { expiresAt: number; data: Loc };
       if (entry.expiresAt > Date.now() && entry.data.country) return entry.data;
     }
-    const ipData = (await fetch("https://ipapi.co/json/").then((r) => r.json())) as Record<string, unknown>;
-    const res = await fetch("/api/location/resolve", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        countryCode: String(ipData.country_code ?? "US").toUpperCase(),
-        regionCode: String(ipData.region_code ?? "").trim(),
-        cityNameRaw: String(ipData.city ?? "").trim(),
-      }),
-    });
-    const resolved = (await res.json()) as Loc;
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ expiresAt: Date.now() + 30 * 60 * 1000, data: resolved }));
-    return resolved;
   } catch {
     return null;
   }
+  return null;
 }
 
 export function HomePostButton() {

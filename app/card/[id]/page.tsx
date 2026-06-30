@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AppProviders } from "@/components/app-providers";
 import { ConnectedWallApp } from "@/features/wall/connected-wall-app";
+import { getClerkPublishableKey } from "@/lib/clerk";
 import { getPublicCard } from "@/server/public-card";
 import { Suspense } from "react";
 
@@ -43,7 +44,7 @@ export default async function CardPage({ params }: CardPageProps) {
   if (!card) notFound();
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPublishableKey = getClerkPublishableKey();
   if (!convexUrl || !clerkPublishableKey) notFound();
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");

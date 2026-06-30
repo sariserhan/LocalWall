@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { auth } from "@clerk/nextjs/server";
 import { AppProviders } from "@/components/app-providers";
 import { BugReportLink } from "@/components/bug-report-link";
 import { ContactLink } from "@/components/contact-link";
 import { PrivacySettingsLink } from "@/components/privacy-settings-link";
 import { HomeNav } from "@/features/home/home-nav";
 import { TrendingTabs } from "@/features/home/trending-tabs";
+import { getClerkPublishableKey } from "@/lib/clerk";
 import { fetchTopWalls, fetchTopCards } from "@/lib/server-cards";
 
 export const metadata: Metadata = {
@@ -22,8 +24,9 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function TrendingPage() {
+  const { userId } = await auth();
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPublishableKey = getClerkPublishableKey();
 
   const [walls, liked, reviewed, contacted, shared] = await Promise.all([
     fetchTopWalls(20),
@@ -35,7 +38,7 @@ export default async function TrendingPage() {
 
   return (
     <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
-      <HomeNav />
+      <HomeNav isSignedIn={Boolean(userId)} showAvatarButton={Boolean(userId)} />
       <main className="trending-page">
         <TrendingTabs
           walls={walls}

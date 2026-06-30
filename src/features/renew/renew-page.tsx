@@ -3,6 +3,7 @@
 import { useClerk, useAuth } from "@clerk/nextjs";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useState } from "react";
+import Link from "next/link";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -53,13 +54,18 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
             <p style={{ margin: "0 0 24px", color: "#666", fontSize: 14 }}>
               Sign in to your LocalWall account to renew this card.
             </p>
-            <button
-              className="primary"
-              style={{ width: "100%" }}
-              onClick={() => openSignIn()}
-            >
-              Sign in
-            </button>
+            <div className="auth-cta-stack">
+              <button
+                className="primary"
+                style={{ width: "100%" }}
+                onClick={() => openSignIn()}
+              >
+                Sign in
+              </button>
+              <p className="auth-cta-hint" style={{ margin: 0 }}>
+                Don&apos;t have an account yet? <Link href="/sign-up" className="auth-cta-link">Sign up</Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

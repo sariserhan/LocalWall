@@ -1,7 +1,8 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
+import { getClerkPublishableKey } from "@/lib/clerk";
 
-const clerkProxy = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? clerkMiddleware() : null;
+const clerkProxy = getClerkPublishableKey() ? clerkMiddleware() : null;
 
 export default function proxy(request: NextRequest, event: Parameters<NonNullable<typeof clerkProxy>>[1]) {
   return clerkProxy ? clerkProxy(request, event) : NextResponse.next();

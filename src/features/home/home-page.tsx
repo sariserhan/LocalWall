@@ -7,10 +7,10 @@ import { BugReportLink } from "@/components/bug-report-link";
 import { ContactLink } from "@/components/contact-link";
 import { PrivacySettingsLink } from "@/components/privacy-settings-link";
 
-export function HomePage() {
+export function HomePage({ isSignedIn = false }: { isSignedIn?: boolean } = {}) {
   return (
     <>
-      <HomeNav />
+      <HomeNav isSignedIn={isSignedIn} showAvatarButton={isSignedIn} />
       <main className="home">
 
         <section className="home-hero">

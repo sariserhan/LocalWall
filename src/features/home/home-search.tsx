@@ -21,7 +21,7 @@ type DetectedLoc = {
 
 type ResolvedLoc = { country: string; state: string; city: string };
 
-const CACHE_KEY = "wall-ip-location-v2";
+const CACHE_KEY = "wall-location-v2";
 
 function makeLabel(city: string, stateCode: string): string {
   return [city, stateCode].filter(Boolean).join(", ");
@@ -34,27 +34,10 @@ async function resolveIpLocation(): Promise<ResolvedLoc | null> {
       const entry = JSON.parse(cached) as { expiresAt: number; data: ResolvedLoc };
       if (entry.expiresAt > Date.now()) return entry.data;
     }
-
-    const ipData = (await fetch("https://ipapi.co/json/").then((r) => r.json())) as Record<string, unknown>;
-    const countryCode = String(ipData.country_code ?? "US").toUpperCase();
-    const regionCode = String(ipData.region_code ?? "").trim();
-    const cityNameRaw = String(ipData.city ?? "").trim();
-
-    const res = await fetch("/api/location/resolve", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ countryCode, regionCode, cityNameRaw }),
-    });
-    const resolved = (await res.json()) as ResolvedLoc;
-
-    window.sessionStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({ expiresAt: Date.now() + 30 * 60 * 1000, data: resolved }),
-    );
-    return resolved;
   } catch {
     return null;
   }
+  return null;
 }
 
 export function HomeSearch() {

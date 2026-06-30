@@ -83,7 +83,11 @@ export async function initAnalytics() {
         api_host: host,
         capture_pageview: false,
         autocapture: true,
+        capture_performance: isProduction,
         capture_dead_clicks: isProduction,
+        capture_exceptions: isProduction,
+        disable_surveys: !isProduction,
+        disable_surveys_automatic_display: !isProduction,
         disable_session_recording: !isProduction,
         disable_external_dependency_loading: !isProduction,
       });

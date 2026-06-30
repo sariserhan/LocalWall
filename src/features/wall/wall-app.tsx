@@ -8,6 +8,7 @@ import {
   Layers3,
   Link2,
   LocateFixed,
+  LogIn,
   MapPin,
   Menu,
   Plus,
@@ -16,6 +17,7 @@ import {
   RotateCcw,
   Search,
   SlidersHorizontal,
+  TrendingUp,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -241,6 +243,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const [locationNotice, setLocationNotice] = useState<string | null>(null);
   const [locationReady, setLocationReady] = useState(false);
   const [locating, setLocating] = useState(false);
+  const showSignedOutAuth = !isSignedIn && pathname !== "/";
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapMessage, setMapMessage] = useState("Click on the map to choose a location.");
@@ -428,77 +431,17 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const fetchUserLocation = async () => {
     try {
       const { Country, State, City } = await loadCSC();
-      const cached = window.sessionStorage.getItem("wall-ip-location-v1");
+      const cached = window.sessionStorage.getItem("wall-location-v1");
       const cachedEntry = cached ? JSON.parse(cached) as { expiresAt: number; data: Record<string, unknown> } : null;
-      const data = cachedEntry && cachedEntry.expiresAt > Date.now()
-        ? cachedEntry.data
-        : await fetch("https://ipapi.co/json/").then((response) => response.json());
-      if (!cachedEntry || cachedEntry.expiresAt <= Date.now()) window.sessionStorage.setItem("wall-ip-location-v1", JSON.stringify({ expiresAt: Date.now() + 30 * 60 * 1000, data }));
-      const countryCode = String(data.country_code || "US").toUpperCase();
+      if (cachedEntry && cachedEntry.expiresAt > Date.now()) return cachedEntry.data as { country: string; state: string; city: string };
+      const countryCode = Country.getAllCountries().some((country) => country.isoCode === "US") ? "US" : Country.getAllCountries()[0]?.isoCode ?? "";
+      if (!countryCode) return null;
       const allCountries = Country.getAllCountries();
       if (!allCountries.some((country) => country.isoCode === countryCode)) return null;
       const states = State.getStatesOfCountry(countryCode);
-      const regionCode = String(data.region_code || data.region || "").trim();
-      const cityNameRaw = String(data.city || "").trim();
-      const ipLat = Number(data.latitude);
-      const ipLon = Number(data.longitude);
-      let stateCode = "";
-
-      if (regionCode) {
-        const candidate = states.find((state) => state.isoCode.toUpperCase() === regionCode.toUpperCase());
-        if (candidate) {
-          stateCode = candidate.isoCode;
-        } else {
-          const normalizedRegion = normalizeKey(regionCode);
-          const matchedState = states.find((state) => normalizeKey(state.name) === normalizedRegion || normalizeKey(state.isoCode) === normalizedRegion || normalizedRegion.includes(normalizeKey(state.name)) || normalizeKey(state.name).includes(normalizedRegion));
-          stateCode = matchedState?.isoCode ?? "";
-        }
-      }
-
+      const stateCode = states[0]?.isoCode ?? "";
       const cities = stateCode ? City.getCitiesOfState(countryCode, stateCode) : [];
-      let cityName = "";
-      if (cityNameRaw && cities.length > 0) {
-        const normalizedCity = normalizeKey(cityNameRaw);
-        const exactCity = cities.find((city) => normalizeKey(city.name) === normalizedCity);
-        const fuzzyCity = cities.find((city) => normalizeKey(city.name).includes(normalizedCity) || normalizedCity.includes(normalizeKey(city.name)));
-        if (exactCity || fuzzyCity) {
-          cityName = exactCity?.name ?? fuzzyCity?.name ?? "";
-        } else if (Number.isFinite(ipLat) && Number.isFinite(ipLon)) {
-          let best = cities[0];
-          let bestDistance = Number.POSITIVE_INFINITY;
-          for (const city of cities) {
-            if (city.latitude == null || city.longitude == null) continue;
-            const dLat = Number(city.latitude) - ipLat;
-            const dLon = Number(city.longitude) - ipLon;
-            const distance = dLat * dLat + dLon * dLon;
-            if (distance < bestDistance) {
-              best = city;
-              bestDistance = distance;
-            }
-          }
-          cityName = best?.name ?? cities[0]?.name ?? "";
-        } else {
-          cityName = cities[0]?.name ?? "";
-        }
-      } else {
-        if (Number.isFinite(ipLat) && Number.isFinite(ipLon) && cities.length > 0) {
-          let best = cities[0];
-          let bestDistance = Number.POSITIVE_INFINITY;
-          for (const city of cities) {
-            if (city.latitude == null || city.longitude == null) continue;
-            const dLat = Number(city.latitude) - ipLat;
-            const dLon = Number(city.longitude) - ipLon;
-            const distance = dLat * dLat + dLon * dLon;
-            if (distance < bestDistance) {
-              best = city;
-              bestDistance = distance;
-            }
-          }
-          cityName = best?.name ?? cities[0]?.name ?? "";
-        } else {
-          cityName = cities[0]?.name ?? "";
-        }
-      }
+      const cityName = cities[0]?.name ?? "";
       return { country: countryCode, state: stateCode, city: cityName };
     } catch (error) {
       console.debug("Could not fetch user location:", error);
@@ -1293,6 +1236,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         </button>
         {mobileMenuOpen && <div className="mobile-menu-backdrop" onClick={() => setMobileMenuOpen(false)} />}
         <nav className={mobileMenuOpen ? "mobile-open" : ""}>
+          {pathname !== "/" ? <Link href="/trending" className="topbar-trending-mobile">Trending</Link> : null}
           <div className="search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, business or creator" aria-label="Search advertisements" /></div>
           <div className="filter-wrap">
             {filterOpen && <div className="filter-backdrop" onClick={() => setFilterOpen(false)} />}
@@ -1409,7 +1353,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               </div>
             )}
           </div>
-          {ownedCardIds ? (
+          {isSignedIn && ownedCardIds ? (
             <button
               className={ownCardsOnly ? "is-active" : ""}
               onClick={() => { setOwnCardsOnly((v) => !v); setMobileMenuOpen(false); }}
@@ -1420,11 +1364,10 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
               <span>My cards</span>
             </button>
           ) : null}
-          {pathname && pathname !== "/" ? (
+          {isSignedIn && pathname && pathname !== "/" ? (
             <button
               className={savedWall ? "save-wall-btn saved" : "save-wall-btn"}
               onClick={() => {
-                if (!isSignedIn) { onRequestSignIn?.(); return; }
                 const wallLabel = [locationLabel(), category !== "All" ? category : null, subcategory || null].filter(Boolean).join(" · ");
                 void onSetSavedWall?.(wallLabel, !savedWall);
                 setMobileMenuOpen(false);
@@ -1438,6 +1381,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           <button className="mobile-nav-post" onClick={() => { openComposer(); setMobileMenuOpen(false); }}><Plus />Post your card</button>
         </nav>
         {authControl ? <div className="auth-control">{authControl}</div> : null}
+        {showSignedOutAuth ? <span className="topbar-divider" aria-hidden="true" /> : null}
+        {showSignedOutAuth ? <Link href="/trending" className="topbar-trending-lite"><TrendingUp size={12} />Trending</Link> : null}
         <button className="primary post-button" onClick={openComposer}><Plus />Post your card</button>
       </header>
       {MAP_ENABLED && mapPickerOpen ? (
@@ -1691,7 +1636,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           )
         )}
         <div className="wall-tools">
-          {ownedCardIds ? (
+          {showSignedOutAuth ? (
+            <Link href="/sign-in" className="wall-tools-link" aria-label="Open sign in">
+              <LogIn />
+            </Link>
+          ) : null}
+          {isSignedIn && ownedCardIds ? (
             <button
               aria-label={ownCardsOnly ? "Show all cards" : "Show only my cards"}
               title={ownCardsHint}

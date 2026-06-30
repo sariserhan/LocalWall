@@ -1,5 +1,6 @@
 import { AppProviders } from "@/components/app-providers";
 import { RenewPage } from "@/features/renew/renew-page";
+import { getClerkPublishableKey } from "@/lib/clerk";
 import { Suspense } from "react";
 
 interface Props {
@@ -15,7 +16,7 @@ export default async function RenewCardPage({ params, searchParams }: Props) {
   const preselectedAmount = amount ? Number(amount) : undefined;
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkPublishableKey = getClerkPublishableKey();
 
   return (
     <AppProviders convexUrl={convexUrl} clerkPublishableKey={clerkPublishableKey}>
