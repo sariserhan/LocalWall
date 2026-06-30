@@ -1,5 +1,6 @@
 "use client";
 
+import { Maximize2 } from "lucide-react";
 import { useRef, useState, type PointerEvent } from "react";
 import type { BusinessCardShape } from "./types";
 
@@ -10,6 +11,7 @@ type ImageSwapViewerProps = {
   backAlt: string;
   className?: string;
   layout?: "full" | "horizontal" | "photo" | BusinessCardShape;
+  onImageClick?: (src?: string) => void;
 };
 
 export function ImageSwapViewer({
@@ -19,6 +21,7 @@ export function ImageSwapViewer({
   backAlt,
   className,
   layout = "full",
+  onImageClick,
 }: ImageSwapViewerProps) {
   const hasFront = Boolean(frontSrc);
   const hasBack = Boolean(backSrc);
@@ -59,7 +62,7 @@ export function ImageSwapViewer({
 
   return (
     <div className={`image-swap ${className ?? ""}`.trim()}>
-      <div className={`image-swap-stage backside-art layout-${layout}`}>
+      <div className={`image-swap-stage backside-art layout-${layout}`} onClick={() => onImageClick?.(visibleSrc)}>
         <img
           src={visibleSrc}
           alt={visibleAlt}
@@ -71,11 +74,28 @@ export function ImageSwapViewer({
           onPointerUp={handlePanPointerEnd}
           onPointerCancel={handlePanPointerEnd}
         />
+        {onImageClick ? (
+          <button
+            type="button"
+            className="image-swap-open"
+            onClick={(event) => {
+              event.stopPropagation();
+              onImageClick?.(visibleSrc);
+            }}
+            aria-label="Open full-screen image preview"
+            title="Open full-screen image preview"
+          >
+            <Maximize2 size={14} aria-hidden="true" />
+          </button>
+        ) : null}
         {hasFront && hasBack ? (
           <button
             type="button"
             className="image-swap-toggle"
-            onClick={() => setSide((current) => (current === "front" ? "back" : "front"))}
+            onClick={(event) => {
+              event.stopPropagation();
+              setSide((current) => (current === "front" ? "back" : "front"));
+            }}
             aria-label={showFront ? "Show back image" : "Show front image"}
           >
             <span aria-hidden="true" />

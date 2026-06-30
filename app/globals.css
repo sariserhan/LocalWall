@@ -888,6 +888,9 @@ button { color: inherit; }
   border: 1px solid #111;
   background: #111;
 }
+.sheet-image-swap-wrap .image-swap-stage {
+  cursor: pointer;
+}
 .image-swap-image,
 .image-swap-empty {
   position: absolute;
@@ -906,6 +909,14 @@ button { color: inherit; }
   font: 700 11px var(--font-inter);
   letter-spacing: .04em;
   text-transform: uppercase;
+}
+.image-swap-stage:hover .image-swap-expand,
+.image-swap-stage:focus-within .image-swap-expand {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 .image-swap-toggle {
   position: absolute;
@@ -952,6 +963,47 @@ button { color: inherit; }
   background: rgba(17, 17, 17, .88);
 }
 .image-swap-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.image-swap-expand {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(.96);
+  transition: opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+  pointer-events: none;
+}
+.image-swap-expand::before {
+  content: "";
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, .72);
+  box-shadow: 0 1px 0 #fff6 inset, 0 4px 10px rgba(0, 0, 0, .18);
+}
+.image-swap-expand svg {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+}
+.image-swap-expand:hover,
+.image-swap-expand:focus-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.image-swap-expand:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
