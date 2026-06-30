@@ -15,6 +15,7 @@ export const subscribe = mutation({
   handler: async (ctx, args) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.email)) throw new Error("Invalid email address.");
     if (!args.country.trim()) throw new Error("Country is required to subscribe.");
+    if (!args.city.trim()) throw new Error("City is required to subscribe.");
     const normalized = args.email.toLowerCase().trim();
     const existing = await ctx.db
       .query("digestSubscriptions")

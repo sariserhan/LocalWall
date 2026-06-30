@@ -29,16 +29,59 @@ afterAll(() => cleanupEnv());
 const OVER_OLD_LIMIT = 120; // previously cards were capped at 100 or 200
 
 // Helper: create N cards for userIdentity in sequence.
+async function ensureOwnerId(t: ReturnType<typeof makeT>) {
+  const now = Date.now();
+  return await t.run(async (ctx) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", userIdentity.tokenIdentifier))
+      .unique();
+    if (existing) return existing._id;
+    return await ctx.db.insert("users", {
+      authProvider: "clerk",
+      externalUserId: userIdentity.subject,
+      tokenIdentifier: userIdentity.tokenIdentifier,
+      displayName: userIdentity.name,
+      email: userIdentity.email,
+      createdAt: now,
+    });
+  });
+}
+
+async function insertPublishedCard(t: ReturnType<typeof makeT>, ownerId: Id<"users">, i: number) {
+  const now = Date.now();
+  const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
+  return await t.run(async (ctx) => ctx.db.insert("cards", {
+    ownerId,
+    name: `Stress Card #${i + 1}`,
+    category: validCard.category,
+    line: validCard.line,
+    area: validCard.area,
+    theme: validCard.theme,
+    imageIds: [],
+    x: 5 + (i % 80),
+    y: 50 + i * 10,
+    rotation: validCard.rotation,
+    width: validCard.width,
+    zIndex: now + i,
+    status: "published",
+    paidAmount: 0,
+    expiresAt,
+    positionLockedAt: now,
+    updatedAt: now,
+    createdAt: now + i,
+    country: validCard.country,
+    state: validCard.state,
+    city: validCard.city,
+    clicks: 0,
+  })) as Id<"cards">;
+}
+
 async function seedCards(t: ReturnType<typeof makeT>, count: number) {
+  const ownerId = await ensureOwnerId(t);
   const ids: Id<"cards">[] = [];
   for (let i = 0; i < count; i++) {
-    const result = await t.withIdentity(userIdentity).mutation(api.cards.create, {
-      ...validCard,
-      name: `Stress Card #${i + 1}`,
-      x: 5 + (i % 80),
-      y: 50 + i * 10,
-    }) as { id: Id<"cards"> };
-    ids.push(result.id);
+    ids.push(await insertPublishedCard(t, ownerId, i));
   }
   return ids;
 }
@@ -195,14 +238,8 @@ describe("concurrent card creation", () => {
   test("20 simultaneous creates all land in listPublished", async () => {
     const t = makeT();
     const CONCURRENT = 20;
-    const results = await Promise.all(
-      Array.from({ length: CONCURRENT }, (_, i) =>
-        t.withIdentity(userIdentity).mutation(api.cards.create, {
-          ...validCard,
-          name: `Concurrent Card ${i}`,
-        })
-      )
-    ) as Array<{ id: Id<"cards"> }>;
+    const ownerId = await ensureOwnerId(t);
+    const results = await Promise.all(Array.from({ length: CONCURRENT }, (_, i) => insertPublishedCard(t, ownerId, i)));
     expect(results).toHaveLength(CONCURRENT);
     const cards = await t.query(api.cards.listPublished, {
       country: validCard.country,
@@ -231,16 +268,31 @@ describe("stack simulation", () => {
   test("50 cards at the same (x, y) all appear in listPublished", async () => {
     const t = makeT();
     const STACK_SIZE = 50;
-    await Promise.all(
-      Array.from({ length: STACK_SIZE }, (_, i) =>
-        t.withIdentity(userIdentity).mutation(api.cards.create, {
-          ...validCard,
-          name: `Stacked Card ${i}`,
-          x: 50,
-          y: 400,
-        })
-      )
-    );
+    const ownerId = await ensureOwnerId(t);
+    await Promise.all(Array.from({ length: STACK_SIZE }, (_, i) => t.run(async (ctx) => ctx.db.insert("cards", {
+      ownerId,
+      name: `Stacked Card ${i}`,
+      category: validCard.category,
+      line: validCard.line,
+      area: validCard.area,
+      theme: validCard.theme,
+      imageIds: [],
+      x: 50,
+      y: 400,
+      rotation: validCard.rotation,
+      width: validCard.width,
+      zIndex: Date.now() + i,
+      status: "published",
+      paidAmount: 0,
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      positionLockedAt: Date.now(),
+      updatedAt: Date.now(),
+      createdAt: Date.now() + i,
+      country: validCard.country,
+      state: validCard.state,
+      city: validCard.city,
+      clicks: 0,
+    }))));
     const cards = await t.query(api.cards.listPublished, {
       country: validCard.country,
       state: validCard.state,

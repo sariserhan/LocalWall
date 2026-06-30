@@ -5,8 +5,6 @@ import { useState, useEffect, useRef, type ChangeEvent, type CSSProperties, type
 import { Country, State, City } from "country-state-city";
 import { businessCardShapes, categories, SUBCATEGORY_OPTIONS, getCardFormat, type BusinessCardShape, type CardCategory, type CardDraft, type CardImageMode, type CardTheme } from "./types";
 import { ImageSwapViewer } from "./image-compare-slider";
-import { buildModerationBatches } from "./image-moderation";
-import { createPreviewUrl } from "./image-preview";
 import { getVisibleFeaturedTierOptions, type FeaturedTierOption, type FeaturedTierValue } from "./wall-helpers";
 
 interface ComposerProps {
@@ -143,6 +141,58 @@ const featuredTierOptions: ReadonlyArray<FeaturedTierOption> = [
 
 const stepLabels = ["Design", "Details", "Duration"] as const;
 const DRAFT_STORAGE_KEY = "wall-card-draft-v1";
+const DRAFT_IMAGES_DB = "wall-draft-images-v1";
+const DRAFT_IMAGES_STORE = "blobs";
+const DRAFT_IMAGES_KEY = "draft";
+
+function openImagesDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DRAFT_IMAGES_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(DRAFT_IMAGES_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveImagesToIDB(key: string, blobs: Blob[]): Promise<void> {
+  try {
+    const db = await openImagesDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(DRAFT_IMAGES_STORE, "readwrite");
+      tx.objectStore(DRAFT_IMAGES_STORE).put(blobs, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch { /* storage unavailable */ }
+}
+
+async function loadImagesFromIDB(key: string): Promise<Blob[] | null> {
+  try {
+    const db = await openImagesDB();
+    const blobs = await new Promise<Blob[] | null>((resolve, reject) => {
+      const tx = db.transaction(DRAFT_IMAGES_STORE, "readonly");
+      const req = tx.objectStore(DRAFT_IMAGES_STORE).get(key);
+      req.onsuccess = () => resolve((req.result as Blob[]) ?? null);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    return blobs;
+  } catch { return null; }
+}
+
+async function clearImagesFromIDB(key: string): Promise<void> {
+  try {
+    const db = await openImagesDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(DRAFT_IMAGES_STORE, "readwrite");
+      tx.objectStore(DRAFT_IMAGES_STORE).delete(key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch { /* storage unavailable */ }
+}
 
 type ModerationMatch = { field: "name" | "line" | "message"; term: string; start: number; end: number };
 type DetailField = "name" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram";
@@ -286,7 +336,6 @@ function LiveCardPreview({
               alt=""
               draggable={false}
               className="wall-card-biz-photo composer-biz-img"
-              decoding="async"
               style={{ transform: `scale(${imageScale})` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -327,7 +376,6 @@ function LiveCardPreview({
               alt=""
               draggable={false}
               className="wall-card-image-top"
-              decoding="async"
               style={{ "--image-h": `${form.imageHeight}px`, objectPosition: `${form.imageX}% ${form.imageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -547,7 +595,6 @@ function BackCardPreview({
               alt=""
               draggable={false}
               className="wall-card-biz-photo composer-biz-img composer-biz-back-img"
-              decoding="async"
               style={{ transform: `scale(${imageScale})`, objectPosition: `${form.backImageX}% ${form.backImageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -598,7 +645,6 @@ function BackCardPreview({
               alt=""
               draggable={false}
               className="details-back-image"
-              decoding="async"
               style={{ transform: "scale(var(--back-scale, 1))", objectPosition: `${form.backImageX}% ${form.backImageY}%` } as CSSProperties}
               onPointerDown={handlePanPointerDown}
               onPointerMove={handlePanPointerMove}
@@ -818,36 +864,29 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setModerationStatus("checking");
     setModerationError(null);
     setModerationMatches([]);
+    const moderationBody = new FormData();
+    moderationBody.set("name", form.name);
+    moderationBody.set("line", form.line);
+    moderationBody.set("message", form.message);
+    if (includeImages) files.forEach((file) => moderationBody.append("images", file));
     try {
-      const batches = includeImages ? buildModerationBatches(files, backFiles) : [];
-      const runBatch = async (batch: File[]) => {
-        const moderationBody = new FormData();
-        moderationBody.set("name", form.name);
-        moderationBody.set("line", form.line);
-        moderationBody.set("message", form.message);
-        batch.forEach((file) => moderationBody.append("images", file));
-        const response = await fetch("/api/moderate", { method: "POST", body: moderationBody, signal: controller.signal });
-        const result = await response.json() as { safe?: boolean; error?: string; matches?: ModerationMatch[] };
-        if (moderationRequestRef.current !== controller) return false;
-        if (!response.ok || !result.safe) {
-          setModerationStatus("blocked");
-          setModerationError(result.error ?? "This content did not pass the safety check.");
-          const matches = result.matches ?? [];
-          setModerationMatches(matches);
-          const firstMatch = matches[0];
-          if (firstMatch) {
-            window.requestAnimationFrame(() => {
-              const field = formRef.current?.elements.namedItem(firstMatch.field) as HTMLInputElement | HTMLTextAreaElement | null;
-              field?.focus();
-              field?.setSelectionRange(firstMatch.start, firstMatch.end);
-            });
-          }
-          return false;
+      const response = await fetch("/api/moderate", { method: "POST", body: moderationBody, signal: controller.signal });
+      const result = await response.json() as { safe?: boolean; error?: string; matches?: ModerationMatch[] };
+      if (moderationRequestRef.current !== controller) return false;
+      if (!response.ok || !result.safe) {
+        setModerationStatus("blocked");
+        setModerationError(result.error ?? "This content did not pass the safety check.");
+        const matches = result.matches ?? [];
+        setModerationMatches(matches);
+        const firstMatch = matches[0];
+        if (firstMatch) {
+          window.requestAnimationFrame(() => {
+            const field = formRef.current?.elements.namedItem(firstMatch.field) as HTMLInputElement | HTMLTextAreaElement | null;
+            field?.focus();
+            field?.setSelectionRange(firstMatch.start, firstMatch.end);
+          });
         }
-        return true;
-      };
-      for (const batch of batches) {
-        if (!await runBatch(batch)) return false;
+        return false;
       }
       setModerationStatus("passed");
       moderationRequestRef.current = null;
@@ -912,7 +951,18 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
   }, [form]);
 
   useEffect(() => {
+    void loadImagesFromIDB(DRAFT_IMAGES_KEY).then((blobs) => {
+      if (!blobs?.length) return;
+      const restored = blobs.map((blob, i) => new File([blob], `draft-${i}.${blob.type.split("/")[1] ?? "jpg"}`, { type: blob.type }));
+      setFiles(restored);
+      setPreviews(restored.map((f) => URL.createObjectURL(f)));
+    });
   }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void saveImagesToIDB(DRAFT_IMAGES_KEY, files); }, 500);
+    return () => window.clearTimeout(timer);
+  }, [files]);
 
   useEffect(() => {
     if (form.theme !== "biz" && form.theme !== "ticket") return;
@@ -939,25 +989,21 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     });
   }, [form.phone, form.email]);
 
-  const onImages = async (event: ChangeEvent<HTMLInputElement>) => {
+  const onImages = (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files ?? []).slice(0, 2);
     previews.forEach(URL.revokeObjectURL);
     setFiles(nextFiles);
-    setPreviews([]);
-    const nextPreviews = await Promise.all(nextFiles.map((file) => createPreviewUrl(file)));
-    setPreviews(nextPreviews);
+    setPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
     if (!nextFiles.length) setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
     else setForm((value) => ({ ...value, imageHeight: 156, imageX: 50, imageY: 35 }));
     event.currentTarget.value = "";
   };
 
-  const onBackImages = async (event: ChangeEvent<HTMLInputElement>) => {
+  const onBackImages = (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files ?? []).slice(0, 1);
     backPreviews.forEach(URL.revokeObjectURL);
     setBackFiles(nextFiles);
-    setBackPreviews([]);
-    const nextPreviews = await Promise.all(nextFiles.map((file) => createPreviewUrl(file)));
-    setBackPreviews(nextPreviews);
+    setBackPreviews(nextFiles.map((file) => URL.createObjectURL(file)));
     setBackImageScale(1);
     setForm((value) => ({ ...value, backImageX: 50, backImageY: 35, backImageScale: 1 }));
     event.currentTarget.value = "";
@@ -969,6 +1015,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setPreviews([]);
     setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
     fileInputRef.current?.value && (fileInputRef.current.value = "");
+    void clearImagesFromIDB(DRAFT_IMAGES_KEY);
   };
 
   const clearBackImages = () => {
@@ -1039,6 +1086,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       backPreviews,
     });
     try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* storage unavailable */ }
+    void clearImagesFromIDB(DRAFT_IMAGES_KEY);
   };
 
   const canUseFrontImages = form.theme !== "biz" && form.theme !== "ticket";
@@ -1221,7 +1269,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                   <span className="upload-zone-label">Front image</span>
                   <label className="upload-zone">
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onImages} />
-                    {previews.length ? <div className="preview-row">{previews.map((src) => <img src={src} key={src} alt="Front upload preview" decoding="async" />)}</div> : <><ImagePlus /><strong>Upload front image</strong><span>JPG, PNG or WEBP · 8MB each</span></>}
+                    {previews.length ? <div className="preview-row">{previews.map((src) => <img src={src} key={src} alt="Front upload preview" />)}</div> : <><ImagePlus /><strong>Upload front image</strong><span>JPG, PNG or WEBP · 8MB each</span></>}
                   </label>
                   {previews.length ? (
                     <button type="button" className="upload-zone-clear" onClick={clearImages} aria-label="Delete front image">
@@ -1243,7 +1291,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                 <span className="upload-zone-label">Back image</span>
                 <label className="upload-zone upload-zone-back">
                   <input ref={backFileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onBackImages} />
-                  {backPreviews.length ? <div className="preview-row">{backPreviews.map((src) => <img src={src} key={src} alt="Back upload preview" decoding="async" />)}</div> : <><ImagePlus /><strong>Upload back image</strong><span>Shown when the card flips</span></>}
+                  {backPreviews.length ? <div className="preview-row">{backPreviews.map((src) => <img src={src} key={src} alt="Back upload preview" />)}</div> : <><ImagePlus /><strong>Upload back image</strong><span>Shown when the card flips</span></>}
                 </label>
                 {backPreviews.length ? (
                   <button type="button" className="upload-zone-clear" onClick={clearBackImages} aria-label="Delete back image">

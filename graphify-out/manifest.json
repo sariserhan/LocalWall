@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782805124.4833758,
-    "ast_hash": "0ab4f7884bd1a1423c743bdefe46f2fa",
+    "mtime": 1782833611.5955675,
+    "ast_hash": "c2d808002b743d6cddca0bfe5734e508",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/image-compare-slider.tsx": {
-    "mtime": 1782805099.275271,
-    "ast_hash": "30ced41b5568e0a847a8944d8e2b19a7",
+    "mtime": 1782833550.5012515,
+    "ast_hash": "cd6d512541fab725f3e1580077e65c93",
     "semantic_hash": ""
   },
   "src/features/wall/location-combobox.tsx": {
@@ -1217,16 +1217,6 @@
   "tests/convex/wall-helpers.test.ts": {
     "mtime": 1782794665.2692657,
     "ast_hash": "29d429565576380a0d86e620040603c2",
-    "semantic_hash": ""
-  },
-  "src/features/wall/image-moderation.ts": {
-    "mtime": 1782804291.1889975,
-    "ast_hash": "7825c3115307935e64f526503725858b",
-    "semantic_hash": ""
-  },
-  "tests/convex/image-moderation.test.ts": {
-    "mtime": 1782804312.953821,
-    "ast_hash": "f489c83d460e0e0d2a022f039692f53f",
     "semantic_hash": ""
   }
 }
