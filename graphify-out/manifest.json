@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
-    "mtime": 1782802080.2411673,
-    "ast_hash": "4e373310afed0eea8c682377bf52ac45",
+    "mtime": 1782804299.155458,
+    "ast_hash": "33fa8cca6a53d15dfc1ea0daad195994",
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
@@ -1220,13 +1220,13 @@
     "semantic_hash": ""
   },
   "src/features/wall/image-moderation.ts": {
-    "mtime": 1782802875.7898552,
-    "ast_hash": "1dd20423d0305d5ab6fe2867eb8f8423",
+    "mtime": 1782804291.1889975,
+    "ast_hash": "7825c3115307935e64f526503725858b",
     "semantic_hash": ""
   },
   "tests/convex/image-moderation.test.ts": {
-    "mtime": 1782802921.664689,
-    "ast_hash": "e4441f9b49f4759b3c67c2022ace67f8",
+    "mtime": 1782804312.953821,
+    "ast_hash": "f489c83d460e0e0d2a022f039692f53f",
     "semantic_hash": ""
   }
 }

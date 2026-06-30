@@ -142,59 +142,6 @@ const featuredTierOptions: ReadonlyArray<FeaturedTierOption> = [
 
 const stepLabels = ["Design", "Details", "Duration"] as const;
 const DRAFT_STORAGE_KEY = "wall-card-draft-v1";
-const DRAFT_IMAGES_DB = "wall-draft-images-v1";
-const DRAFT_IMAGES_STORE = "blobs";
-const DRAFT_IMAGES_KEY = "draft";
-const DRAFT_BACK_IMAGES_KEY = "draft-back";
-
-function openImagesDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DRAFT_IMAGES_DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(DRAFT_IMAGES_STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function saveImagesToIDB(key: string, blobs: Blob[]): Promise<void> {
-  try {
-    const db = await openImagesDB();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(DRAFT_IMAGES_STORE, "readwrite");
-      tx.objectStore(DRAFT_IMAGES_STORE).put(blobs, key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-    db.close();
-  } catch { /* storage unavailable */ }
-}
-
-async function loadImagesFromIDB(key: string): Promise<Blob[] | null> {
-  try {
-    const db = await openImagesDB();
-    const blobs = await new Promise<Blob[] | null>((resolve, reject) => {
-      const tx = db.transaction(DRAFT_IMAGES_STORE, "readonly");
-      const req = tx.objectStore(DRAFT_IMAGES_STORE).get(key);
-      req.onsuccess = () => resolve((req.result as Blob[]) ?? null);
-      req.onerror = () => reject(req.error);
-    });
-    db.close();
-    return blobs;
-  } catch { return null; }
-}
-
-async function clearImagesFromIDB(key: string): Promise<void> {
-  try {
-    const db = await openImagesDB();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(DRAFT_IMAGES_STORE, "readwrite");
-      tx.objectStore(DRAFT_IMAGES_STORE).delete(key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-    db.close();
-  } catch { /* storage unavailable */ }
-}
 
 type ModerationMatch = { field: "name" | "line" | "message"; term: string; start: number; end: number };
 type DetailField = "name" | "line" | "message" | "area" | "zipcode" | "price" | "phone" | "email" | "website" | "location" | "instagram" | "facebook" | "tiktok" | "linkedin" | "whatsapp" | "telegram";
@@ -960,32 +907,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
   }, [form]);
 
   useEffect(() => {
-    void loadImagesFromIDB(DRAFT_IMAGES_KEY).then((blobs) => {
-      if (!blobs?.length) return;
-      const restored = blobs.map((blob, i) => new File([blob], `draft-${i}.${blob.type.split("/")[1] ?? "jpg"}`, { type: blob.type }));
-      setFiles(restored);
-      setPreviews(restored.map((f) => URL.createObjectURL(f)));
-    });
   }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => { void saveImagesToIDB(DRAFT_IMAGES_KEY, files); }, 500);
-    return () => window.clearTimeout(timer);
-  }, [files]);
-
-  useEffect(() => {
-    void loadImagesFromIDB(DRAFT_BACK_IMAGES_KEY).then((blobs) => {
-      if (!blobs?.length) return;
-      const restored = blobs.map((blob, i) => new File([blob], `draft-back-${i}.${blob.type.split("/")[1] ?? "jpg"}`, { type: blob.type }));
-      setBackFiles(restored);
-      setBackPreviews(restored.map((f) => URL.createObjectURL(f)));
-    });
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => { void saveImagesToIDB(DRAFT_BACK_IMAGES_KEY, backFiles); }, 500);
-    return () => window.clearTimeout(timer);
-  }, [backFiles]);
 
   useEffect(() => {
     if (form.theme !== "biz" && form.theme !== "ticket") return;
@@ -1038,7 +960,6 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setPreviews([]);
     setForm((value) => ({ ...value, imageMode: "photo", imageHeight: 156, imageX: 50, imageY: 35 }));
     fileInputRef.current?.value && (fileInputRef.current.value = "");
-    void clearImagesFromIDB(DRAFT_IMAGES_KEY);
   };
 
   const clearBackImages = () => {
@@ -1048,7 +969,6 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
     setBackImageScale(1);
     setForm((value) => ({ ...value, backImageX: 50, backImageY: 35, backImageScale: 1 }));
     backFileInputRef.current?.value && (backFileInputRef.current.value = "");
-    void clearImagesFromIDB(DRAFT_BACK_IMAGES_KEY);
   };
 
   const chooseImageMode = (imageMode: CardImageMode) => {
@@ -1110,8 +1030,6 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       backPreviews,
     });
     try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* storage unavailable */ }
-    void clearImagesFromIDB(DRAFT_IMAGES_KEY);
-    void clearImagesFromIDB(DRAFT_BACK_IMAGES_KEY);
   };
 
   const canUseFrontImages = form.theme !== "biz" && form.theme !== "ticket";
