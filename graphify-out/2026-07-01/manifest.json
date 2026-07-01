@@ -375,7 +375,7 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1782939283.4285197,
+    "mtime": 1782922623.30387,
     "ast_hash": "5ce354da01b2a8d3708dca3db5a2ddba",
     "semantic_hash": ""
   },
@@ -395,8 +395,8 @@
     "semantic_hash": ""
   },
   "proxy.ts": {
-    "mtime": 1782940302.2662952,
-    "ast_hash": "ed07713d930df2c2027817c9cc9999d7",
+    "mtime": 1782922623.30424,
+    "ast_hash": "91313c91346aa6efb31d79b810bee011",
     "semantic_hash": ""
   },
   "sentry.edge.config.ts": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782939270.1990898,
-    "ast_hash": "278ec3d1d90b4bafd5a790b25d2e24fe",
+    "mtime": 1782922623.3049784,
+    "ast_hash": "6001cae07f24133d61ae4a40889f2082",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {

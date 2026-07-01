@@ -53,6 +53,7 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
     return (
       <ClerkProvider
         ui={ui}
+        proxyUrl="/__clerk"
         publishableKey={clerkPublishableKey}
         signInUrl="/sign-in"
         signUpUrl="/sign-up"
@@ -80,6 +81,7 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
   return (
     <ClerkProvider
       ui={ui}
+      proxyUrl="/__clerk"
       publishableKey={clerkPublishableKey}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"

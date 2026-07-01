@@ -1,7 +1,7 @@
 # Graph Report - local-wall  (2026-07-01)
 
 ## Corpus Check
-- 251 files · ~464,211 words
+- 251 files · ~464,203 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `388fd124`
+- Built from commit: `18a7c7a4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -459,7 +459,7 @@ Cohesion: 0.40
 Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
 
 ## Knowledge Gaps
-- **846 isolated node(s):** `config`, `AppProvidersProps`, `getAccess`, `resetRateLimitsForUser`, `getDashboard` (+841 more)
+- **846 isolated node(s):** `getAccess`, `resetRateLimitsForUser`, `getDashboard`, `playgroundStoreImageFromUrl`, `sendTestReminderEmail` (+841 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -468,11 +468,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Billing, Admin & Test Infrastructure`, `Community 34`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 10`, `Community 11`, `Community 81`, `Community 17`, `Community 56`, `Community 57`?**
   _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `getCardFormat()` connect `Community 64` to `Rate Limiting & API Utilities`, `Community 3`, `Community 72`, `Community 46`, `Community 23`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `config`, `AppProvidersProps`, `getAccess` to the rest of the system?**
+- **What connects `getAccess`, `resetRateLimitsForUser`, `getDashboard` to the rest of the system?**
   _846 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
   _Cohesion score 0.09846153846153846 - nodes in this community are weakly interconnected._
@@ -480,3 +478,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.08275862068965517 - nodes in this community are weakly interconnected._
 - **Should `Geo-Routed Pages & RSS Feeds` be split into smaller, more focused modules?**
   _Cohesion score 0.073224043715847 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.07529411764705882 - nodes in this community are weakly interconnected._
