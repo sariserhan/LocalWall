@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1782939283.4285197,
-    "ast_hash": "5ce354da01b2a8d3708dca3db5a2ddba",
+    "mtime": 1782940900.1334984,
+    "ast_hash": "b754ffd62d40d36f92ef63aea8e45fdd",
     "semantic_hash": ""
   },
   "package.json": {
@@ -1387,6 +1387,11 @@
   "public/assets/pin.webp": {
     "mtime": 1782929260.9565108,
     "ast_hash": "2b883454d46802fbbffc8d3c2242b38a",
+    "semantic_hash": ""
+  },
+  "app/%5F%5Fclerk/[[...path]]/route.ts": {
+    "mtime": 1782940603.4437444,
+    "ast_hash": "6484d3012bf393502f7c9f08013e68ea",
     "semantic_hash": ""
   }
 }

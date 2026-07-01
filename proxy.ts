@@ -4,6 +4,7 @@ import { getClerkPublishableKey } from "@/lib/clerk";
 
 const clerkProxy = getClerkPublishableKey()
   ? clerkMiddleware({
+      publishableKey: getClerkPublishableKey(),
       frontendApiProxy: {
         enabled: true,
       },

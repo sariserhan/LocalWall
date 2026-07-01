@@ -4,14 +4,94 @@
   "graph": {},
   "nodes": [
     {
+      "label": "proxy.ts",
+      "file_type": "code",
+      "source_file": "proxy.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "proxy",
+      "community": 17,
+      "norm_label": "proxy.ts"
+    },
+    {
+      "label": "proxy()",
+      "file_type": "code",
+      "source_file": "proxy.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "proxy_proxy",
+      "community": 17,
+      "norm_label": "proxy()"
+    },
+    {
+      "label": "config",
+      "file_type": "code",
+      "source_file": "proxy.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "proxy_config",
+      "community": 17,
+      "norm_label": "config"
+    },
+    {
+      "label": "app-providers.tsx",
+      "file_type": "code",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_app_providers",
+      "community": 56,
+      "norm_label": "app-providers.tsx"
+    },
+    {
+      "label": "AppProvidersProps",
+      "file_type": "code",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "components_app_providers_appprovidersprops",
+      "community": 56,
+      "norm_label": "appprovidersprops"
+    },
+    {
+      "label": "AppProviders()",
+      "file_type": "code",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "components_app_providers_appproviders",
+      "community": 17,
+      "norm_label": "appproviders()"
+    },
+    {
+      "label": "ConnectedProviders()",
+      "file_type": "code",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "components_app_providers_connectedproviders",
+      "community": 56,
+      "norm_label": "connectedproviders()"
+    },
+    {
+      "label": "ClerkUsernameSync()",
+      "file_type": "code",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L123",
+      "_origin": "ast",
+      "id": "components_app_providers_clerkusernamesync",
+      "community": 56,
+      "norm_label": "clerkusernamesync()"
+    },
+    {
       "label": "admin.ts",
       "file_type": "code",
       "source_file": "convex/admin.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "convex_admin",
       "community": 8,
-      "norm_label": "admin.ts"
+      "norm_label": "admin.ts",
+      "id": "convex_admin"
     },
     {
       "label": "configuredAdminEmails()",
@@ -19,9 +99,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "convex_admin_configuredadminemails",
       "community": 8,
-      "norm_label": "configuredadminemails()"
+      "norm_label": "configuredadminemails()",
+      "id": "convex_admin_configuredadminemails"
     },
     {
       "label": "getAdminIdentity()",
@@ -29,9 +109,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "convex_admin_getadminidentity",
       "community": 8,
-      "norm_label": "getadminidentity()"
+      "norm_label": "getadminidentity()",
+      "id": "convex_admin_getadminidentity"
     },
     {
       "label": "requireAdmin()",
@@ -39,9 +119,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "convex_admin_requireadmin",
       "community": 8,
-      "norm_label": "requireadmin()"
+      "norm_label": "requireadmin()",
+      "id": "convex_admin_requireadmin"
     },
     {
       "label": "audit()",
@@ -49,9 +129,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "convex_admin_audit",
       "community": 8,
-      "norm_label": "audit()"
+      "norm_label": "audit()",
+      "id": "convex_admin_audit"
     },
     {
       "label": "getAccess",
@@ -59,9 +139,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L40",
       "_origin": "ast",
-      "id": "convex_admin_getaccess",
       "community": 8,
-      "norm_label": "getaccess"
+      "norm_label": "getaccess",
+      "id": "convex_admin_getaccess"
     },
     {
       "label": "resetRateLimitsForUser",
@@ -69,9 +149,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L45",
       "_origin": "ast",
-      "id": "convex_admin_resetratelimitsforuser",
       "community": 8,
-      "norm_label": "resetratelimitsforuser"
+      "norm_label": "resetratelimitsforuser",
+      "id": "convex_admin_resetratelimitsforuser"
     },
     {
       "label": "getDashboard",
@@ -79,9 +159,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L70",
       "_origin": "ast",
-      "id": "convex_admin_getdashboard",
       "community": 8,
-      "norm_label": "getdashboard"
+      "norm_label": "getdashboard",
+      "id": "convex_admin_getdashboard"
     },
     {
       "label": "playgroundStoreImageFromUrl",
@@ -89,9 +169,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L297",
       "_origin": "ast",
-      "id": "convex_admin_playgroundstoreimagefromurl",
       "community": 8,
-      "norm_label": "playgroundstoreimagefromurl"
+      "norm_label": "playgroundstoreimagefromurl",
+      "id": "convex_admin_playgroundstoreimagefromurl"
     },
     {
       "label": "sendTestReminderEmail",
@@ -99,9 +179,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L320",
       "_origin": "ast",
-      "id": "convex_admin_sendtestreminderemail",
       "community": 8,
-      "norm_label": "sendtestreminderemail"
+      "norm_label": "sendtestreminderemail",
+      "id": "convex_admin_sendtestreminderemail"
     },
     {
       "label": "setUserVerified",
@@ -109,9 +189,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L364",
       "_origin": "ast",
-      "id": "convex_admin_setuserverified",
       "community": 8,
-      "norm_label": "setuserverified"
+      "norm_label": "setuserverified",
+      "id": "convex_admin_setuserverified"
     },
     {
       "label": "approveVerification",
@@ -119,9 +199,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L378",
       "_origin": "ast",
-      "id": "convex_admin_approveverification",
       "community": 8,
-      "norm_label": "approveverification"
+      "norm_label": "approveverification",
+      "id": "convex_admin_approveverification"
     },
     {
       "label": "rejectVerification",
@@ -129,9 +209,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L392",
       "_origin": "ast",
-      "id": "convex_admin_rejectverification",
       "community": 8,
-      "norm_label": "rejectverification"
+      "norm_label": "rejectverification",
+      "id": "convex_admin_rejectverification"
     },
     {
       "label": "resolveReport",
@@ -139,9 +219,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L404",
       "_origin": "ast",
-      "id": "convex_admin_resolvereport",
       "community": 8,
-      "norm_label": "resolvereport"
+      "norm_label": "resolvereport",
+      "id": "convex_admin_resolvereport"
     },
     {
       "label": "resolveBugReport",
@@ -149,9 +229,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L415",
       "_origin": "ast",
-      "id": "convex_admin_resolvebugreport",
       "community": 8,
-      "norm_label": "resolvebugreport"
+      "norm_label": "resolvebugreport",
+      "id": "convex_admin_resolvebugreport"
     },
     {
       "label": "resolveContactMessage",
@@ -159,9 +239,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L426",
       "_origin": "ast",
-      "id": "convex_admin_resolvecontactmessage",
       "community": 8,
-      "norm_label": "resolvecontactmessage"
+      "norm_label": "resolvecontactmessage",
+      "id": "convex_admin_resolvecontactmessage"
     },
     {
       "label": "setCardStatus",
@@ -169,9 +249,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L437",
       "_origin": "ast",
-      "id": "convex_admin_setcardstatus",
       "community": 8,
-      "norm_label": "setcardstatus"
+      "norm_label": "setcardstatus",
+      "id": "convex_admin_setcardstatus"
     },
     {
       "label": "removeCard",
@@ -179,9 +259,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L453",
       "_origin": "ast",
-      "id": "convex_admin_removecard",
       "community": 8,
-      "norm_label": "removecard"
+      "norm_label": "removecard",
+      "id": "convex_admin_removecard"
     },
     {
       "label": "purgeOrphanCardData",
@@ -189,9 +269,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L468",
       "_origin": "ast",
-      "id": "convex_admin_purgeorphancarddata",
       "community": 8,
-      "norm_label": "purgeorphancarddata"
+      "norm_label": "purgeorphancarddata",
+      "id": "convex_admin_purgeorphancarddata"
     },
     {
       "label": "deleteCardsByOwnerBatch",
@@ -199,9 +279,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L512",
       "_origin": "ast",
-      "id": "convex_admin_deletecardsbyownerbatch",
       "community": 8,
-      "norm_label": "deletecardsbyownerbatch"
+      "norm_label": "deletecardsbyownerbatch",
+      "id": "convex_admin_deletecardsbyownerbatch"
     },
     {
       "label": "deleteAllCardsByOwner",
@@ -209,9 +289,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L531",
       "_origin": "ast",
-      "id": "convex_admin_deleteallcardsbyowner",
       "community": 8,
-      "norm_label": "deleteallcardsbyowner"
+      "norm_label": "deleteallcardsbyowner",
+      "id": "convex_admin_deleteallcardsbyowner"
     },
     {
       "label": "blockUser",
@@ -219,9 +299,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L548",
       "_origin": "ast",
-      "id": "convex_admin_blockuser",
       "community": 8,
-      "norm_label": "blockuser"
+      "norm_label": "blockuser",
+      "id": "convex_admin_blockuser"
     },
     {
       "label": "unblockUser",
@@ -229,9 +309,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L575",
       "_origin": "ast",
-      "id": "convex_admin_unblockuser",
       "community": 8,
-      "norm_label": "unblockuser"
+      "norm_label": "unblockuser",
+      "id": "convex_admin_unblockuser"
     },
     {
       "label": "getAuditLog",
@@ -239,9 +319,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L611",
       "_origin": "ast",
-      "id": "convex_admin_getauditlog",
       "community": 8,
-      "norm_label": "getauditlog"
+      "norm_label": "getauditlog",
+      "id": "convex_admin_getauditlog"
     },
     {
       "label": "PG_DURATIONS",
@@ -249,9 +329,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L621",
       "_origin": "ast",
-      "id": "convex_admin_pg_durations",
       "community": 8,
-      "norm_label": "pg_durations"
+      "norm_label": "pg_durations",
+      "id": "convex_admin_pg_durations"
     },
     {
       "label": "PG_ADMIN_STATUS",
@@ -259,9 +339,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L629",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_status",
       "community": 8,
-      "norm_label": "pg_admin_status"
+      "norm_label": "pg_admin_status",
+      "id": "convex_admin_pg_admin_status"
     },
     {
       "label": "PG_ADMIN_CATEGORY",
@@ -269,9 +349,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L630",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_category",
       "community": 8,
-      "norm_label": "pg_admin_category"
+      "norm_label": "pg_admin_category",
+      "id": "convex_admin_pg_admin_category"
     },
     {
       "label": "PG_ADMIN_THEME",
@@ -279,9 +359,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L652",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_theme",
       "community": 8,
-      "norm_label": "pg_admin_theme"
+      "norm_label": "pg_admin_theme",
+      "id": "convex_admin_pg_admin_theme"
     },
     {
       "label": "PG_ADMIN_IMAGE_MODE",
@@ -289,9 +369,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L653",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_image_mode",
       "community": 8,
-      "norm_label": "pg_admin_image_mode"
+      "norm_label": "pg_admin_image_mode",
+      "id": "convex_admin_pg_admin_image_mode"
     },
     {
       "label": "PG_ADMIN_CARD_SHAPE",
@@ -299,9 +379,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L654",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_card_shape",
       "community": 8,
-      "norm_label": "pg_admin_card_shape"
+      "norm_label": "pg_admin_card_shape",
+      "id": "convex_admin_pg_admin_card_shape"
     },
     {
       "label": "PG_ADMIN_FEATURED_TIER",
@@ -309,9 +389,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L655",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_featured_tier",
       "community": 8,
-      "norm_label": "pg_admin_featured_tier"
+      "norm_label": "pg_admin_featured_tier",
+      "id": "convex_admin_pg_admin_featured_tier"
     },
     {
       "label": "PG_ADMIN_CARD_ARGS",
@@ -319,9 +399,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L658",
       "_origin": "ast",
-      "id": "convex_admin_pg_admin_card_args",
       "community": 8,
-      "norm_label": "pg_admin_card_args"
+      "norm_label": "pg_admin_card_args",
+      "id": "convex_admin_pg_admin_card_args"
     },
     {
       "label": "PlaygroundCardArgs",
@@ -329,9 +409,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L718",
       "_origin": "ast",
-      "id": "convex_admin_playgroundcardargs",
       "community": 8,
-      "norm_label": "playgroundcardargs"
+      "norm_label": "playgroundcardargs",
+      "id": "convex_admin_playgroundcardargs"
     },
     {
       "label": "createPlaygroundCard()",
@@ -339,9 +419,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L778",
       "_origin": "ast",
-      "id": "convex_admin_createplaygroundcard",
       "community": 8,
-      "norm_label": "createplaygroundcard()"
+      "norm_label": "createplaygroundcard()",
+      "id": "convex_admin_createplaygroundcard"
     },
     {
       "label": "playgroundGetMyCards",
@@ -349,9 +429,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L944",
       "_origin": "ast",
-      "id": "convex_admin_playgroundgetmycards",
       "community": 8,
-      "norm_label": "playgroundgetmycards"
+      "norm_label": "playgroundgetmycards",
+      "id": "convex_admin_playgroundgetmycards"
     },
     {
       "label": "playgroundCreateCard",
@@ -359,9 +439,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L977",
       "_origin": "ast",
-      "id": "convex_admin_playgroundcreatecard",
       "community": 8,
-      "norm_label": "playgroundcreatecard"
+      "norm_label": "playgroundcreatecard",
+      "id": "convex_admin_playgroundcreatecard"
     },
     {
       "label": "playgroundSetExpiry",
@@ -369,9 +449,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L988",
       "_origin": "ast",
-      "id": "convex_admin_playgroundsetexpiry",
       "community": 8,
-      "norm_label": "playgroundsetexpiry"
+      "norm_label": "playgroundsetexpiry",
+      "id": "convex_admin_playgroundsetexpiry"
     },
     {
       "label": "playgroundSetFeaturedTier",
@@ -379,9 +459,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1004",
       "_origin": "ast",
-      "id": "convex_admin_playgroundsetfeaturedtier",
       "community": 8,
-      "norm_label": "playgroundsetfeaturedtier"
+      "norm_label": "playgroundsetfeaturedtier",
+      "id": "convex_admin_playgroundsetfeaturedtier"
     },
     {
       "label": "playgroundRenewCard",
@@ -389,9 +469,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1013",
       "_origin": "ast",
-      "id": "convex_admin_playgroundrenewcard",
       "community": 8,
-      "norm_label": "playgroundrenewcard"
+      "norm_label": "playgroundrenewcard",
+      "id": "convex_admin_playgroundrenewcard"
     },
     {
       "label": "playgroundSetVerified",
@@ -399,9 +479,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1027",
       "_origin": "ast",
-      "id": "convex_admin_playgroundsetverified",
       "community": 8,
-      "norm_label": "playgroundsetverified"
+      "norm_label": "playgroundsetverified",
+      "id": "convex_admin_playgroundsetverified"
     },
     {
       "label": "playgroundDeleteCard",
@@ -409,9 +489,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1041",
       "_origin": "ast",
-      "id": "convex_admin_playgrounddeletecard",
       "community": 8,
-      "norm_label": "playgrounddeletecard"
+      "norm_label": "playgrounddeletecard",
+      "id": "convex_admin_playgrounddeletecard"
     },
     {
       "label": "playgroundDeleteAllMyCards",
@@ -419,9 +499,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1055",
       "_origin": "ast",
-      "id": "convex_admin_playgrounddeleteallmycards",
       "community": 8,
-      "norm_label": "playgrounddeleteallmycards"
+      "norm_label": "playgrounddeleteallmycards",
+      "id": "convex_admin_playgrounddeleteallmycards"
     },
     {
       "label": "playgroundSendDigestTest",
@@ -429,9 +509,9 @@
       "source_file": "convex/admin.ts",
       "source_location": "L1074",
       "_origin": "ast",
-      "id": "convex_admin_playgroundsenddigesttest",
       "community": 8,
-      "norm_label": "playgroundsenddigesttest"
+      "norm_label": "playgroundsenddigesttest",
+      "id": "convex_admin_playgroundsenddigesttest"
     },
     {
       "label": "cards.ts",
@@ -439,9 +519,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "convex_cards",
       "community": 10,
-      "norm_label": "cards.ts"
+      "norm_label": "cards.ts",
+      "id": "convex_cards"
     },
     {
       "label": "category",
@@ -449,9 +529,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "convex_cards_category",
       "community": 10,
-      "norm_label": "category"
+      "norm_label": "category",
+      "id": "convex_cards_category"
     },
     {
       "label": "theme",
@@ -459,9 +539,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L29",
       "_origin": "ast",
-      "id": "convex_cards_theme",
       "community": 10,
-      "norm_label": "theme"
+      "norm_label": "theme",
+      "id": "convex_cards_theme"
     },
     {
       "label": "imageMode",
@@ -469,9 +549,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "convex_cards_imagemode",
       "community": 10,
-      "norm_label": "imagemode"
+      "norm_label": "imagemode",
+      "id": "convex_cards_imagemode"
     },
     {
       "label": "cardShape",
@@ -479,9 +559,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L31",
       "_origin": "ast",
-      "id": "convex_cards_cardshape",
       "community": 10,
-      "norm_label": "cardshape"
+      "norm_label": "cardshape",
+      "id": "convex_cards_cardshape"
     },
     {
       "label": "requireIdentity()",
@@ -489,9 +569,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L34",
       "_origin": "ast",
-      "id": "convex_cards_requireidentity",
       "community": 10,
-      "norm_label": "requireidentity()"
+      "norm_label": "requireidentity()",
+      "id": "convex_cards_requireidentity"
     },
     {
       "label": "requireUser()",
@@ -499,9 +579,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L40",
       "_origin": "ast",
-      "id": "convex_cards_requireuser",
       "community": 10,
-      "norm_label": "requireuser()"
+      "norm_label": "requireuser()",
+      "id": "convex_cards_requireuser"
     },
     {
       "label": "requireActiveUser()",
@@ -509,9 +589,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L47",
       "_origin": "ast",
-      "id": "convex_cards_requireactiveuser",
       "community": 10,
-      "norm_label": "requireactiveuser()"
+      "norm_label": "requireactiveuser()",
+      "id": "convex_cards_requireactiveuser"
     },
     {
       "label": "packageDurations",
@@ -519,9 +599,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L55",
       "_origin": "ast",
-      "id": "convex_cards_packagedurations",
       "community": 10,
-      "norm_label": "packagedurations"
+      "norm_label": "packagedurations",
+      "id": "convex_cards_packagedurations"
     },
     {
       "label": "getExpiryDuration()",
@@ -529,9 +609,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L63",
       "_origin": "ast",
-      "id": "convex_cards_getexpiryduration",
       "community": 10,
-      "norm_label": "getexpiryduration()"
+      "norm_label": "getexpiryduration()",
+      "id": "convex_cards_getexpiryduration"
     },
     {
       "label": "paymentAmount",
@@ -539,9 +619,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L67",
       "_origin": "ast",
-      "id": "convex_cards_paymentamount",
       "community": 10,
-      "norm_label": "paymentamount"
+      "norm_label": "paymentamount",
+      "id": "convex_cards_paymentamount"
     },
     {
       "label": "isValidWebUrl()",
@@ -549,9 +629,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L72",
       "_origin": "ast",
-      "id": "convex_cards_isvalidweburl",
       "community": 10,
-      "norm_label": "isvalidweburl()"
+      "norm_label": "isvalidweburl()",
+      "id": "convex_cards_isvalidweburl"
     },
     {
       "label": "syncDerivedProfileFields()",
@@ -559,9 +639,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L82",
       "_origin": "ast",
-      "id": "convex_cards_syncderivedprofilefields",
       "community": 10,
-      "norm_label": "syncderivedprofilefields()"
+      "norm_label": "syncderivedprofilefields()",
+      "id": "convex_cards_syncderivedprofilefields"
     },
     {
       "label": "getMyProfile",
@@ -569,9 +649,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L110",
       "_origin": "ast",
-      "id": "convex_cards_getmyprofile",
       "community": 10,
-      "norm_label": "getmyprofile"
+      "norm_label": "getmyprofile",
+      "id": "convex_cards_getmyprofile"
     },
     {
       "label": "getMyCardDailyStats",
@@ -579,9 +659,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L128",
       "_origin": "ast",
-      "id": "convex_cards_getmycarddailystats",
       "community": 10,
-      "norm_label": "getmycarddailystats"
+      "norm_label": "getmycarddailystats",
+      "id": "convex_cards_getmycarddailystats"
     },
     {
       "label": "updateProfile",
@@ -589,9 +669,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L154",
       "_origin": "ast",
-      "id": "convex_cards_updateprofile",
       "community": 10,
-      "norm_label": "updateprofile"
+      "norm_label": "updateprofile",
+      "id": "convex_cards_updateprofile"
     },
     {
       "label": "syncClerkUsername",
@@ -599,9 +679,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L167",
       "_origin": "ast",
-      "id": "convex_cards_syncclerkusername",
       "community": 10,
-      "norm_label": "syncclerkusername"
+      "norm_label": "syncclerkusername",
+      "id": "convex_cards_syncclerkusername"
     },
     {
       "label": "backfillDerivedProfileFields",
@@ -609,9 +689,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L179",
       "_origin": "ast",
-      "id": "convex_cards_backfillderivedprofilefields",
       "community": 10,
-      "norm_label": "backfillderivedprofilefields"
+      "norm_label": "backfillderivedprofilefields",
+      "id": "convex_cards_backfillderivedprofilefields"
     },
     {
       "label": "listPublished",
@@ -619,9 +699,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L193",
       "_origin": "ast",
-      "id": "convex_cards_listpublished",
       "community": 10,
-      "norm_label": "listpublished"
+      "norm_label": "listpublished",
+      "id": "convex_cards_listpublished"
     },
     {
       "label": "getPublishedById",
@@ -629,9 +709,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L274",
       "_origin": "ast",
-      "id": "convex_cards_getpublishedbyid",
       "community": 10,
-      "norm_label": "getpublishedbyid"
+      "norm_label": "getpublishedbyid",
+      "id": "convex_cards_getpublishedbyid"
     },
     {
       "label": "getCardForEmbed",
@@ -639,9 +719,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L344",
       "_origin": "ast",
-      "id": "convex_cards_getcardforembed",
       "community": 10,
-      "norm_label": "getcardforembed"
+      "norm_label": "getcardforembed",
+      "id": "convex_cards_getcardforembed"
     },
     {
       "label": "getLiveViewCounts",
@@ -649,9 +729,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L385",
       "_origin": "ast",
-      "id": "convex_cards_getliveviewcounts",
       "community": 10,
-      "norm_label": "getliveviewcounts"
+      "norm_label": "getliveviewcounts",
+      "id": "convex_cards_getliveviewcounts"
     },
     {
       "label": "toggleLike",
@@ -659,9 +739,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L397",
       "_origin": "ast",
-      "id": "convex_cards_togglelike",
       "community": 10,
-      "norm_label": "togglelike"
+      "norm_label": "togglelike",
+      "id": "convex_cards_togglelike"
     },
     {
       "label": "getLikedCards",
@@ -669,9 +749,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L426",
       "_origin": "ast",
-      "id": "convex_cards_getlikedcards",
       "community": 10,
-      "norm_label": "getlikedcards"
+      "norm_label": "getlikedcards",
+      "id": "convex_cards_getlikedcards"
     },
     {
       "label": "generateUploadUrl",
@@ -679,9 +759,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L438",
       "_origin": "ast",
-      "id": "convex_cards_generateuploadurl",
       "community": 10,
-      "norm_label": "generateuploadurl"
+      "norm_label": "generateuploadurl",
+      "id": "convex_cards_generateuploadurl"
     },
     {
       "label": "listMine",
@@ -689,9 +769,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L446",
       "_origin": "ast",
-      "id": "convex_cards_listmine",
       "community": 10,
-      "norm_label": "listmine"
+      "norm_label": "listmine",
+      "id": "convex_cards_listmine"
     },
     {
       "label": "setVisibility",
@@ -699,9 +779,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L523",
       "_origin": "ast",
-      "id": "convex_cards_setvisibility",
       "community": 10,
-      "norm_label": "setvisibility"
+      "norm_label": "setvisibility",
+      "id": "convex_cards_setvisibility"
     },
     {
       "label": "renew",
@@ -709,9 +789,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L538",
       "_origin": "ast",
-      "id": "convex_cards_renew",
       "community": 10,
-      "norm_label": "renew"
+      "norm_label": "renew",
+      "id": "convex_cards_renew"
     },
     {
       "label": "markExpired",
@@ -719,9 +799,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L565",
       "_origin": "ast",
-      "id": "convex_cards_markexpired",
       "community": 10,
-      "norm_label": "markexpired"
+      "norm_label": "markexpired",
+      "id": "convex_cards_markexpired"
     },
     {
       "label": "update",
@@ -729,9 +809,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L587",
       "_origin": "ast",
-      "id": "convex_cards_update",
       "community": 10,
-      "norm_label": "update"
+      "norm_label": "update",
+      "id": "convex_cards_update"
     },
     {
       "label": "updatePosition",
@@ -739,9 +819,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L663",
       "_origin": "ast",
-      "id": "convex_cards_updateposition",
       "community": 10,
-      "norm_label": "updateposition"
+      "norm_label": "updateposition",
+      "id": "convex_cards_updateposition"
     },
     {
       "label": "remove",
@@ -749,9 +829,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L687",
       "_origin": "ast",
-      "id": "convex_cards_remove",
       "community": 10,
-      "norm_label": "remove"
+      "norm_label": "remove",
+      "id": "convex_cards_remove"
     },
     {
       "label": "create",
@@ -759,9 +839,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L701",
       "_origin": "ast",
-      "id": "convex_cards_create",
       "community": 10,
-      "norm_label": "create"
+      "norm_label": "create",
+      "id": "convex_cards_create"
     },
     {
       "label": "getMyCardForRenewal",
@@ -769,9 +849,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L976",
       "_origin": "ast",
-      "id": "convex_cards_getmycardforrenewal",
       "community": 10,
-      "norm_label": "getmycardforrenewal"
+      "norm_label": "getmycardforrenewal",
+      "id": "convex_cards_getmycardforrenewal"
     },
     {
       "label": "incrementClicks",
@@ -779,9 +859,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L995",
       "_origin": "ast",
-      "id": "convex_cards_incrementclicks",
       "community": 10,
-      "norm_label": "incrementclicks"
+      "norm_label": "incrementclicks",
+      "id": "convex_cards_incrementclicks"
     },
     {
       "label": "recordEvent",
@@ -789,9 +869,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1023",
       "_origin": "ast",
-      "id": "convex_cards_recordevent",
       "community": 10,
-      "norm_label": "recordevent"
+      "norm_label": "recordevent",
+      "id": "convex_cards_recordevent"
     },
     {
       "label": "recordSearch",
@@ -799,9 +879,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1040",
       "_origin": "ast",
-      "id": "convex_cards_recordsearch",
       "community": 10,
-      "norm_label": "recordsearch"
+      "norm_label": "recordsearch",
+      "id": "convex_cards_recordsearch"
     },
     {
       "label": "report",
@@ -809,9 +889,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1061",
       "_origin": "ast",
-      "id": "convex_cards_report",
       "community": 10,
-      "norm_label": "report"
+      "norm_label": "report",
+      "id": "convex_cards_report"
     },
     {
       "label": "listPublishedIds",
@@ -819,9 +899,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1074",
       "_origin": "ast",
-      "id": "convex_cards_listpublishedids",
       "community": 10,
-      "norm_label": "listpublishedids"
+      "norm_label": "listpublishedids",
+      "id": "convex_cards_listpublishedids"
     },
     {
       "label": "getStats",
@@ -829,9 +909,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1089",
       "_origin": "ast",
-      "id": "convex_cards_getstats",
       "community": 10,
-      "norm_label": "getstats"
+      "norm_label": "getstats",
+      "id": "convex_cards_getstats"
     },
     {
       "label": "getTopCards",
@@ -839,9 +919,9 @@
       "source_file": "convex/cards.ts",
       "source_location": "L1105",
       "_origin": "ast",
-      "id": "convex_cards_gettopcards",
       "community": 10,
-      "norm_label": "gettopcards"
+      "norm_label": "gettopcards",
+      "id": "convex_cards_gettopcards"
     },
     {
       "label": "clerk-avatar-menu.tsx",
@@ -849,9 +929,9 @@
       "source_file": "src/components/clerk-avatar-menu.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_clerk_avatar_menu",
       "community": 3,
-      "norm_label": "clerk-avatar-menu.tsx"
+      "norm_label": "clerk-avatar-menu.tsx",
+      "id": "components_clerk_avatar_menu"
     },
     {
       "label": "ClerkProfile",
@@ -859,9 +939,9 @@
       "source_file": "src/components/clerk-avatar-menu.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "components_clerk_avatar_menu_clerkprofile",
       "community": 3,
-      "norm_label": "clerkprofile"
+      "norm_label": "clerkprofile",
+      "id": "components_clerk_avatar_menu_clerkprofile"
     },
     {
       "label": "ClerkAvatarMenuProps",
@@ -869,9 +949,9 @@
       "source_file": "src/components/clerk-avatar-menu.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "id": "components_clerk_avatar_menu_clerkavatarmenuprops",
       "community": 3,
-      "norm_label": "clerkavatarmenuprops"
+      "norm_label": "clerkavatarmenuprops",
+      "id": "components_clerk_avatar_menu_clerkavatarmenuprops"
     },
     {
       "label": "ClerkAvatarMenu()",
@@ -879,9 +959,9 @@
       "source_file": "src/components/clerk-avatar-menu.tsx",
       "source_location": "L29",
       "_origin": "ast",
-      "id": "components_clerk_avatar_menu_clerkavatarmenu",
       "community": 3,
-      "norm_label": "clerkavatarmenu()"
+      "norm_label": "clerkavatarmenu()",
+      "id": "components_clerk_avatar_menu_clerkavatarmenu"
     },
     {
       "label": "home-nav.tsx",
@@ -889,9 +969,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "home_home_nav",
       "community": 3,
-      "norm_label": "home-nav.tsx"
+      "norm_label": "home-nav.tsx",
+      "id": "home_home_nav"
     },
     {
       "label": "HomeNav()",
@@ -899,9 +979,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "home_home_nav_homenav",
       "community": 3,
-      "norm_label": "homenav()"
+      "norm_label": "homenav()",
+      "id": "home_home_nav_homenav"
     },
     {
       "label": "admin-playground.tsx",
@@ -909,9 +989,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_admin_playground",
       "community": 11,
-      "norm_label": "admin-playground.tsx"
+      "norm_label": "admin-playground.tsx",
+      "id": "wall_admin_playground"
     },
     {
       "label": "PG_DEFAULTS",
@@ -919,9 +999,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L14",
       "_origin": "ast",
-      "id": "wall_admin_playground_pg_defaults",
       "community": 11,
-      "norm_label": "pg_defaults"
+      "norm_label": "pg_defaults",
+      "id": "wall_admin_playground_pg_defaults"
     },
     {
       "label": "PLAN_OPTIONS",
@@ -929,9 +1009,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "id": "wall_admin_playground_plan_options",
       "community": 11,
-      "norm_label": "plan_options"
+      "norm_label": "plan_options",
+      "id": "wall_admin_playground_plan_options"
     },
     {
       "label": "DURATION_OPTIONS",
@@ -939,9 +1019,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "wall_admin_playground_duration_options",
       "community": 11,
-      "norm_label": "duration_options"
+      "norm_label": "duration_options",
+      "id": "wall_admin_playground_duration_options"
     },
     {
       "label": "EXPIRY_PRESETS",
@@ -949,9 +1029,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L35",
       "_origin": "ast",
-      "id": "wall_admin_playground_expiry_presets",
       "community": 11,
-      "norm_label": "expiry_presets"
+      "norm_label": "expiry_presets",
+      "id": "wall_admin_playground_expiry_presets"
     },
     {
       "label": "useAsync()",
@@ -959,9 +1039,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L42",
       "_origin": "ast",
-      "id": "wall_admin_playground_useasync",
       "community": 11,
-      "norm_label": "useasync()"
+      "norm_label": "useasync()",
+      "id": "wall_admin_playground_useasync"
     },
     {
       "label": "Section()",
@@ -969,9 +1049,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L65",
       "_origin": "ast",
-      "id": "wall_admin_playground_section",
       "community": 11,
-      "norm_label": "section()"
+      "norm_label": "section()",
+      "id": "wall_admin_playground_section"
     },
     {
       "label": "PgError()",
@@ -979,9 +1059,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L79",
       "_origin": "ast",
-      "id": "wall_admin_playground_pgerror",
       "community": 11,
-      "norm_label": "pgerror()"
+      "norm_label": "pgerror()",
+      "id": "wall_admin_playground_pgerror"
     },
     {
       "label": "PgOk()",
@@ -989,9 +1069,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L88",
       "_origin": "ast",
-      "id": "wall_admin_playground_pgok",
       "community": 11,
-      "norm_label": "pgok()"
+      "norm_label": "pgok()",
+      "id": "wall_admin_playground_pgok"
     },
     {
       "label": "PlaygroundCardArgs",
@@ -999,9 +1079,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L92",
       "_origin": "ast",
-      "id": "wall_admin_playground_playgroundcardargs",
       "community": 11,
-      "norm_label": "playgroundcardargs"
+      "norm_label": "playgroundcardargs",
+      "id": "wall_admin_playground_playgroundcardargs"
     },
     {
       "label": "ParsedCsvRow",
@@ -1009,9 +1089,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L149",
       "_origin": "ast",
-      "id": "wall_admin_playground_parsedcsvrow",
       "community": 11,
-      "norm_label": "parsedcsvrow"
+      "norm_label": "parsedcsvrow",
+      "id": "wall_admin_playground_parsedcsvrow"
     },
     {
       "label": "CSV_REQUIRED_HEADERS",
@@ -1019,9 +1099,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L155",
       "_origin": "ast",
-      "id": "wall_admin_playground_csv_required_headers",
       "community": 11,
-      "norm_label": "csv_required_headers"
+      "norm_label": "csv_required_headers",
+      "id": "wall_admin_playground_csv_required_headers"
     },
     {
       "label": "CSV_ALLOWED_HEADERS",
@@ -1029,9 +1109,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L156",
       "_origin": "ast",
-      "id": "wall_admin_playground_csv_allowed_headers",
       "community": 11,
-      "norm_label": "csv_allowed_headers"
+      "norm_label": "csv_allowed_headers",
+      "id": "wall_admin_playground_csv_allowed_headers"
     },
     {
       "label": "parseCsv()",
@@ -1039,9 +1119,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L196",
       "_origin": "ast",
-      "id": "wall_admin_playground_parsecsv",
       "community": 11,
-      "norm_label": "parsecsv()"
+      "norm_label": "parsecsv()",
+      "id": "wall_admin_playground_parsecsv"
     },
     {
       "label": "csvString()",
@@ -1049,9 +1129,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L253",
       "_origin": "ast",
-      "id": "wall_admin_playground_csvstring",
       "community": 11,
-      "norm_label": "csvstring()"
+      "norm_label": "csvstring()",
+      "id": "wall_admin_playground_csvstring"
     },
     {
       "label": "csvMaybeNumber()",
@@ -1059,9 +1139,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L257",
       "_origin": "ast",
-      "id": "wall_admin_playground_csvmaybenumber",
       "community": 11,
-      "norm_label": "csvmaybenumber()"
+      "norm_label": "csvmaybenumber()",
+      "id": "wall_admin_playground_csvmaybenumber"
     },
     {
       "label": "csvMaybeInteger()",
@@ -1069,9 +1149,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L264",
       "_origin": "ast",
-      "id": "wall_admin_playground_csvmaybeinteger",
       "community": 11,
-      "norm_label": "csvmaybeinteger()"
+      "norm_label": "csvmaybeinteger()",
+      "id": "wall_admin_playground_csvmaybeinteger"
     },
     {
       "label": "csvPick()",
@@ -1079,9 +1159,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L272",
       "_origin": "ast",
-      "id": "wall_admin_playground_csvpick",
       "community": 11,
-      "norm_label": "csvpick()"
+      "norm_label": "csvpick()",
+      "id": "wall_admin_playground_csvpick"
     },
     {
       "label": "isZipArchive()",
@@ -1089,9 +1169,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L277",
       "_origin": "ast",
-      "id": "wall_admin_playground_isziparchive",
       "community": 11,
-      "norm_label": "isziparchive()"
+      "norm_label": "isziparchive()",
+      "id": "wall_admin_playground_isziparchive"
     },
     {
       "label": "LocationCatalog",
@@ -1099,9 +1179,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L282",
       "_origin": "ast",
-      "id": "wall_admin_playground_locationcatalog",
       "community": 11,
-      "norm_label": "locationcatalog"
+      "norm_label": "locationcatalog",
+      "id": "wall_admin_playground_locationcatalog"
     },
     {
       "label": "toExcelColumnLetter()",
@@ -1109,9 +1189,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L290",
       "_origin": "ast",
-      "id": "wall_admin_playground_toexcelcolumnletter",
       "community": 11,
-      "norm_label": "toexcelcolumnletter()"
+      "norm_label": "toexcelcolumnletter()",
+      "id": "wall_admin_playground_toexcelcolumnletter"
     },
     {
       "label": "formatLocationLabel()",
@@ -1119,9 +1199,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L301",
       "_origin": "ast",
-      "id": "wall_admin_playground_formatlocationlabel",
       "community": 11,
-      "norm_label": "formatlocationlabel()"
+      "norm_label": "formatlocationlabel()",
+      "id": "wall_admin_playground_formatlocationlabel"
     },
     {
       "label": "loadLocationCatalog()",
@@ -1129,9 +1209,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L306",
       "_origin": "ast",
-      "id": "wall_admin_playground_loadlocationcatalog",
       "community": 11,
-      "norm_label": "loadlocationcatalog()"
+      "norm_label": "loadlocationcatalog()",
+      "id": "wall_admin_playground_loadlocationcatalog"
     },
     {
       "label": "getSubcategoriesForCategory()",
@@ -1139,9 +1219,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L335",
       "_origin": "ast",
-      "id": "wall_admin_playground_getsubcategoriesforcategory",
       "community": 107,
-      "norm_label": "getsubcategoriesforcategory()"
+      "norm_label": "getsubcategoriesforcategory()",
+      "id": "wall_admin_playground_getsubcategoriesforcategory"
     },
     {
       "label": "CreateCardSection()",
@@ -1149,9 +1229,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L341",
       "_origin": "ast",
-      "id": "wall_admin_playground_createcardsection",
       "community": 107,
-      "norm_label": "createcardsection()"
+      "norm_label": "createcardsection()",
+      "id": "wall_admin_playground_createcardsection"
     },
     {
       "label": "BulkCsvImportSection()",
@@ -1159,9 +1239,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L643",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulkcsvimportsection",
       "community": 11,
-      "norm_label": "bulkcsvimportsection()"
+      "norm_label": "bulkcsvimportsection()",
+      "id": "wall_admin_playground_bulkcsvimportsection"
     },
     {
       "label": "PgCard",
@@ -1169,9 +1249,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1007",
       "_origin": "ast",
-      "id": "wall_admin_playground_pgcard",
       "community": 11,
-      "norm_label": "pgcard"
+      "norm_label": "pgcard",
+      "id": "wall_admin_playground_pgcard"
     },
     {
       "label": "CardToolRow()",
@@ -1179,9 +1259,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1022",
       "_origin": "ast",
-      "id": "wall_admin_playground_cardtoolrow",
       "community": 11,
-      "norm_label": "cardtoolrow()"
+      "norm_label": "cardtoolrow()",
+      "id": "wall_admin_playground_cardtoolrow"
     },
     {
       "label": "MyCardsSection()",
@@ -1189,9 +1269,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1142",
       "_origin": "ast",
-      "id": "wall_admin_playground_mycardssection",
       "community": 11,
-      "norm_label": "mycardssection()"
+      "norm_label": "mycardssection()",
+      "id": "wall_admin_playground_mycardssection"
     },
     {
       "label": "EmailTestSection()",
@@ -1199,9 +1279,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1168",
       "_origin": "ast",
-      "id": "wall_admin_playground_emailtestsection",
       "community": 11,
-      "norm_label": "emailtestsection()"
+      "norm_label": "emailtestsection()",
+      "id": "wall_admin_playground_emailtestsection"
     },
     {
       "label": "SubscriptionSection()",
@@ -1209,9 +1289,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1209",
       "_origin": "ast",
-      "id": "wall_admin_playground_subscriptionsection",
       "community": 11,
-      "norm_label": "subscriptionsection()"
+      "norm_label": "subscriptionsection()",
+      "id": "wall_admin_playground_subscriptionsection"
     },
     {
       "label": "PaymentSection()",
@@ -1219,9 +1299,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1260",
       "_origin": "ast",
-      "id": "wall_admin_playground_paymentsection",
       "community": 11,
-      "norm_label": "paymentsection()"
+      "norm_label": "paymentsection()",
+      "id": "wall_admin_playground_paymentsection"
     },
     {
       "label": "VerificationSection()",
@@ -1229,9 +1309,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1293",
       "_origin": "ast",
-      "id": "wall_admin_playground_verificationsection",
       "community": 11,
-      "norm_label": "verificationsection()"
+      "norm_label": "verificationsection()",
+      "id": "wall_admin_playground_verificationsection"
     },
     {
       "label": "BULK_COUNTS",
@@ -1239,9 +1319,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1334",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulk_counts",
       "community": 11,
-      "norm_label": "bulk_counts"
+      "norm_label": "bulk_counts",
+      "id": "wall_admin_playground_bulk_counts"
     },
     {
       "label": "BULK_NAMES",
@@ -1249,9 +1329,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1335",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulk_names",
       "community": 11,
-      "norm_label": "bulk_names"
+      "norm_label": "bulk_names",
+      "id": "wall_admin_playground_bulk_names"
     },
     {
       "label": "BULK_CATEGORIES",
@@ -1259,9 +1339,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1336",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulk_categories",
       "community": 11,
-      "norm_label": "bulk_categories"
+      "norm_label": "bulk_categories",
+      "id": "wall_admin_playground_bulk_categories"
     },
     {
       "label": "BULK_THEMES",
@@ -1269,9 +1349,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1337",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulk_themes",
       "community": 11,
-      "norm_label": "bulk_themes"
+      "norm_label": "bulk_themes",
+      "id": "wall_admin_playground_bulk_themes"
     },
     {
       "label": "BULK_LINES",
@@ -1279,9 +1359,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1338",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulk_lines",
       "community": 11,
-      "norm_label": "bulk_lines"
+      "norm_label": "bulk_lines",
+      "id": "wall_admin_playground_bulk_lines"
     },
     {
       "label": "pick()",
@@ -1289,9 +1369,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1349",
       "_origin": "ast",
-      "id": "wall_admin_playground_pick",
       "community": 11,
-      "norm_label": "pick()"
+      "norm_label": "pick()",
+      "id": "wall_admin_playground_pick"
     },
     {
       "label": "BulkCreateSection()",
@@ -1299,9 +1379,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1351",
       "_origin": "ast",
-      "id": "wall_admin_playground_bulkcreatesection",
       "community": 11,
-      "norm_label": "bulkcreatesection()"
+      "norm_label": "bulkcreatesection()",
+      "id": "wall_admin_playground_bulkcreatesection"
     },
     {
       "label": "AdminPlayground()",
@@ -1309,9 +1389,9 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L1483",
       "_origin": "ast",
-      "id": "wall_admin_playground_adminplayground",
       "community": 3,
-      "norm_label": "adminplayground()"
+      "norm_label": "adminplayground()",
+      "id": "wall_admin_playground_adminplayground"
     },
     {
       "label": "composer.tsx",
@@ -1319,9 +1399,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_composer",
       "community": 0,
-      "norm_label": "composer.tsx"
+      "norm_label": "composer.tsx",
+      "id": "wall_composer"
     },
     {
       "label": "ComposerProps",
@@ -1329,9 +1409,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "wall_composer_composerprops",
       "community": 64,
-      "norm_label": "composerprops"
+      "norm_label": "composerprops",
+      "id": "wall_composer_composerprops"
     },
     {
       "label": "ComposerForm",
@@ -1339,9 +1419,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "wall_composer_composerform",
       "community": 46,
-      "norm_label": "composerform"
+      "norm_label": "composerform",
+      "id": "wall_composer_composerform"
     },
     {
       "label": "BundleCity",
@@ -1349,9 +1429,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L57",
       "_origin": "ast",
-      "id": "wall_composer_bundlecity",
       "community": 0,
-      "norm_label": "bundlecity"
+      "norm_label": "bundlecity",
+      "id": "wall_composer_bundlecity"
     },
     {
       "label": "countries",
@@ -1359,9 +1439,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L59",
       "_origin": "ast",
-      "id": "wall_composer_countries",
       "community": 0,
-      "norm_label": "countries"
+      "norm_label": "countries",
+      "id": "wall_composer_countries"
     },
     {
       "label": "defaultStates",
@@ -1369,9 +1449,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L61",
       "_origin": "ast",
-      "id": "wall_composer_defaultstates",
       "community": 0,
-      "norm_label": "defaultstates"
+      "norm_label": "defaultstates",
+      "id": "wall_composer_defaultstates"
     },
     {
       "label": "initialForm",
@@ -1379,9 +1459,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L66",
       "_origin": "ast",
-      "id": "wall_composer_initialform",
       "community": 0,
-      "norm_label": "initialform"
+      "norm_label": "initialform",
+      "id": "wall_composer_initialform"
     },
     {
       "label": "formatWallLocation()",
@@ -1389,9 +1469,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L105",
       "_origin": "ast",
-      "id": "wall_composer_formatwalllocation",
       "community": 0,
-      "norm_label": "formatwalllocation()"
+      "norm_label": "formatwalllocation()",
+      "id": "wall_composer_formatwalllocation"
     },
     {
       "label": "hashString()",
@@ -1399,9 +1479,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L110",
       "_origin": "ast",
-      "id": "wall_composer_hashstring",
       "community": 0,
-      "norm_label": "hashstring()"
+      "norm_label": "hashstring()",
+      "id": "wall_composer_hashstring"
     },
     {
       "label": "themeOptions",
@@ -1409,9 +1489,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L119",
       "_origin": "ast",
-      "id": "wall_composer_themeoptions",
       "community": 0,
-      "norm_label": "themeoptions"
+      "norm_label": "themeoptions",
+      "id": "wall_composer_themeoptions"
     },
     {
       "label": "businessCardShapeOptions",
@@ -1419,9 +1499,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L132",
       "_origin": "ast",
-      "id": "wall_composer_businesscardshapeoptions",
       "community": 0,
-      "norm_label": "businesscardshapeoptions"
+      "norm_label": "businesscardshapeoptions",
+      "id": "wall_composer_businesscardshapeoptions"
     },
     {
       "label": "paymentOptions",
@@ -1429,9 +1509,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L138",
       "_origin": "ast",
-      "id": "wall_composer_paymentoptions",
       "community": 0,
-      "norm_label": "paymentoptions"
+      "norm_label": "paymentoptions",
+      "id": "wall_composer_paymentoptions"
     },
     {
       "label": "featuredTierOptions",
@@ -1439,9 +1519,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L146",
       "_origin": "ast",
-      "id": "wall_composer_featuredtieroptions",
       "community": 0,
-      "norm_label": "featuredtieroptions"
+      "norm_label": "featuredtieroptions",
+      "id": "wall_composer_featuredtieroptions"
     },
     {
       "label": "stepLabels",
@@ -1449,9 +1529,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L154",
       "_origin": "ast",
-      "id": "wall_composer_steplabels",
       "community": 0,
-      "norm_label": "steplabels"
+      "norm_label": "steplabels",
+      "id": "wall_composer_steplabels"
     },
     {
       "label": "openImagesDB()",
@@ -1459,9 +1539,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L160",
       "_origin": "ast",
-      "id": "wall_composer_openimagesdb",
       "community": 0,
-      "norm_label": "openimagesdb()"
+      "norm_label": "openimagesdb()",
+      "id": "wall_composer_openimagesdb"
     },
     {
       "label": "saveImagesToIDB()",
@@ -1469,9 +1549,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L169",
       "_origin": "ast",
-      "id": "wall_composer_saveimagestoidb",
       "community": 0,
-      "norm_label": "saveimagestoidb()"
+      "norm_label": "saveimagestoidb()",
+      "id": "wall_composer_saveimagestoidb"
     },
     {
       "label": "loadImagesFromIDB()",
@@ -1479,9 +1559,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L182",
       "_origin": "ast",
-      "id": "wall_composer_loadimagesfromidb",
       "community": 0,
-      "norm_label": "loadimagesfromidb()"
+      "norm_label": "loadimagesfromidb()",
+      "id": "wall_composer_loadimagesfromidb"
     },
     {
       "label": "clearImagesFromIDB()",
@@ -1489,9 +1569,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L196",
       "_origin": "ast",
-      "id": "wall_composer_clearimagesfromidb",
       "community": 0,
-      "norm_label": "clearimagesfromidb()"
+      "norm_label": "clearimagesfromidb()",
+      "id": "wall_composer_clearimagesfromidb"
     },
     {
       "label": "ModerationMatch",
@@ -1499,9 +1579,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L209",
       "_origin": "ast",
-      "id": "wall_composer_moderationmatch",
       "community": 0,
-      "norm_label": "moderationmatch"
+      "norm_label": "moderationmatch",
+      "id": "wall_composer_moderationmatch"
     },
     {
       "label": "DetailField",
@@ -1509,9 +1589,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L210",
       "_origin": "ast",
-      "id": "wall_composer_detailfield",
       "community": 0,
-      "norm_label": "detailfield"
+      "norm_label": "detailfield",
+      "id": "wall_composer_detailfield"
     },
     {
       "label": "detailFieldLabels",
@@ -1519,9 +1599,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L212",
       "_origin": "ast",
-      "id": "wall_composer_detailfieldlabels",
       "community": 0,
-      "norm_label": "detailfieldlabels"
+      "norm_label": "detailfieldlabels",
+      "id": "wall_composer_detailfieldlabels"
     },
     {
       "label": "validWebUrl()",
@@ -1529,9 +1609,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L216",
       "_origin": "ast",
-      "id": "wall_composer_validweburl",
       "community": 0,
-      "norm_label": "validweburl()"
+      "norm_label": "validweburl()",
+      "id": "wall_composer_validweburl"
     },
     {
       "label": "validSocialProfile()",
@@ -1539,9 +1619,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L226",
       "_origin": "ast",
-      "id": "wall_composer_validsocialprofile",
       "community": 0,
-      "norm_label": "validsocialprofile()"
+      "norm_label": "validsocialprofile()",
+      "id": "wall_composer_validsocialprofile"
     },
     {
       "label": "bakeImageCrop()",
@@ -1549,9 +1629,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L230",
       "_origin": "ast",
-      "id": "wall_composer_bakeimagecrop",
       "community": 0,
-      "norm_label": "bakeimagecrop()"
+      "norm_label": "bakeimagecrop()",
+      "id": "wall_composer_bakeimagecrop"
     },
     {
       "label": "LiveCardPreview()",
@@ -1559,9 +1639,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L267",
       "_origin": "ast",
-      "id": "wall_composer_livecardpreview",
       "community": 0,
-      "norm_label": "livecardpreview()"
+      "norm_label": "livecardpreview()",
+      "id": "wall_composer_livecardpreview"
     },
     {
       "label": "ExpandedCardPreview()",
@@ -1569,9 +1649,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L442",
       "_origin": "ast",
-      "id": "wall_composer_expandedcardpreview",
       "community": 0,
-      "norm_label": "expandedcardpreview()"
+      "norm_label": "expandedcardpreview()",
+      "id": "wall_composer_expandedcardpreview"
     },
     {
       "label": "BackCardPreview()",
@@ -1579,9 +1659,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L540",
       "_origin": "ast",
-      "id": "wall_composer_backcardpreview",
       "community": 64,
-      "norm_label": "backcardpreview()"
+      "norm_label": "backcardpreview()",
+      "id": "wall_composer_backcardpreview"
     },
     {
       "label": "CardSidesPreview()",
@@ -1589,9 +1669,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L705",
       "_origin": "ast",
-      "id": "wall_composer_cardsidespreview",
       "community": 0,
-      "norm_label": "cardsidespreview()"
+      "norm_label": "cardsidespreview()",
+      "id": "wall_composer_cardsidespreview"
     },
     {
       "label": "Composer()",
@@ -1599,9 +1679,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L789",
       "_origin": "ast",
-      "id": "wall_composer_composer",
       "community": 0,
-      "norm_label": "composer()"
+      "norm_label": "composer()",
+      "id": "wall_composer_composer"
     },
     {
       "label": "connected-wall-app.tsx",
@@ -1609,9 +1689,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_connected_wall_app",
       "community": 3,
-      "norm_label": "connected-wall-app.tsx"
+      "norm_label": "connected-wall-app.tsx",
+      "id": "wall_connected_wall_app"
     },
     {
       "label": "allowedImageTypes",
@@ -1619,9 +1699,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "id": "wall_connected_wall_app_allowedimagetypes",
       "community": 3,
-      "norm_label": "allowedimagetypes"
+      "norm_label": "allowedimagetypes",
+      "id": "wall_connected_wall_app_allowedimagetypes"
     },
     {
       "label": "ImageVariants",
@@ -1629,9 +1709,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "wall_connected_wall_app_imagevariants",
       "community": 3,
-      "norm_label": "imagevariants"
+      "norm_label": "imagevariants",
+      "id": "wall_connected_wall_app_imagevariants"
     },
     {
       "label": "encodeWebpVariant()",
@@ -1639,9 +1719,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "wall_connected_wall_app_encodewebpvariant",
       "community": 3,
-      "norm_label": "encodewebpvariant()"
+      "norm_label": "encodewebpvariant()",
+      "id": "wall_connected_wall_app_encodewebpvariant"
     },
     {
       "label": "createImageVariants()",
@@ -1649,9 +1729,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L46",
       "_origin": "ast",
-      "id": "wall_connected_wall_app_createimagevariants",
       "community": 3,
-      "norm_label": "createimagevariants()"
+      "norm_label": "createimagevariants()",
+      "id": "wall_connected_wall_app_createimagevariants"
     },
     {
       "label": "ConnectedWallApp()",
@@ -1659,9 +1739,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L59",
       "_origin": "ast",
-      "id": "wall_connected_wall_app_connectedwallapp",
       "community": 3,
-      "norm_label": "connectedwallapp()"
+      "norm_label": "connectedwallapp()",
+      "id": "wall_connected_wall_app_connectedwallapp"
     },
     {
       "label": "detail-panel.tsx",
@@ -1669,9 +1749,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_detail_panel",
       "community": 1,
-      "norm_label": "detail-panel.tsx"
+      "norm_label": "detail-panel.tsx",
+      "id": "wall_detail_panel"
     },
     {
       "label": "WhatsAppIcon()",
@@ -1679,9 +1759,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "wall_detail_panel_whatsappicon",
       "community": 1,
-      "norm_label": "whatsappicon()"
+      "norm_label": "whatsappicon()",
+      "id": "wall_detail_panel_whatsappicon"
     },
     {
       "label": "websiteHref()",
@@ -1689,9 +1769,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "wall_detail_panel_websitehref",
       "community": 1,
-      "norm_label": "websitehref()"
+      "norm_label": "websitehref()",
+      "id": "wall_detail_panel_websitehref"
     },
     {
       "label": "hashString()",
@@ -1699,9 +1779,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "wall_detail_panel_hashstring",
       "community": 1,
-      "norm_label": "hashstring()"
+      "norm_label": "hashstring()",
+      "id": "wall_detail_panel_hashstring"
     },
     {
       "label": "CardEvent",
@@ -1709,9 +1789,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "id": "wall_detail_panel_cardevent",
       "community": 1,
-      "norm_label": "cardevent"
+      "norm_label": "cardevent",
+      "id": "wall_detail_panel_cardevent"
     },
     {
       "label": "ReportReason",
@@ -1719,9 +1799,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L38",
       "_origin": "ast",
-      "id": "wall_detail_panel_reportreason",
       "community": 1,
-      "norm_label": "reportreason"
+      "norm_label": "reportreason",
+      "id": "wall_detail_panel_reportreason"
     },
     {
       "label": "REPORT_REASONS",
@@ -1729,9 +1809,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L40",
       "_origin": "ast",
-      "id": "wall_detail_panel_report_reasons",
       "community": 1,
-      "norm_label": "report_reasons"
+      "norm_label": "report_reasons",
+      "id": "wall_detail_panel_report_reasons"
     },
     {
       "label": "DetailPanel()",
@@ -1739,9 +1819,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L48",
       "_origin": "ast",
-      "id": "wall_detail_panel_detailpanel",
       "community": 1,
-      "norm_label": "detailpanel()"
+      "norm_label": "detailpanel()",
+      "id": "wall_detail_panel_detailpanel"
     },
     {
       "label": "types.ts",
@@ -1749,9 +1829,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_types",
       "community": 46,
-      "norm_label": "types.ts"
+      "norm_label": "types.ts",
+      "id": "wall_types"
     },
     {
       "label": "categories",
@@ -1759,9 +1839,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_types_categories",
       "community": 32,
-      "norm_label": "categories"
+      "norm_label": "categories",
+      "id": "wall_types_categories"
     },
     {
       "label": "SUBCATEGORY_OPTIONS",
@@ -1769,9 +1849,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L25",
       "_origin": "ast",
-      "id": "wall_types_subcategory_options",
       "community": 46,
-      "norm_label": "subcategory_options"
+      "norm_label": "subcategory_options",
+      "id": "wall_types_subcategory_options"
     },
     {
       "label": "cardThemes",
@@ -1779,9 +1859,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L47",
       "_origin": "ast",
-      "id": "wall_types_cardthemes",
       "community": 46,
-      "norm_label": "cardthemes"
+      "norm_label": "cardthemes",
+      "id": "wall_types_cardthemes"
     },
     {
       "label": "businessCardShapes",
@@ -1789,9 +1869,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L48",
       "_origin": "ast",
-      "id": "wall_types_businesscardshapes",
       "community": 46,
-      "norm_label": "businesscardshapes"
+      "norm_label": "businesscardshapes",
+      "id": "wall_types_businesscardshapes"
     },
     {
       "label": "CardCategory",
@@ -1799,9 +1879,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L50",
       "_origin": "ast",
-      "id": "wall_types_cardcategory",
       "community": 46,
-      "norm_label": "cardcategory"
+      "norm_label": "cardcategory",
+      "id": "wall_types_cardcategory"
     },
     {
       "label": "CardTheme",
@@ -1809,9 +1889,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L51",
       "_origin": "ast",
-      "id": "wall_types_cardtheme",
       "community": 46,
-      "norm_label": "cardtheme"
+      "norm_label": "cardtheme",
+      "id": "wall_types_cardtheme"
     },
     {
       "label": "CardImageMode",
@@ -1819,9 +1899,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L52",
       "_origin": "ast",
-      "id": "wall_types_cardimagemode",
       "community": 46,
-      "norm_label": "cardimagemode"
+      "norm_label": "cardimagemode",
+      "id": "wall_types_cardimagemode"
     },
     {
       "label": "BusinessCardShape",
@@ -1829,9 +1909,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L53",
       "_origin": "ast",
-      "id": "wall_types_businesscardshape",
       "community": 46,
-      "norm_label": "businesscardshape"
+      "norm_label": "businesscardshape",
+      "id": "wall_types_businesscardshape"
     },
     {
       "label": "cardFormats",
@@ -1839,9 +1919,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L55",
       "_origin": "ast",
-      "id": "wall_types_cardformats",
       "community": 106,
-      "norm_label": "cardformats"
+      "norm_label": "cardformats",
+      "id": "wall_types_cardformats"
     },
     {
       "label": "businessCardFormats",
@@ -1849,9 +1929,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L69",
       "_origin": "ast",
-      "id": "wall_types_businesscardformats",
       "community": 46,
-      "norm_label": "businesscardformats"
+      "norm_label": "businesscardformats",
+      "id": "wall_types_businesscardformats"
     },
     {
       "label": "getCardFormat()",
@@ -1859,9 +1939,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L75",
       "_origin": "ast",
-      "id": "wall_types_getcardformat",
       "community": 64,
-      "norm_label": "getcardformat()"
+      "norm_label": "getcardformat()",
+      "id": "wall_types_getcardformat"
     },
     {
       "label": "getImageCardFormat()",
@@ -1869,9 +1949,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L80",
       "_origin": "ast",
-      "id": "wall_types_getimagecardformat",
       "community": 64,
-      "norm_label": "getimagecardformat()"
+      "norm_label": "getimagecardformat()",
+      "id": "wall_types_getimagecardformat"
     },
     {
       "label": "WallCard",
@@ -1879,9 +1959,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L91",
       "_origin": "ast",
-      "id": "wall_types_wallcard",
       "community": 81,
-      "norm_label": "wallcard"
+      "norm_label": "wallcard",
+      "id": "wall_types_wallcard"
     },
     {
       "label": "OwnerCard",
@@ -1889,9 +1969,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L149",
       "_origin": "ast",
-      "id": "wall_types_ownercard",
       "community": 81,
-      "norm_label": "ownercard"
+      "norm_label": "ownercard",
+      "id": "wall_types_ownercard"
     },
     {
       "label": "RenewalAmount",
@@ -1899,9 +1979,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L164",
       "_origin": "ast",
-      "id": "wall_types_renewalamount",
       "community": 81,
-      "norm_label": "renewalamount"
+      "norm_label": "renewalamount",
+      "id": "wall_types_renewalamount"
     },
     {
       "label": "CardUpdate",
@@ -1909,9 +1989,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L166",
       "_origin": "ast",
-      "id": "wall_types_cardupdate",
       "community": 81,
-      "norm_label": "cardupdate"
+      "norm_label": "cardupdate",
+      "id": "wall_types_cardupdate"
     },
     {
       "label": "CardDraft",
@@ -1919,9 +1999,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L168",
       "_origin": "ast",
-      "id": "wall_types_carddraft",
       "community": 64,
-      "norm_label": "carddraft"
+      "norm_label": "carddraft",
+      "id": "wall_types_carddraft"
     },
     {
       "label": "Placement",
@@ -1929,9 +2009,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L213",
       "_origin": "ast",
-      "id": "wall_types_placement",
       "community": 64,
-      "norm_label": "placement"
+      "norm_label": "placement",
+      "id": "wall_types_placement"
     },
     {
       "label": "SavedWall",
@@ -1939,9 +2019,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L219",
       "_origin": "ast",
-      "id": "wall_types_savedwall",
       "community": 81,
-      "norm_label": "savedwall"
+      "norm_label": "savedwall",
+      "id": "wall_types_savedwall"
     },
     {
       "label": "CreateCardRateLimit",
@@ -1949,9 +2029,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L225",
       "_origin": "ast",
-      "id": "wall_types_createcardratelimit",
       "community": 23,
-      "norm_label": "createcardratelimit"
+      "norm_label": "createcardratelimit",
+      "id": "wall_types_createcardratelimit"
     },
     {
       "label": "CreateCard",
@@ -1959,9 +2039,9 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L232",
       "_origin": "ast",
-      "id": "wall_types_createcard",
       "community": 23,
-      "norm_label": "createcard"
+      "norm_label": "createcard",
+      "id": "wall_types_createcard"
     },
     {
       "label": "wall-app.tsx",
@@ -1969,9 +2049,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_wall_app",
       "community": 23,
-      "norm_label": "wall-app.tsx"
+      "norm_label": "wall-app.tsx",
+      "id": "wall_wall_app"
     },
     {
       "label": "loadCSC()",
@@ -1979,9 +2059,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "wall_wall_app_loadcsc",
       "community": 23,
-      "norm_label": "loadcsc()"
+      "norm_label": "loadcsc()",
+      "id": "wall_wall_app_loadcsc"
     },
     {
       "label": "Composer",
@@ -1989,9 +2069,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "id": "wall_wall_app_composer",
       "community": 23,
-      "norm_label": "composer"
+      "norm_label": "composer",
+      "id": "wall_wall_app_composer"
     },
     {
       "label": "DetailPanel",
@@ -1999,9 +2079,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L38",
       "_origin": "ast",
-      "id": "wall_wall_app_detailpanel",
       "community": 23,
-      "norm_label": "detailpanel"
+      "norm_label": "detailpanel",
+      "id": "wall_wall_app_detailpanel"
     },
     {
       "label": "PlacementMode",
@@ -2009,9 +2089,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L39",
       "_origin": "ast",
-      "id": "wall_wall_app_placementmode",
       "community": 23,
-      "norm_label": "placementmode"
+      "norm_label": "placementmode",
+      "id": "wall_wall_app_placementmode"
     },
     {
       "label": "OwnerDashboard",
@@ -2019,9 +2099,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L40",
       "_origin": "ast",
-      "id": "wall_wall_app_ownerdashboard",
       "community": 23,
-      "norm_label": "ownerdashboard"
+      "norm_label": "ownerdashboard",
+      "id": "wall_wall_app_ownerdashboard"
     },
     {
       "label": "WallAppProps",
@@ -2029,9 +2109,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L56",
       "_origin": "ast",
-      "id": "wall_wall_app_wallappprops",
       "community": 81,
-      "norm_label": "wallappprops"
+      "norm_label": "wallappprops",
+      "id": "wall_wall_app_wallappprops"
     },
     {
       "label": "makeDemoCard()",
@@ -2039,9 +2119,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L101",
       "_origin": "ast",
-      "id": "wall_wall_app_makedemocard",
       "community": 64,
-      "norm_label": "makedemocard()"
+      "norm_label": "makedemocard()",
+      "id": "wall_wall_app_makedemocard"
     },
     {
       "label": "defaultSeedLocation",
@@ -2049,9 +2129,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L137",
       "_origin": "ast",
-      "id": "wall_wall_app_defaultseedlocation",
       "community": 23,
-      "norm_label": "defaultseedlocation"
+      "norm_label": "defaultseedlocation",
+      "id": "wall_wall_app_defaultseedlocation"
     },
     {
       "label": "EmptyWallCard()",
@@ -2059,9 +2139,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L146",
       "_origin": "ast",
-      "id": "wall_wall_app_emptywallcard",
       "community": 23,
-      "norm_label": "emptywallcard()"
+      "norm_label": "emptywallcard()",
+      "id": "wall_wall_app_emptywallcard"
     },
     {
       "label": "WallApp()",
@@ -2069,9 +2149,9 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L184",
       "_origin": "ast",
-      "id": "wall_wall_app_wallapp",
       "community": 107,
-      "norm_label": "wallapp()"
+      "norm_label": "wallapp()",
+      "id": "wall_wall_app_wallapp"
     },
     {
       "label": "wall-card.tsx",
@@ -2079,9 +2159,9 @@
       "source_file": "src/features/wall/wall-card.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "wall_wall_card",
       "community": 72,
-      "norm_label": "wall-card.tsx"
+      "norm_label": "wall-card.tsx",
+      "id": "wall_wall_card"
     },
     {
       "label": "WallCardProps",
@@ -2089,9 +2169,9 @@
       "source_file": "src/features/wall/wall-card.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "wall_wall_card_wallcardprops",
       "community": 72,
-      "norm_label": "wallcardprops"
+      "norm_label": "wallcardprops",
+      "id": "wall_wall_card_wallcardprops"
     },
     {
       "label": "CardStyle",
@@ -2099,9 +2179,9 @@
       "source_file": "src/features/wall/wall-card.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "wall_wall_card_cardstyle",
       "community": 72,
-      "norm_label": "cardstyle"
+      "norm_label": "cardstyle",
+      "id": "wall_wall_card_cardstyle"
     },
     {
       "label": "hashString()",
@@ -2109,9 +2189,9 @@
       "source_file": "src/features/wall/wall-card.tsx",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "wall_wall_card_hashstring",
       "community": 72,
-      "norm_label": "hashstring()"
+      "norm_label": "hashstring()",
+      "id": "wall_wall_card_hashstring"
     },
     {
       "label": "WallCard()",
@@ -2119,9 +2199,9 @@
       "source_file": "src/features/wall/wall-card.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "id": "wall_wall_card_wallcard",
       "community": 72,
-      "norm_label": "wallcard()"
+      "norm_label": "wallcard()",
+      "id": "wall_wall_card_wallcard"
     },
     {
       "label": "home-path.ts",
@@ -2129,9 +2209,9 @@
       "source_file": "src/lib/home-path.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_home_path",
       "community": 3,
-      "norm_label": "home-path.ts"
+      "norm_label": "home-path.ts",
+      "id": "lib_home_path"
     },
     {
       "label": "SKILL.md",
@@ -8423,36 +8503,6 @@
       "id": "postcss_config"
     },
     {
-      "label": "proxy.ts",
-      "file_type": "code",
-      "source_file": "proxy.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 17,
-      "norm_label": "proxy.ts",
-      "id": "proxy"
-    },
-    {
-      "label": "proxy()",
-      "file_type": "code",
-      "source_file": "proxy.ts",
-      "source_location": "L7",
-      "_origin": "ast",
-      "community": 17,
-      "norm_label": "proxy()",
-      "id": "proxy_proxy"
-    },
-    {
-      "label": "config",
-      "file_type": "code",
-      "source_file": "proxy.ts",
-      "source_location": "L11",
-      "_origin": "ast",
-      "community": 17,
-      "norm_label": "config",
-      "id": "proxy_config"
-    },
-    {
       "label": "sentry.edge.config.ts",
       "file_type": "code",
       "source_file": "sentry.edge.config.ts",
@@ -8571,56 +8621,6 @@
       "community": 9,
       "norm_label": "analyticstracker()",
       "id": "components_analytics_tracker_analyticstracker"
-    },
-    {
-      "label": "app-providers.tsx",
-      "file_type": "code",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 56,
-      "norm_label": "app-providers.tsx",
-      "id": "components_app_providers"
-    },
-    {
-      "label": "AppProvidersProps",
-      "file_type": "code",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L17",
-      "_origin": "ast",
-      "community": 56,
-      "norm_label": "appprovidersprops",
-      "id": "components_app_providers_appprovidersprops"
-    },
-    {
-      "label": "AppProviders()",
-      "file_type": "code",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L24",
-      "_origin": "ast",
-      "community": 17,
-      "norm_label": "appproviders()",
-      "id": "components_app_providers_appproviders"
-    },
-    {
-      "label": "ConnectedProviders()",
-      "file_type": "code",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L107",
-      "_origin": "ast",
-      "community": 56,
-      "norm_label": "connectedproviders()",
-      "id": "components_app_providers_connectedproviders"
-    },
-    {
-      "label": "ClerkUsernameSync()",
-      "file_type": "code",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L121",
-      "_origin": "ast",
-      "community": 56,
-      "norm_label": "clerkusernamesync()",
-      "id": "components_app_providers_clerkusernamesync"
     },
     {
       "label": "bug-report-link.tsx",
@@ -15495,6 +15495,396 @@
   ],
   "links": [
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "proxy.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "proxy",
+      "target": "lib_clerk"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "proxy.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "proxy",
+      "target": "lib_clerk_getclerkpublishablekey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "proxy.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "proxy",
+      "target": "proxy_config"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "proxy.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "proxy",
+      "target": "proxy_proxy"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/card/[id]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_card_id_page_tsx_id_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/renew/[cardId]/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "cardid_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_app_providers_appprovidersprops"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_app_providers_clerkusernamesync"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_app_providers_connectedproviders"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_admin_panel"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_admin_panel_globaladminpanel"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_bug_report_modal"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_bug_report_modal_globalbugreportmodal"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_contact_modal"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_contact_modal_globalcontactmodal"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_owner_dashboard"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "components_global_owner_dashboard_globalownerdashboard"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "generated_api"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "generated_api_api"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "lib_toast"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/app-providers.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_app_providers",
+      "target": "lib_toast_toaster"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sign-in/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "sign_in_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sign-up/[[...sign-up]]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "sign_up_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/trending/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "trending_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/unsubscribe/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unsubscribe_page",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/wall-page-shell.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "wall_wall_page_shell",
+      "target": "components_app_providers"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/card/[id]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_card_id_page_tsx_id_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/renew/[cardId]/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "cardid_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sign-in/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "sign_in_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sign-up/[[...sign-up]]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "sign_up_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/trending/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "trending_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/unsubscribe/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unsubscribe_page",
+      "target": "components_app_providers_appproviders"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/features/wall/wall-page-shell.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "wall_wall_page_shell",
+      "target": "components_app_providers_appproviders"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "convex/admin.ts",
@@ -16900,9 +17290,9 @@
       "source_file": "src/features/home/home-nav.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_nav",
-      "target": "lib_home_path",
-      "confidence_score": 1.0
+      "target": "lib_home_path"
     },
     {
       "relation": "imports_from",
@@ -17888,9 +18278,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_composer",
-      "target": "wall_composer_hashstring",
-      "confidence_score": 1.0
+      "target": "wall_composer_hashstring"
     },
     {
       "relation": "contains",
@@ -18284,9 +18674,9 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L470",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_composer_expandedcardpreview",
-      "target": "wall_composer_hashstring",
-      "confidence_score": 1.0
+      "target": "wall_composer_hashstring"
     },
     {
       "relation": "calls",
@@ -18515,9 +18905,9 @@
       "source_file": "src/features/wall/connected-wall-app.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_connected_wall_app",
-      "target": "lib_home_path",
-      "confidence_score": 1.0
+      "target": "lib_home_path"
     },
     {
       "relation": "imports_from",
@@ -18958,9 +19348,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_detail_panel",
-      "target": "wall_detail_panel_hashstring",
-      "confidence_score": 1.0
+      "target": "wall_detail_panel_hashstring"
     },
     {
       "relation": "contains",
@@ -19108,9 +19498,9 @@
       "source_file": "src/features/wall/detail-panel.tsx",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wall_detail_panel_detailpanel",
-      "target": "wall_detail_panel_hashstring",
-      "confidence_score": 1.0
+      "target": "wall_detail_panel_hashstring"
     },
     {
       "relation": "imports_from",
@@ -26376,28 +26766,6 @@
       "target": "app_card_id_page_tsx_id_page_generatemetadata"
     },
     {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/card/[id]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_card_id_page_tsx_id_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/card/[id]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_card_id_page_tsx_id_page",
-      "target": "components_app_providers_appproviders"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/card/[id]/page.tsx",
@@ -26708,28 +27076,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_page",
-      "target": "components_app_providers_appproviders"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26912,28 +27258,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/renew/[cardId]/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "cardid_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/renew/[cardId]/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "cardid_page",
-      "target": "components_app_providers_appproviders"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/renew/[cardId]/page.tsx",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27029,28 +27353,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/sign-in/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sign_in_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/sign-in/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sign_in_page",
-      "target": "components_app_providers_appproviders"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/sign-in/page.tsx",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27098,28 +27400,6 @@
       "weight": 1.0,
       "source": "sign_in_page_signinpage",
       "target": "lib_clerk_getclerkpublishablekey"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/sign-up/[[...sign-up]]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sign_up_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/sign-up/[[...sign-up]]/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sign_up_page",
-      "target": "components_app_providers_appproviders"
     },
     {
       "relation": "imports_from",
@@ -27326,28 +27606,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/trending/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "trending_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/trending/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "trending_page",
-      "target": "components_app_providers_appproviders"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/trending/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27538,28 +27796,6 @@
       "weight": 1.0,
       "source": "trending_page_trendingpage",
       "target": "lib_server_cards_fetchtopwalls"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/unsubscribe/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "unsubscribe_page",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/unsubscribe/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "unsubscribe_page",
-      "target": "components_app_providers_appproviders"
     },
     {
       "relation": "imports_from",
@@ -27972,17 +28208,6 @@
       "confidence_score": 1.0,
       "source": "generated_api_d",
       "target": "convex_walls"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "generated_api"
     },
     {
       "relation": "imports_from",
@@ -30544,48 +30769,6 @@
       "target": "package_overrides_ws"
     },
     {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "proxy.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "proxy",
-      "target": "lib_clerk"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "proxy.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "proxy",
-      "target": "lib_clerk_getclerkpublishablekey"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "proxy.ts",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "proxy",
-      "target": "proxy_config"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "proxy.ts",
-      "source_location": "L6",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "proxy",
-      "target": "proxy_proxy"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/analytics-consent-provider.tsx",
@@ -30885,189 +31068,6 @@
       "confidence_score": 1.0,
       "source": "components_global_client_shell",
       "target": "components_analytics_tracker_analyticstracker"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L18",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_app_providers_appproviders"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L12",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_app_providers_appprovidersprops"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L62",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_app_providers_clerkusernamesync"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L44",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_app_providers_connectedproviders"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_admin_panel"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_admin_panel_globaladminpanel"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_bug_report_modal"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_bug_report_modal_globalbugreportmodal"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_contact_modal"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_contact_modal_globalcontactmodal"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_owner_dashboard"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "components_global_owner_dashboard_globalownerdashboard"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "generated_api_api"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "lib_toast"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/app-providers.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_app_providers",
-      "target": "lib_toast_toaster"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/features/wall/wall-page-shell.tsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "wall_wall_page_shell",
-      "target": "components_app_providers"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/features/wall/wall-page-shell.tsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "wall_wall_page_shell",
-      "target": "components_app_providers_appproviders"
     },
     {
       "relation": "contains",
@@ -38839,5 +38839,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "18a7c7a4c9b4e46232968add3fcbfc2a703edfb6"
+  "built_at_commit": "388fd124ee58769ca5541514a53979147b8e7947"
 }
