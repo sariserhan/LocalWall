@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1782940900.1334984,
-    "ast_hash": "b754ffd62d40d36f92ef63aea8e45fdd",
+    "mtime": 1782949103.9905376,
+    "ast_hash": "d481303e16ec034c156e05747194f20a",
     "semantic_hash": ""
   },
   "package.json": {
@@ -395,8 +395,8 @@
     "semantic_hash": ""
   },
   "proxy.ts": {
-    "mtime": 1782940302.2662952,
-    "ast_hash": "ed07713d930df2c2027817c9cc9999d7",
+    "mtime": 1782945055.5959933,
+    "ast_hash": "adb51a70afd8edc449d813d0fbe3869e",
     "semantic_hash": ""
   },
   "sentry.edge.config.ts": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782939270.1990898,
-    "ast_hash": "278ec3d1d90b4bafd5a790b25d2e24fe",
+    "mtime": 1782945049.802538,
+    "ast_hash": "6001cae07f24133d61ae4a40889f2082",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {
@@ -1387,11 +1387,6 @@
   "public/assets/pin.webp": {
     "mtime": 1782929260.9565108,
     "ast_hash": "2b883454d46802fbbffc8d3c2242b38a",
-    "semantic_hash": ""
-  },
-  "app/%5F%5Fclerk/[[...path]]/route.ts": {
-    "mtime": 1782940603.4437444,
-    "ast_hash": "6484d3012bf393502f7c9f08013e68ea",
     "semantic_hash": ""
   }
 }

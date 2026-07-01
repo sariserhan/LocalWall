@@ -4,6 +4,36 @@
   "graph": {},
   "nodes": [
     {
+      "label": "next.config.ts",
+      "file_type": "code",
+      "source_file": "next.config.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "next_config",
+      "community": 80,
+      "norm_label": "next.config.ts"
+    },
+    {
+      "label": "CSP",
+      "file_type": "code",
+      "source_file": "next.config.ts",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "next_config_csp",
+      "community": 80,
+      "norm_label": "csp"
+    },
+    {
+      "label": "nextConfig",
+      "file_type": "code",
+      "source_file": "next.config.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "next_config_nextconfig",
+      "community": 80,
+      "norm_label": "nextconfig"
+    },
+    {
       "label": "proxy.ts",
       "file_type": "code",
       "source_file": "proxy.ts",
@@ -17,7 +47,7 @@
       "label": "proxy()",
       "file_type": "code",
       "source_file": "proxy.ts",
-      "source_location": "L13",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "proxy_proxy",
       "community": 17,
@@ -27,7 +57,7 @@
       "label": "config",
       "file_type": "code",
       "source_file": "proxy.ts",
-      "source_location": "L17",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "proxy_config",
       "community": 17,
@@ -40,7 +70,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_app_providers",
-      "community": 56,
+      "community": 46,
       "norm_label": "app-providers.tsx"
     },
     {
@@ -50,7 +80,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "components_app_providers_appprovidersprops",
-      "community": 56,
+      "community": 46,
       "norm_label": "appprovidersprops"
     },
     {
@@ -67,20 +97,20 @@
       "label": "ConnectedProviders()",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
-      "source_location": "L109",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "components_app_providers_connectedproviders",
-      "community": 56,
+      "community": 46,
       "norm_label": "connectedproviders()"
     },
     {
       "label": "ClerkUsernameSync()",
       "file_type": "code",
       "source_file": "src/components/app-providers.tsx",
-      "source_location": "L123",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "components_app_providers_clerkusernamesync",
-      "community": 56,
+      "community": 46,
       "norm_label": "clerkusernamesync()"
     },
     {
@@ -1219,7 +1249,7 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L335",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "getsubcategoriesforcategory()",
       "id": "wall_admin_playground_getsubcategoriesforcategory"
     },
@@ -1229,7 +1259,7 @@
       "source_file": "src/features/wall/admin-playground.tsx",
       "source_location": "L341",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "createcardsection()",
       "id": "wall_admin_playground_createcardsection"
     },
@@ -1419,7 +1449,7 @@
       "source_file": "src/features/wall/composer.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "composerform",
       "id": "wall_composer_composerform"
     },
@@ -1829,7 +1859,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "types.ts",
       "id": "wall_types"
     },
@@ -1839,7 +1869,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "categories",
       "id": "wall_types_categories"
     },
@@ -1849,7 +1879,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "subcategory_options",
       "id": "wall_types_subcategory_options"
     },
@@ -1859,7 +1889,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "cardthemes",
       "id": "wall_types_cardthemes"
     },
@@ -1869,7 +1899,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L48",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "businesscardshapes",
       "id": "wall_types_businesscardshapes"
     },
@@ -1879,7 +1909,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L50",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "cardcategory",
       "id": "wall_types_cardcategory"
     },
@@ -1889,7 +1919,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "cardtheme",
       "id": "wall_types_cardtheme"
     },
@@ -1899,7 +1929,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "cardimagemode",
       "id": "wall_types_cardimagemode"
     },
@@ -1909,7 +1939,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "businesscardshape",
       "id": "wall_types_businesscardshape"
     },
@@ -1919,7 +1949,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L55",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "cardformats",
       "id": "wall_types_cardformats"
     },
@@ -1929,7 +1959,7 @@
       "source_file": "src/features/wall/types.ts",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "businesscardformats",
       "id": "wall_types_businesscardformats"
     },
@@ -2149,7 +2179,7 @@
       "source_file": "src/features/wall/wall-app.tsx",
       "source_location": "L184",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "wallapp()",
       "id": "wall_wall_app_wallapp"
     },
@@ -4989,7 +5019,7 @@
       "source_file": "src/features/support/contact-page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 56,
+      "community": 46,
       "norm_label": "contact-page.tsx",
       "id": "support_contact_page"
     },
@@ -4999,7 +5029,7 @@
       "source_file": "src/features/support/contact-page.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 56,
+      "community": 46,
       "norm_label": "clerkcontactuser",
       "id": "support_contact_page_clerkcontactuser"
     },
@@ -5009,7 +5039,7 @@
       "source_file": "src/features/support/contact-page.tsx",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 56,
+      "community": 46,
       "norm_label": "contactpage()",
       "id": "support_contact_page_contactpage"
     },
@@ -6368,7 +6398,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "sitemap.ts",
       "id": "app_sitemap"
     },
@@ -6378,7 +6408,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "base_url",
       "id": "app_sitemap_base_url"
     },
@@ -6388,7 +6418,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "us_state_codes",
       "id": "app_sitemap_us_state_codes"
     },
@@ -6398,7 +6428,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "city_paths",
       "id": "app_sitemap_city_paths"
     },
@@ -6408,7 +6438,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L49",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "static_routes",
       "id": "app_sitemap_static_routes"
     },
@@ -6418,7 +6448,7 @@
       "source_file": "app/sitemap.ts",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "sitemap()",
       "id": "app_sitemap_sitemap"
     },
@@ -7873,36 +7903,6 @@
       "id": "next_env_d"
     },
     {
-      "label": "next.config.ts",
-      "file_type": "code",
-      "source_file": "next.config.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 80,
-      "norm_label": "next.config.ts",
-      "id": "next_config"
-    },
-    {
-      "label": "CSP",
-      "file_type": "code",
-      "source_file": "next.config.ts",
-      "source_location": "L14",
-      "_origin": "ast",
-      "community": 80,
-      "norm_label": "csp",
-      "id": "next_config_csp"
-    },
-    {
-      "label": "nextConfig",
-      "file_type": "code",
-      "source_file": "next.config.ts",
-      "source_location": "L28",
-      "_origin": "ast",
-      "community": 80,
-      "norm_label": "nextconfig",
-      "id": "next_config_nextconfig"
-    },
-    {
       "label": "package.json",
       "file_type": "code",
       "source_file": "package.json",
@@ -8768,7 +8768,7 @@
       "source_file": "src/components/global-contact-modal.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 56,
+      "community": 46,
       "norm_label": "global-contact-modal.tsx",
       "id": "components_global_contact_modal"
     },
@@ -8778,7 +8778,7 @@
       "source_file": "src/components/global-contact-modal.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 56,
+      "community": 46,
       "norm_label": "globalcontactmodal()",
       "id": "components_global_contact_modal_globalcontactmodal"
     },
@@ -9308,7 +9308,7 @@
       "source_file": "src/features/home/trending-wall-style.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "trending-wall-style.ts",
       "id": "home_trending_wall_style"
     },
@@ -9318,7 +9318,7 @@
       "source_file": "src/features/home/trending-wall-style.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "wallcardvars",
       "id": "home_trending_wall_style_wallcardvars"
     },
@@ -9328,7 +9328,7 @@
       "source_file": "src/features/home/trending-wall-style.ts",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "hashstr()",
       "id": "home_trending_wall_style_hashstr"
     },
@@ -9338,7 +9338,7 @@
       "source_file": "src/features/home/trending-wall-style.ts",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "wallcardstyle()",
       "id": "home_trending_wall_style_wallcardstyle"
     },
@@ -9768,7 +9768,7 @@
       "source_file": "src/features/wall/edit-card-modal.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "edit-card-modal.tsx",
       "id": "wall_edit_card_modal"
     },
@@ -9778,7 +9778,7 @@
       "source_file": "src/features/wall/edit-card-modal.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "themelabels",
       "id": "wall_edit_card_modal_themelabels"
     },
@@ -9788,7 +9788,7 @@
       "source_file": "src/features/wall/edit-card-modal.tsx",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "shapelabels",
       "id": "wall_edit_card_modal_shapelabels"
     },
@@ -9808,7 +9808,7 @@
       "source_file": "src/features/wall/image-compare-slider.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "image-compare-slider.tsx",
       "id": "wall_image_compare_slider"
     },
@@ -9818,7 +9818,7 @@
       "source_file": "src/features/wall/image-compare-slider.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "imageswapviewerprops",
       "id": "wall_image_compare_slider_imageswapviewerprops"
     },
@@ -9828,7 +9828,7 @@
       "source_file": "src/features/wall/image-compare-slider.tsx",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 46,
+      "community": 32,
       "norm_label": "imageswapviewer()",
       "id": "wall_image_compare_slider_imageswapviewer"
     },
@@ -10148,7 +10148,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "wall-helpers.ts",
       "id": "wall_wall_helpers"
     },
@@ -10158,7 +10158,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "featuredtiervalue",
       "id": "wall_wall_helpers_featuredtiervalue"
     },
@@ -10168,7 +10168,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "featuredtieroption",
       "id": "wall_wall_helpers_featuredtieroption"
     },
@@ -10178,7 +10178,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "getvisiblefeaturedtieroptions()",
       "id": "wall_wall_helpers_getvisiblefeaturedtieroptions"
     },
@@ -10188,7 +10188,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "featuredtierweight()",
       "id": "wall_wall_helpers_featuredtierweight"
     },
@@ -10198,7 +10198,7 @@
       "source_file": "src/features/wall/wall-helpers.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "activefiltercount()",
       "id": "wall_wall_helpers_activefiltercount"
     },
@@ -10208,7 +10208,7 @@
       "source_file": "src/features/wall/wall-minimap.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "wall-minimap.tsx",
       "id": "wall_wall_minimap"
     },
@@ -10218,7 +10218,7 @@
       "source_file": "src/features/wall/wall-minimap.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "theme_dot",
       "id": "wall_wall_minimap_theme_dot"
     },
@@ -10228,7 +10228,7 @@
       "source_file": "src/features/wall/wall-minimap.tsx",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "dims",
       "id": "wall_wall_minimap_dims"
     },
@@ -10238,7 +10238,7 @@
       "source_file": "src/features/wall/wall-minimap.tsx",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "props",
       "id": "wall_wall_minimap_props"
     },
@@ -10248,7 +10248,7 @@
       "source_file": "src/features/wall/wall-minimap.tsx",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 106,
+      "community": 107,
       "norm_label": "wallminimap()",
       "id": "wall_wall_minimap_wallminimap"
     },
@@ -10888,7 +10888,7 @@
       "source_file": "src/lib/server-cards.ts",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 32,
+      "community": 56,
       "norm_label": "fetchpublishedcardids()",
       "id": "lib_server_cards_fetchpublishedcardids"
     },
@@ -11608,7 +11608,7 @@
       "source_file": "tests/convex/wall-helpers.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 107,
+      "community": 106,
       "norm_label": "wall-helpers.test.ts",
       "id": "convex_wall_helpers_test"
     },
@@ -13948,7 +13948,7 @@
       "source_file": ".claude/skills/playwright-cli/references/session-management.md",
       "source_location": "L108",
       "_origin": "ast",
-      "community": 117,
+      "community": 108,
       "norm_label": "attaching to a running browser",
       "id": "references_session_management_attaching_to_a_running_browser"
     },
@@ -13958,7 +13958,7 @@
       "source_file": ".claude/skills/playwright-cli/references/session-management.md",
       "source_location": "L112",
       "_origin": "ast",
-      "community": 117,
+      "community": 108,
       "norm_label": "attach by channel name",
       "id": "references_session_management_attach_by_channel_name"
     },
@@ -13968,7 +13968,7 @@
       "source_file": ".claude/skills/playwright-cli/references/session-management.md",
       "source_location": "L134",
       "_origin": "ast",
-      "community": 117,
+      "community": 108,
       "norm_label": "attach via cdp endpoint",
       "id": "references_session_management_attach_via_cdp_endpoint"
     },
@@ -13978,7 +13978,7 @@
       "source_file": ".claude/skills/playwright-cli/references/session-management.md",
       "source_location": "L142",
       "_origin": "ast",
-      "community": 117,
+      "community": 108,
       "norm_label": "attach via browser extension",
       "id": "references_session_management_attach_via_browser_extension"
     },
@@ -13988,7 +13988,7 @@
       "source_file": ".claude/skills/playwright-cli/references/session-management.md",
       "source_location": "L150",
       "_origin": "ast",
-      "community": 117,
+      "community": 108,
       "norm_label": "detach",
       "id": "references_session_management_detach"
     },
@@ -14728,7 +14728,7 @@
       "source_file": ".claude/skills/playwright-cli/references/tracing.md",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 108,
+      "community": 111,
       "norm_label": "trace output files",
       "id": "references_tracing_trace_output_files"
     },
@@ -14738,7 +14738,7 @@
       "source_file": ".claude/skills/playwright-cli/references/tracing.md",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 108,
+      "community": 111,
       "norm_label": "`trace-{timestamp}.trace`",
       "id": "references_tracing_trace_timestamp_trace"
     },
@@ -14748,7 +14748,7 @@
       "source_file": ".claude/skills/playwright-cli/references/tracing.md",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 108,
+      "community": 111,
       "norm_label": "`trace-{timestamp}.network`",
       "id": "references_tracing_trace_timestamp_network"
     },
@@ -14758,7 +14758,7 @@
       "source_file": ".claude/skills/playwright-cli/references/tracing.md",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 108,
+      "community": 111,
       "norm_label": "`resources/`",
       "id": "references_tracing_resources"
     },
@@ -15494,6 +15494,26 @@
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "next.config.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "next_config",
+      "target": "next_config_csp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "next.config.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "next_config",
+      "target": "next_config_nextconfig"
+    },
     {
       "relation": "imports_from",
       "context": "import",
@@ -30181,26 +30201,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "next.config.ts",
-      "source_location": "L14",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "next_config",
-      "target": "next_config_csp"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "next.config.ts",
-      "source_location": "L28",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "next_config",
-      "target": "next_config_nextconfig"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "package.json",
       "source_location": "L21",
       "weight": 1.0,
@@ -38839,5 +38839,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "388fd124ee58769ca5541514a53979147b8e7947"
+  "built_at_commit": "2c2bbf805e39862e7160c3f18304681ee4c89407"
 }

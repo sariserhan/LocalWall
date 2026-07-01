@@ -1,7 +1,7 @@
 # Graph Report - local-wall  (2026-07-01)
 
 ## Corpus Check
-- 251 files · ~464,211 words
+- 251 files · ~464,206 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `388fd124`
+- Built from commit: `2c2bbf80`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -106,8 +106,8 @@
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
-- [[_COMMUNITY_Community 117|Community 117]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `api` - 31 edges
@@ -267,8 +267,8 @@ Cohesion: 0.11
 Nodes (16): Advanced Patterns, Authentication and environment access, Checklist, Choose the Shape, Client-facing API, Component Skeleton, Convex Create Component, Critical Rules (+8 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.29
-Nodes (7): BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES, fetchPublishedCardIds(), categories
+Cohesion: 0.18
+Nodes (13): ComposerForm, shapeLabels, themeLabels, ImageSwapViewer(), ImageSwapViewerProps, businessCardFormats, BusinessCardShape, businessCardShapes (+5 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.12
@@ -323,8 +323,8 @@ Cohesion: 0.15
 Nodes (11): Adding a Required Field, Changing a Field Type, Cleaning Up Orphaned Documents, Deleting a Field, Dual Read, Dual Write (Preferred), Migration Patterns Reference, Small Table Shortcut (+3 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.18
-Nodes (13): ComposerForm, shapeLabels, themeLabels, ImageSwapViewer(), ImageSwapViewerProps, businessCardFormats, BusinessCardShape, businessCardShapes (+5 more)
+Cohesion: 0.28
+Nodes (4): AppProvidersProps, GlobalContactModal(), ClerkContactUser, ContactPage()
 
 ### Community 47 - "Community 47"
 Cohesion: 0.22
@@ -363,8 +363,8 @@ Cohesion: 0.25
 Nodes (7): deleteCardOwnedData(), deleteAccount, _deleteMyData, exportMyData, _gatherMyData, GdprExport, action
 
 ### Community 56 - "Community 56"
-Cohesion: 0.28
-Nodes (4): AppProvidersProps, GlobalContactModal(), ClerkContactUser, ContactPage()
+Cohesion: 0.29
+Nodes (7): BASE_URL, CITY_PATHS, sitemap(), STATIC_ROUTES, US_STATE_CODES, fetchPublishedCardIds(), categories
 
 ### Community 57 - "Community 57"
 Cohesion: 0.20
@@ -435,44 +435,44 @@ Cohesion: 0.24
 Nodes (11): GlobalOwnerDashboard(), OwnerDashboard, OwnerDashboardProps, renewalOptions, CardUpdate, OwnerCard, RenewalAmount, SavedWall (+3 more)
 
 ### Community 106 - "Community 106"
-Cohesion: 0.33
-Nodes (5): cardFormats, Dims, Props, THEME_DOT, WallMinimap()
-
-### Community 107 - "Community 107"
 Cohesion: 0.20
 Nodes (11): hashStr(), wallCardStyle(), WallCardVars, CreateCardSection(), getSubcategoriesForCategory(), WallApp(), activeFilterCount(), FeaturedTierOption (+3 more)
 
+### Community 107 - "Community 107"
+Cohesion: 0.33
+Nodes (5): cardFormats, Dims, Props, THEME_DOT, WallMinimap()
+
 ### Community 108 - "Community 108"
-Cohesion: 0.50
-Nodes (4): `resources/`, Trace Output Files, `trace-{timestamp}.network`, `trace-{timestamp}.trace`
+Cohesion: 0.40
+Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
 
 ### Community 109 - "Community 109"
 Cohesion: 0.25
 Nodes (8): buildReminderEmail(), escapeHtml(), findCardsNeedingReminders, markReminderSent, RENEWAL_TIERS, sendExpirationReminders, internalAction, internalQuery
 
+### Community 111 - "Community 111"
+Cohesion: 0.50
+Nodes (4): `resources/`, Trace Output Files, `trace-{timestamp}.network`, `trace-{timestamp}.trace`
+
 ### Community 112 - "Community 112"
 Cohesion: 0.29
 Nodes (6): backfillUsernames, purgeStale, quotas, scopeValidator, take, internalMutation
 
-### Community 117 - "Community 117"
-Cohesion: 0.40
-Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
-
 ## Knowledge Gaps
-- **846 isolated node(s):** `config`, `AppProvidersProps`, `getAccess`, `resetRateLimitsForUser`, `getDashboard` (+841 more)
+- **846 isolated node(s):** `CSP`, `nextConfig`, `config`, `AppProvidersProps`, `getAccess` (+841 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Billing, Admin & Test Infrastructure`, `Community 34`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 10`, `Community 11`, `Community 81`, `Community 17`, `Community 56`, `Community 57`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `getCardFormat()` connect `Community 64` to `Rate Limiting & API Utilities`, `Community 3`, `Community 72`, `Community 46`, `Community 23`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `api` connect `Geo-Routed Pages & RSS Feeds` to `Billing, Admin & Test Infrastructure`, `Community 34`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 10`, `Community 11`, `Community 46`, `Community 81`, `Community 17`, `Community 57`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `Browser Session Management` connect `Community 26` to `Community 108`, `Community 44`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `parseCountrySlug()` (e.g. with `GET()` and `GET()`) actually correct?**
   _`parseCountrySlug()` has 5 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `config`, `AppProvidersProps`, `getAccess` to the rest of the system?**
+- **What connects `CSP`, `nextConfig`, `config` to the rest of the system?**
   _846 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Rate Limiting & API Utilities` be split into smaller, more focused modules?**
   _Cohesion score 0.09846153846153846 - nodes in this community are weakly interconnected._
