@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { BriefcaseBusiness, CreditCard, Download, LayoutDashboard, ShieldCheck, TrendingUp } from "lucide-react";
+import { BriefcaseBusiness, CreditCard, Download, Home, LayoutDashboard, MapPin, ShieldCheck, TrendingUp } from "lucide-react";
 import { getClerkUserButtonAppearance, getClerkUserProfileAppearance } from "@/lib/clerk-appearance";
 import { ClerkBusinessPage } from "@/features/wall/clerk-business-page";
 import { ClerkMyDataPage } from "@/features/wall/clerk-my-data-page";
@@ -18,7 +18,9 @@ type ClerkAvatarMenuProps = {
   profile: ClerkProfile;
   isReady: boolean;
   onUpdateBusinessName: (businessName: string | undefined) => Promise<void>;
+  onOpenHome?: () => void;
   onOpenAdminPanel?: () => void;
+  onOpenAdminWall?: () => void;
   onOpenDashboard?: () => void;
   onOpenTrending?: () => void;
   onOpenBilling?: () => void;
@@ -29,7 +31,9 @@ export function ClerkAvatarMenu({
   profile,
   isReady,
   onUpdateBusinessName,
+  onOpenHome,
   onOpenAdminPanel,
+  onOpenAdminWall,
   onOpenDashboard,
   onOpenTrending,
   onOpenBilling,
@@ -53,11 +57,25 @@ export function ClerkAvatarMenu({
         <ClerkMyDataPage />
       </UserButton.UserProfilePage>
       <UserButton.MenuItems>
+        {onOpenHome ? (
+          <UserButton.Action
+            label="Home"
+            labelIcon={<Home size={16} />}
+            onClick={onOpenHome}
+          />
+        ) : null}
         {onOpenAdminPanel ? (
           <UserButton.Action
             label="Admin"
             labelIcon={<ShieldCheck size={16} />}
             onClick={onOpenAdminPanel}
+          />
+        ) : null}
+        {onOpenAdminWall ? (
+          <UserButton.Action
+            label="Admin wall"
+            labelIcon={<MapPin size={16} />}
+            onClick={onOpenAdminWall}
           />
         ) : null}
         {onOpenDashboard ? (

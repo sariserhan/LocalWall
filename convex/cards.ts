@@ -724,6 +724,7 @@ export const create = mutation({
     telegram: v.optional(v.string()),
     paidAmount: v.number(),
     featuredTier: v.optional(v.union(v.literal("boost"), v.literal("bronze"), v.literal("silver"), v.literal("gold"))),
+    bypassPayment: v.optional(v.boolean()),
     theme,
     imageMode: v.optional(imageMode),
     cardShape,
@@ -746,6 +747,11 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const startedAt = Date.now();
     const identity = await requireIdentity(ctx);
+    const bypassPayment = Boolean(args.bypassPayment);
+    if (bypassPayment) {
+      const access: { isAdmin: boolean } = await ctx.runQuery(api.admin.getAccess, {});
+      if (!access.isAdmin) throw new Error("Bypass payment is admin only.");
+    }
     const phone = args.phone?.trim() ?? "";
     const email = args.email?.trim() ?? "";
     const featuredPrices: Record<string, number> = { boost: 2.99, bronze: 2.99, silver: 4.99, gold: 9.99 };
@@ -833,7 +839,7 @@ export const create = mutation({
       basePaidAmount: args.paidAmount,
       featuredTier: args.featuredTier,
     };
-    if (totalPaidAmount > 0) {
+    if (!bypassPayment && totalPaidAmount > 0) {
       const pendingCardId = await ctx.db.insert("pendingCards", {
         ownerId: user._id,
         payload: normalizedPayload,

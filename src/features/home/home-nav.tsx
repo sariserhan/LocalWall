@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
+import { HOME_PATH } from "@/lib/home-path";
 import { useTheme } from "@/lib/use-theme";
 import { ClerkAvatarMenu } from "@/components/clerk-avatar-menu";
 import { HomePostButton } from "./home-post-button";
@@ -40,7 +41,9 @@ export function HomeNav({ isSignedIn = false, showAvatarButton = false }: { isSi
             profile={profile}
             isReady={profile !== undefined}
             onUpdateBusinessName={async (businessName) => { await updateProfileMutation({ businessName }); }}
+            onOpenHome={() => router.push(HOME_PATH)}
             onOpenAdminPanel={adminAccess?.isAdmin ? () => openAdminPanel() : undefined}
+            onOpenAdminWall={adminAccess?.isAdmin ? () => router.push("/admin/wall") : undefined}
             onOpenDashboard={() => openDashboard()}
             onOpenTrending={() => router.push("/trending")}
             onOpenBilling={() => router.push("/billing")}

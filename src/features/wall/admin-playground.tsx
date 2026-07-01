@@ -125,6 +125,7 @@ type PlaygroundCardArgs = {
   imageY?: number;
   imageWidth?: number;
   paidAmount: number;
+  bypassPayment?: boolean;
   featuredTier?: FeaturedTierValue;
   status?: "published" | "hidden" | "expired";
   durationDays?: number;
@@ -361,6 +362,7 @@ function CreateCardSection() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastId, setLastId] = useState<string | null>(null);
+  const boostEnabled = paymentMode === "bypass" && featuredTier === "boost";
 
   const buildArgs = (pending = false): PlaygroundCardArgs => ({
     name,
@@ -373,6 +375,7 @@ function CreateCardSection() {
     country,
     theme,
     paidAmount,
+    bypassPayment: paymentMode === "bypass",
     featuredTier,
     ownerName: ownerName.trim() || undefined,
     pending,
@@ -433,6 +436,22 @@ function CreateCardSection() {
           <CreditCard size={12} /> Test Stripe checkout
         </button>
       </div>
+
+      {paymentMode === "bypass" ? (
+        <div className="pg-bypass-boost">
+          <label className="pg-bypass-boost-option">
+            <input
+              type="checkbox"
+              checked={boostEnabled}
+              onChange={(e) => setFeaturedTier(e.target.checked ? "boost" : undefined)}
+            />
+            <span>
+              <strong>Boost this card</strong>
+              <span className="pg-hint">Optional. Create a featured boost card immediately, with no Stripe checkout.</span>
+            </span>
+          </label>
+        </div>
+      ) : null}
 
       <details className="pg-disclosure">
         <summary>Business details</summary>
@@ -598,9 +617,11 @@ function CreateCardSection() {
         <button className="pg-action-btn" disabled={busy || !name.trim() || stripeOnly} onClick={handleCreate}>
           {busy
             ? (paymentMode === "stripe" ? "Redirecting to Stripe…" : "Creating…")
-            : paymentMode === "bypass"
-              ? <><Zap size={13} /> Create card (bypass payment)</>
-              : <><CreditCard size={13} /> Create card + go to Stripe</>
+            : boostEnabled
+              ? <><Star size={13} /> Create boost card (bypass payment)</>
+              : paymentMode === "bypass"
+                ? <><Zap size={13} /> Create card (bypass payment)</>
+                : <><CreditCard size={13} /> Create card + go to Stripe</>
           }
         </button>
         <a className="pg-wall-link" href={PG_WALL_URL} target="_blank" rel="noopener noreferrer">
@@ -608,8 +629,10 @@ function CreateCardSection() {
         </a>
       </div>
       <p className="pg-hint">
-        {paymentMode === "bypass"
-          ? <>Card appears immediately on <code>{PG_WALL_URL}</code>. No Stripe involved.</>
+        {boostEnabled
+          ? <>Boost card appears immediately on <code>{PG_WALL_URL}</code>. No Stripe involved, so you can test featured placement for free.</>
+          : paymentMode === "bypass"
+            ? <>Card appears immediately on <code>{PG_WALL_URL}</code>. You can assign a featured tier and skip Stripe entirely.</>
           : <>Creates a hidden pending card, then redirects to real Stripe checkout. Use card <code>4242 4242 4242 4242</code> to test.</>
         }
       </p>

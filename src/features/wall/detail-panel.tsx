@@ -25,6 +25,15 @@ function websiteHref(website: string) {
   return /^https?:\/\//i.test(website) ? website : `https://${website}`;
 }
 
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 type CardEvent = "website" | "phone" | "email" | "social" | "save" | "share";
 type ReportReason = "spam" | "scam" | "inappropriate" | "expired" | "other";
 
@@ -79,6 +88,10 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   const frontImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backThumbnailImages?.[0] ?? card.backImages?.[0];
   const backLayout = card.imageMode === "business-card" ? (card.cardShape ?? "horizontal") : (card.theme === "photo" ? "photo" : "full");
+  const featuredSeed = hashString(String(card.id));
+  const featuredPinAngle = -14 + (featuredSeed % 29);
+  const featuredPinHue = (featuredSeed * 37) % 360;
+  const featuredClass = card.featuredTier ? `featured-${card.featuredTier}` : "";
 
   useEffect(() => setOptimisticSaved(saved), [saved]);
   useEffect(() => { setOptimisticLiked(liked); }, [liked]);
@@ -300,87 +313,99 @@ export function DetailPanel({ card, onClose, viewCount, onEvent, onReport, canSa
   return (
     <aside
       ref={sheetRef}
-      className="detail-sheet detail-sheet-404"
+      className={`detail-sheet detail-sheet-404 ${featuredClass}`}
       aria-label={`${card.name} details`}
       style={dragOffset > 0 ? { transform: `translateY(${dragOffset}px)`, transition: draggingSheet ? "none" : "transform 180ms cubic-bezier(.2,.8,.2,1)" } : undefined}
     >
-      <div className="nf-tape detail-sheet-tape" aria-hidden="true" />
+      <div className="nf-tape detail-sheet-tape" aria-hidden="true">
+        {card.featuredTier ? (
+          <span
+            className="featured-pin-on-tape"
+            aria-hidden="true"
+            style={{ transform: `translate(-50%, -50%) rotate(${featuredPinAngle}deg)`, filter: `hue-rotate(${featuredPinHue}deg) saturate(1.08) brightness(1.02)` }}
+          >
+            <img src="/assets/pin.webp" alt="" draggable={false} className="featured-pin-image" />
+          </span>
+        ) : null}
+      </div>
       <div className="detail-sheet-stamp" aria-hidden="true">DETAILS</div>
-      <p className="nf-eyebrow detail-sheet-eyebrow">Notice · Card details</p>
-      <div
-        className="sheet-drag-handle"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={resetDrag}
-      >
-        <div className="sheet-pin" />
-        <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
-      </div>
-      <p className="sheet-category">{card.category} · {card.area}</p>
-      {card.ownerName ? (
-        <p className="sheet-byline">
-          by {card.ownerName}
-          {(card.verified || card.imageMode === "business-card") ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
-        </p>
-      ) : (card.verified || card.imageMode === "business-card") ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
-      <h2>{card.name}</h2>
-      <div className="rule" />
-      <p className="sheet-service">{card.line}</p>
-      <ImageSwapViewer
-        frontSrc={frontImage}
-        backSrc={backImage}
-        frontAlt={`${card.name} front image`}
-        backAlt={`${card.name} back image`}
-        className="sheet-image-swap-wrap"
-        layout={backLayout}
-        onImageClick={(src) => setExpandedImage(src ?? null)}
-      />
-      {card.message ? <div className="note-copy">{card.message}</div> : null}
-      {card.price ? <div className="sheet-price">Starting at <strong>{card.price}</strong></div> : null}
-      <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
-      {hasContact ? (
-        <div className="contact-actions" aria-label={`Contact ${card.name}`}>
-          {card.phone ? <button type="button" className={`primary contact-action call-desktop${phoneRevealed ? " is-revealed" : ""}`} onClick={() => { setRevealedPhoneFor(String(card.id)); onEvent?.("phone"); }}><Phone /> {phoneRevealed ? card.phone : "Show phone"}</button> : null}
-          {card.phone ? <a className="primary contact-action call-mobile" href={`tel:${card.phone}`} onClick={() => onEvent?.("phone")}><Phone /> Call</a> : null}
-          {card.email ? <a className="secondary contact-action" href={`mailto:${card.email}?subject=${encodeURIComponent(`Saw your card on WALL`)}`} onClick={() => onEvent?.("email")}><Mail /> Email</a> : null}
-          {card.website ? <a className="secondary contact-action" href={websiteHref(card.website)} target="_blank" rel="noreferrer" onClick={() => onEvent?.("website")}><ExternalLink /> Website</a> : null}
+      <div className="detail-sheet-scroll">
+        <p className="nf-eyebrow detail-sheet-eyebrow">Notice · Card details</p>
+        <div
+          className="sheet-drag-handle"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={resetDrag}
+        >
+          <div className="sheet-pin" />
+          <button className="icon-btn sheet-close" onClick={onClose} aria-label="Close details"><X /></button>
         </div>
-      ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
-      <div className="detail-card-actions">
-        {canSaveCard ? <button className={`secondary ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save"}</button> : null}
-        {canLike ? <button className={`secondary like-btn${optimisticLiked ? " is-liked" : ""}`} onClick={() => { if (!onToggleLike) { onRequestSignIn?.(); return; } void handleToggleLike(); }} aria-pressed={optimisticLiked} disabled={liking}><Heart fill={optimisticLiked ? "currentColor" : "none"} /> {optimisticLikeCount > 0 ? optimisticLikeCount : "Like"}</button> : null}
-      </div>
-      <div className="detail-secondary-actions">
-        <div className="share-menu-wrap" ref={shareMenuRef}>
-          <button type="button" className="secondary" onClick={() => void handleShareClick()}><Share2 /> Share</button>
-          {shareMenuOpen ? (
-            <div className="share-menu" role="menu">
-              <button type="button" role="menuitem" onClick={() => void copyLink()}><Copy size={14} /> Copy link</button>
-              <button type="button" role="menuitem" className="share-menu-whatsapp" onClick={shareOnWhatsApp}><WhatsAppIcon /> WhatsApp</button>
-            </div>
-          ) : null}
-        </div>
-        <button type="button" className="secondary" onClick={() => void openQr()}><QrCode size={15} /> QR Code</button>
-        {onReport ? <button type="button" className="secondary" onClick={openReport}><Flag /> Report</button> : null}
-      </div>
-      <div className="sheet-meta"><span><Eye size={12} /> {viewCount > 0 ? viewCount : 0}{optimisticLikeCount > 0 ? <> · <Heart size={12} fill="currentColor" style={{ color: "#f43d38" }} /> {optimisticLikeCount}</> : null}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
-      <ReviewsSection cardId={card.id} onRequestSignIn={onRequestSignIn} />
-      {similarCards.length > 0 ? (
-        <div className="similar-cards">
-          <h4 className="similar-cards-heading">Similar listings</h4>
-          <div className="similar-cards-list">
-            {similarCards.map((sc) => (
-              <button key={String(sc.id)} type="button" className={`similar-card theme-${sc.imageMode === "business-card" ? "biz" : sc.theme}`} onClick={() => onCardOpen?.(sc)}>
-                {sc.thumbnailImages?.[0] && <Image src={sc.thumbnailImages[0]} alt="" aria-hidden fill sizes="90px" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />}
-                <span className="similar-card-category">{sc.category}</span>
-                <strong>{sc.name}</strong>
-                {sc.line ? <span className="similar-card-line">{sc.line}</span> : null}
-              </button>
-            ))}
+        <p className="sheet-category">{card.category} · {card.area}</p>
+        {card.ownerName ? (
+          <p className="sheet-byline">
+            by {card.ownerName}
+            {(card.verified || card.imageMode === "business-card") ? <span className="sheet-verified" aria-label="Verified business">✓ Verified</span> : null}
+          </p>
+        ) : (card.verified || card.imageMode === "business-card") ? <p className="sheet-byline"><span className="sheet-verified" aria-label="Verified business">✓ Verified</span></p> : null}
+        <h2>{card.name}</h2>
+        <div className="rule" />
+        <p className="sheet-service">{card.line}</p>
+        <ImageSwapViewer
+          frontSrc={frontImage}
+          backSrc={backImage}
+          frontAlt={`${card.name} front image`}
+          backAlt={`${card.name} back image`}
+          className="sheet-image-swap-wrap"
+          layout={backLayout}
+          onImageClick={(src) => setExpandedImage(src ?? null)}
+        />
+        {card.message ? <div className="note-copy">{card.message}</div> : null}
+        {card.price ? <div className="sheet-price">Starting at <strong>{card.price}</strong></div> : null}
+        <SocialLinks card={card} onVisit={() => onEvent?.("social")} />
+        {hasContact ? (
+          <div className="contact-actions" aria-label={`Contact ${card.name}`}>
+            {card.phone ? <button type="button" className={`primary contact-action call-desktop${phoneRevealed ? " is-revealed" : ""}`} onClick={() => { setRevealedPhoneFor(String(card.id)); onEvent?.("phone"); }}><Phone /> {phoneRevealed ? card.phone : "Show phone"}</button> : null}
+            {card.phone ? <a className="primary contact-action call-mobile" href={`tel:${card.phone}`} onClick={() => onEvent?.("phone")}><Phone /> Call</a> : null}
+            {card.email ? <a className="secondary contact-action" href={`mailto:${card.email}?subject=${encodeURIComponent(`Saw your card on WALL`)}`} onClick={() => onEvent?.("email")}><Mail /> Email</a> : null}
+            {card.website ? <a className="secondary contact-action" href={websiteHref(card.website)} target="_blank" rel="noreferrer" onClick={() => onEvent?.("website")}><ExternalLink /> Website</a> : null}
           </div>
+        ) : <p className="contact-unavailable">This poster has not added public contact details yet.</p>}
+        <div className="detail-card-actions">
+          {canSaveCard ? <button className={`secondary ${optimisticSaved ? "is-saved" : ""}`} onClick={() => void toggleSaved()} aria-pressed={optimisticSaved} disabled={saving}><Bookmark fill={optimisticSaved ? "currentColor" : "none"} /> {saving ? "Saving…" : optimisticSaved ? "Saved" : "Save"}</button> : null}
+          {canLike ? <button className={`secondary like-btn${optimisticLiked ? " is-liked" : ""}`} onClick={() => { if (!onToggleLike) { onRequestSignIn?.(); return; } void handleToggleLike(); }} aria-pressed={optimisticLiked} disabled={liking}><Heart fill={optimisticLiked ? "currentColor" : "none"} /> {optimisticLikeCount > 0 ? optimisticLikeCount : "Like"}</button> : null}
         </div>
-      ) : null}
+        <div className="detail-secondary-actions">
+          <div className="share-menu-wrap" ref={shareMenuRef}>
+            <button type="button" className="secondary" onClick={() => void handleShareClick()}><Share2 /> Share</button>
+            {shareMenuOpen ? (
+              <div className="share-menu" role="menu">
+                <button type="button" role="menuitem" onClick={() => void copyLink()}><Copy size={14} /> Copy link</button>
+                <button type="button" role="menuitem" className="share-menu-whatsapp" onClick={shareOnWhatsApp}><WhatsAppIcon /> WhatsApp</button>
+              </div>
+            ) : null}
+          </div>
+          <button type="button" className="secondary" onClick={() => void openQr()}><QrCode size={15} /> QR Code</button>
+          {onReport ? <button type="button" className="secondary" onClick={openReport}><Flag /> Report</button> : null}
+        </div>
+        <div className="sheet-meta"><span><Eye size={12} /> {viewCount > 0 ? viewCount : 0}{optimisticLikeCount > 0 ? <> · <Heart size={12} fill="currentColor" style={{ color: "#f43d38" }} /> {optimisticLikeCount}</> : null}</span><span>CARD #{String(card.id).slice(-6).toUpperCase()}</span></div>
+        <ReviewsSection cardId={card.id} onRequestSignIn={onRequestSignIn} />
+        {similarCards.length > 0 ? (
+          <div className="similar-cards">
+            <h4 className="similar-cards-heading">Similar listings</h4>
+            <div className="similar-cards-list">
+              {similarCards.map((sc) => (
+                <button key={String(sc.id)} type="button" className={`similar-card theme-${sc.imageMode === "business-card" ? "biz" : sc.theme}`} onClick={() => onCardOpen?.(sc)}>
+                  {sc.thumbnailImages?.[0] && <Image src={sc.thumbnailImages[0]} alt="" aria-hidden fill sizes="90px" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />}
+                  <span className="similar-card-category">{sc.category}</span>
+                  <strong>{sc.name}</strong>
+                  {sc.line ? <span className="similar-card-line">{sc.line}</span> : null}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
       {qrOpen ? createPortal(
         <div className="dashboard-confirm-backdrop qr-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setQrOpen(false)}>
           <div className="qr-modal" role="dialog" aria-modal="true" aria-label="QR code for this card">

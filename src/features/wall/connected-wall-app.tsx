@@ -13,6 +13,7 @@ import { getCardFormat, getImageCardFormat, type CardDraft, type CardUpdate, typ
 import { buildWallPath } from "@/lib/wall-slug";
 import { openAdminPanel } from "@/lib/admin-signal";
 import { openDashboard } from "@/lib/dashboard-signal";
+import { HOME_PATH } from "@/lib/home-path";
 import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
 import { ClerkAvatarMenu } from "@/components/clerk-avatar-menu";
 
@@ -151,6 +152,7 @@ export function ConnectedWallApp({
   const updateProfileMutation = useMutation(api.cards.updateProfile);
   const generateUploadUrl = useMutation(api.cards.generateUploadUrl);
   const createCard = useMutation(api.cards.create);
+  const adminCreateCard = useMutation(api.admin.playgroundCreateCard);
   const incrementCardClicks = useMutation(api.cards.incrementClicks);
   const setCardVisibility = useMutation(api.cards.setVisibility);
   const updateCard = useMutation(api.cards.update);
@@ -403,7 +405,8 @@ export function ConnectedWallApp({
     const basePaidAmount = isBundle ? 19.99 : draft.paymentOption === "free" ? 0 : Number(draft.paymentOption);
     const featuredPrices: Record<string, number> = { boost: 2.99, bronze: 2.99, silver: 4.99, gold: 9.99 };
     const featuredPaidAmount = !isBundle && draft.featuredTier && draft.featuredTier !== "none" ? (featuredPrices[draft.featuredTier] ?? 0) : 0;
-    const totalPaidAmount = basePaidAmount + featuredPaidAmount;
+    const bypassPayment = Boolean(draft.bypassPayment && adminAccess?.isAdmin && !isBundle);
+    const totalPaidAmount = bypassPayment ? 0 : basePaidAmount + featuredPaidAmount;
     const featuredTierArg = !isBundle && draft.featuredTier && draft.featuredTier !== "none" ? draft.featuredTier : undefined;
     const primaryCity = isBundle && draft.bundleCities?.[0]
       ? draft.bundleCities[0]
@@ -433,6 +436,7 @@ export function ConnectedWallApp({
       telegram: draft.telegram,
       paidAmount: basePaidAmount,
       featuredTier: featuredTierArg,
+      bypassPayment: bypassPayment ? true : undefined,
       theme: draft.theme,
       imageMode: draft.imageMode,
       cardShape: draft.cardShape,
@@ -452,6 +456,20 @@ export function ConnectedWallApp({
       rotation: draft.rotation ?? 0,
       width: draft.imageMode === "business-card" ? getCardFormat("biz", draft.cardShape).width : getImageCardFormat(draft.theme, draft.imageMode).width,
     };
+    if (bypassPayment) {
+      const createdResult = await adminCreateCard({ ...cardPayload, bypassPayment: true }) as { card: WallCard };
+      const createdCard = createdResult.card;
+      addCardToLocalWall(createdCard);
+      captureAnalytics("card_created", {
+        card_name: draft.name,
+        category: draft.category,
+        theme: draft.theme,
+        location_country: draft.country,
+        location_state: draft.state,
+        location_city: draft.city,
+      });
+      return createdCard;
+    }
     const result = await createCard(cardPayload) as WallCard | { pendingCardId: Id<"pendingCards"> } | CreateCardRateLimit;
     if ("kind" in result && result.kind === "rate_limited") {
       setCheckoutMessage(result.message);
@@ -559,7 +577,9 @@ export function ConnectedWallApp({
           profile={profile}
           isReady={profile !== undefined}
           onUpdateBusinessName={async (businessName) => { await updateProfileMutation({ businessName }); }}
+          onOpenHome={() => router.push(HOME_PATH)}
           onOpenAdminPanel={adminAccess?.isAdmin ? () => openAdminPanel() : undefined}
+          onOpenAdminWall={adminAccess?.isAdmin ? () => router.push("/admin/wall") : undefined}
           onOpenDashboard={() => openDashboard()}
           onOpenTrending={() => router.push("/trending")}
           onOpenBilling={() => router.push("/billing")}
@@ -609,6 +629,7 @@ export function ConnectedWallApp({
       } : undefined}
       profile={null}
       cardDailyStats={cardDailyStats ?? null}
+      allowPaymentBypass={Boolean(adminAccess?.isAdmin)}
       onRequestVerification={isAuthenticated ? async (plan) => {
         const response = await fetch("/api/stripe/checkout", {
           method: "POST",

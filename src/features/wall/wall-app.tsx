@@ -93,6 +93,7 @@ interface WallAppProps {
   cardDailyStats?: { dates: string[]; byCard: Record<string, number[]> } | null;
   wallViewCount?: number;
   onSubscribeDigest?: (email: string, country: string, state: string, city: string) => Promise<{ alreadySubscribed: boolean }>;
+  allowPaymentBypass?: boolean;
 }
 
 const MAX_CARD_Y = 1500;
@@ -180,7 +181,7 @@ function EmptyWallCard({
   );
 }
 
-export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest }: WallAppProps) {
+export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], onRefreshWall, onCreateCard, onCardOpen, onRequestSignIn, isSignedIn = mode === "demo", isLoading = false, authControl, notice, ownerCards, ownerCardsLoading = false, onSetCardStatus, onUpdateCard, onDeleteCard, onRenewCard, onCancelAutoRenewCard, onMoveCard, ownedCardIds, likedCardIds, onToggleLike, onCardEvent, onReportCard, initialCardId, initialLocation, initialKeyword, initialCategory, savedCards = [], onSetSavedCard, savedWall = false, onSetSavedWall, savedWalls = [], onRemoveSavedWall, profile, onRequestVerification, cardDailyStats, wallViewCount, onSubscribeDigest, allowPaymentBypass = false }: WallAppProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -559,7 +560,9 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const updateLocationQuery = (country: string, state: string, city: string, neighborhood = "") => {
     const next = new URLSearchParams();
     if (neighborhood) next.set("neighborhood", neighborhood);
-    const newPath = buildWallPath(country, state, city, category !== "All" ? category : undefined);
+    const newPath = isAdminWall
+      ? (pathname ?? "/admin/wall")
+      : buildWallPath(country, state, city, category !== "All" ? category : undefined);
     const qs = next.toString();
     router.push(`${newPath}${qs ? `?${qs}` : ""}`);
   };
@@ -641,9 +644,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   const availableCities = (csc && draftState) ? csc.City.getCitiesOfState(draftCountry, draftState) : [];
   const hasStateOptions = availableStates.length > 0;
   const hasCityOptions = availableCities.length > 0;
+  const isAdminWall = pathname === "/admin/wall";
 
   // Base path for the current location (without category)
-  const locationBasePath = selectedCountry
+  const locationBasePath = isAdminWall
+    ? (pathname ?? "/admin/wall")
+    : selectedCountry
     ? buildWallPath(selectedCountry, selectedState || undefined, selectedCity || undefined)
     : "/";
 
@@ -1073,6 +1079,8 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     }
   }, []);
   const shareRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  const [footerInView, setFooterInView] = useState(false);
 
   useEffect(() => {
     if (!shareOpen) { setInlineQR(null); return; }
@@ -1081,6 +1089,16 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
       void QRCode.toDataURL(url, { width: 256, margin: 2, color: { dark: "#141414", light: "#ffffff" } }).then(setInlineQR);
     });
   }, [shareOpen]);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setFooterInView(entry.isIntersecting);
+    }, { threshold: 0.01 });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
 
   const copyWallLink = async () => {
@@ -1230,7 +1248,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
   return (
     <main className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={resetFilters}>LocalWall<span>your local bulletin board</span></button>
+        <button className="brand" onClick={() => router.push("/")}>LocalWall<span>your local bulletin board</span></button>
         <div className="location-wrap">
           <button className="location" onClick={() => { if (locationReady) { if (!locationDropdown) { setDraftCountry(selectedCountry); setDraftState(selectedState); setDraftCity(selectedCity); setDraftNeighborhood(selectedNeighborhood); } setLocationDropdown(!locationDropdown); } }} aria-expanded={locationDropdown}>
             <MapPin />
@@ -1736,7 +1754,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             )
           )
         )}
-        <div className={`wall-tools${toolsCollapsed ? " is-collapsed" : ""}`}>
+        <div className={`wall-tools${toolsCollapsed ? " is-collapsed" : ""}`} hidden={footerInView}>
           <button
             type="button"
             className="wall-tools-toggle"
@@ -1772,7 +1790,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             {/* <button aria-label="Reset wall" onClick={resetFilters}><RotateCcw /><span>Reset</span></button> */}
           </div>
         </div>
-        <div className="wall-count">
+        <div className="wall-count" hidden={footerInView}>
           {wallViewCount !== undefined && mode === "connected" ? `${wallViewCount.toLocaleString()} WALL VIEWS · ` : ""}
           {locationReady
             ? `${visible.length} CARDS · ${locationLabel()}${locationWeather ? ` · ${Math.round(locationWeather.tempC)}°C / ${Math.round(locationWeather.tempC * 9 / 5 + 32)}°F` : ""}`
@@ -1796,13 +1814,12 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         {!listView ? <WallMinimap cards={visible} wallRef={wallRef} /> : null}
       </section>
       {notice ? <div className="notice-toast" role="status">{notice}</div> : null}
-      <footer className={`app-footer${mode === "connected" && pendingCardsOnSelectedWall > 0 && onRefreshWall ? " has-refresh-notice" : ""}`}>
+      <footer
+        ref={footerRef}
+        className={`app-footer${mode === "connected" && pendingCardsOnSelectedWall > 0 && onRefreshWall ? " has-refresh-notice" : ""}`}
+      >
         <div className="footer-inner">
-          {/* left — intentionally empty */}
-          <div className="footer-col footer-col-left" />
-
-          {/* center — legal links */}
-          <nav className="footer-col footer-col-center footer-legal" aria-label="Legal links">
+          <nav className="footer-col footer-col-left footer-legal" aria-label="Legal links">
             <Link href="/terms-and-conditions">Terms & Conditions</Link>
             <Link href="/privacy-policy">Privacy Policy</Link>
             <BugReportLink />
@@ -1810,7 +1827,6 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
             <ContactLink />
           </nav>
 
-          {/* right — digest widget */}
           <div className="footer-col footer-col-right">
             {mode === "connected" && locationReady && selectedCountry && onSubscribeDigest ? (
               digestStatus === "done" ? (
@@ -1946,7 +1962,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
           cardDailyStats={cardDailyStats}
         />
       ) : null}
-      {composer ? <Composer onClose={() => setComposer(false)} onReady={beginPlacement} initialLocation={{ country: selectedCountry, state: selectedState, city: selectedCity }} isVerified={profile?.verified ?? false} /> : null}
+      {composer ? <Composer onClose={() => setComposer(false)} onReady={beginPlacement} initialLocation={{ country: selectedCountry, state: selectedState, city: selectedCity }} isVerified={profile?.verified ?? false} allowPaymentBypass={allowPaymentBypass} /> : null}
       {showTip && <div className="onboard-tip" onAnimationEnd={() => setShowTip(false)}>Tap a card to open it · Drag to move it</div>}
     </main>
   );

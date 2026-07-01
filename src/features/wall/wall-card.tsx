@@ -43,6 +43,8 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
   const tapeWidth = 42 + (seed % 45); // 42px to 86px
   const tapeRotate = -14 + ((seed >> 3) % 23); // -14deg to +8deg
   const tapeLeft = 22 + ((seed >> 6) % 48); // 22% to 69%
+  const featuredPinAngle = -14 + (seed % 29); // -14deg to +14deg
+  const featuredPinHue = (seed * 37) % 360;
   const displayTheme = card.imageMode === "business-card" ? "biz" : card.theme;
   const cardImage = card.thumbnailImages?.[0] ?? card.images[0];
   const backImage = card.backImages?.[0] ?? card.backThumbnailImages?.[0];
@@ -219,11 +221,18 @@ export function WallCard({ card, active, onOpen, onFront, flipped = false, onFli
       title={ownerDraggable ? "Drag to reposition your card" : undefined}
       aria-label={ownerDraggable ? `Your advertisement for ${card.name}. Drag to reposition or activate to open.` : `Open advertisement for ${card.name}`}
     >
-      <span className="card-tape" aria-hidden="true" />
+      <span className="card-tape" aria-hidden="true">
+        {card.featuredTier ? (
+          <span
+            className={`featured-pin-on-tape ${card.featuredTier === "boost" ? "featured-ribbon featured-ribbon-boost" : card.featuredTier === "gold" ? "featured-ribbon" : "featured-badge"}`}
+            aria-hidden="true"
+            style={{ transform: `translate(-50%, -50%) rotate(${featuredPinAngle}deg)`, filter: `hue-rotate(${featuredPinHue}deg) saturate(1.1) brightness(1.02)` }}
+          >
+            <img src="/assets/pin.webp" alt="" draggable={false} className="featured-pin-image" />
+          </span>
+        ) : null}
+      </span>
       {expiringSoon ? <span className="card-expiry-warn" aria-label="This card is expiring soon — open your dashboard to renew">⚠ Renew</span> : null}
-      {card.featuredTier === "boost" ? <span className="featured-ribbon featured-ribbon-boost" aria-label="Boosted listing">⚡ Boost</span> : null}
-      {card.featuredTier === "gold" ? <span className="featured-ribbon" aria-label="Featured Gold">⭐ Featured</span> : null}
-      {card.featuredTier === "silver" || card.featuredTier === "bronze" ? <span className="featured-badge" aria-label={`Featured ${card.featuredTier}`}>⭐</span> : null}
       {onFlip ? (
         <button
           type="button"

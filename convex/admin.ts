@@ -694,6 +694,7 @@ const PG_ADMIN_CARD_ARGS = {
   backImageY: v.optional(v.number()),
   backImageScale: v.optional(v.number()),
   paidAmount: v.number(),
+  bypassPayment: v.optional(v.boolean()),
   featuredTier: PG_ADMIN_FEATURED_TIER,
   status: v.optional(PG_ADMIN_STATUS),
   durationDays: v.optional(v.number()),
@@ -753,6 +754,7 @@ type PlaygroundCardArgs = {
   backImageY?: number;
   backImageScale?: number;
   paidAmount: number;
+  bypassPayment?: boolean;
   featuredTier?: "boost" | "bronze" | "silver" | "gold";
   status?: "published" | "hidden" | "expired";
   durationDays?: number;
@@ -787,6 +789,7 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
       ? now + Math.max(0, args.durationDays) * PG_ONE_DAY_MS
       : now + (PG_DURATIONS[args.paidAmount] ?? PG_DURATIONS[0])
   );
+  const storedPaidAmount = args.bypassPayment ? 0 : args.paidAmount;
   const clicks = Math.max(0, Math.floor(args.clicks ?? 0));
   const likes = Math.max(0, Math.floor(args.likes ?? 0));
   const reviewCount = Math.max(0, Math.floor(args.reviewCount ?? 0));
@@ -842,7 +845,7 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     width: cardWidth,
     zIndex: now,
     status,
-    paidAmount: args.paidAmount,
+    paidAmount: storedPaidAmount,
     expiresAt,
     positionLockedAt: now,
     updatedAt: now,
@@ -865,7 +868,77 @@ async function createPlaygroundCard(ctx: MutationCtx, userId: Id<"users">, args:
     updatedAt: now,
   });
 
-  return { cardId, expiresAt, status, likes, clicks, reviewCount };
+  const [urls, thumbnailUrls, backUrls, backThumbnailUrls] = await Promise.all([
+    Promise.all((args.imageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+    Promise.all((args.thumbnailImageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+    Promise.all((args.backImageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+    Promise.all((args.backThumbnailImageIds ?? []).map((imageId) => ctx.storage.getUrl(imageId))),
+  ]);
+
+  return {
+    cardId,
+    expiresAt,
+    status,
+    likes,
+    clicks,
+    reviewCount,
+    card: {
+      id: cardId,
+      ownerId: userId,
+      name: args.name.trim(),
+      category: args.category as any,
+      subcategory: args.subcategory?.trim() || undefined,
+      line: args.line.trim(),
+      message: args.message?.trim() || undefined,
+      area: baseArea.trim(),
+      city: args.city.trim(),
+      state: args.state.trim(),
+      country: args.country.trim(),
+      zipcode: args.zipcode?.trim() || undefined,
+      neighborhood: args.neighborhood?.trim() || undefined,
+      username: user?.username ?? undefined,
+      ownerName: args.ownerName?.trim() || undefined,
+      price: args.price?.trim() || undefined,
+      phone: args.phone?.trim() || undefined,
+      email: args.email?.trim() || undefined,
+      website: args.website?.trim() || undefined,
+      location: args.location?.trim() || undefined,
+      instagram: args.instagram?.trim() || undefined,
+      facebook: args.facebook?.trim() || undefined,
+      tiktok: args.tiktok?.trim() || undefined,
+      linkedin: args.linkedin?.trim() || undefined,
+      whatsapp: args.whatsapp?.trim() || undefined,
+      telegram: args.telegram?.trim() || undefined,
+      theme: args.theme as any,
+      imageMode: args.imageMode,
+      cardShape: args.cardShape,
+      imageX: args.imageX,
+      imageY: args.imageY,
+      imageWidth: args.imageWidth,
+      imageHeight: args.imageHeight,
+      backImageX: args.backImageX,
+      backImageY: args.backImageY,
+      backImageScale: args.backImageScale,
+      images: urls.filter((url): url is string => url !== null),
+      thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null),
+      backImages: backUrls.filter((url): url is string => url !== null),
+      backThumbnailImages: backThumbnailUrls.filter((url): url is string => url !== null),
+      x,
+      y,
+      rotation,
+      width: cardWidth,
+      zIndex: now,
+      positionLockedAt: now,
+      updatedAt: now,
+      createdAt: now,
+      paidAmount: storedPaidAmount,
+      expiresAt,
+      clicks,
+      featuredTier: args.featuredTier,
+      reviewCount,
+      verified: user?.verified ?? false,
+    },
+  };
 }
 
 export const playgroundGetMyCards = query({

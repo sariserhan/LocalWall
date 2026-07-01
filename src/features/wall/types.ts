@@ -204,6 +204,7 @@ export interface CardDraft {
   paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   bundleCities?: Array<{ country: string; state: string; city: string }>;
   featuredTier: "none" | "boost" | "bronze" | "silver" | "gold";
+  bypassPayment?: boolean;
   autoRenew?: boolean;
   files: File[];
   previews: string[];

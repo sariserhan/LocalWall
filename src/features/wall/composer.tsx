@@ -12,6 +12,7 @@ interface ComposerProps {
   onReady: (draft: CardDraft) => void;
   initialLocation?: { country: string; state: string; city: string };
   isVerified?: boolean;
+  allowPaymentBypass?: boolean;
 }
 
 interface ComposerForm {
@@ -50,6 +51,7 @@ interface ComposerForm {
   rotation: number;
   paymentOption: "free" | "2.99" | "7.99" | "24.99" | "bundle";
   featuredTier: FeaturedTierValue;
+  bypassPayment: boolean;
 }
 
 interface BundleCity { country: string; state: string; city: string; }
@@ -97,11 +99,21 @@ const initialForm: ComposerForm = {
   rotation: 0,
   paymentOption: "free",
   featuredTier: "none",
+  bypassPayment: false,
 };
 
 function formatWallLocation(area: string, city: string, state: string, country: string) {
   const countryName = Country.getCountryByCode(country.trim())?.name ?? country.trim();
   return [city, state, countryName].map((part) => part.trim()).filter(Boolean).join(", ") || "Selected wall";
+}
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
 }
 
 const themeOptions: ReadonlyArray<{ theme: CardTheme; label: string; description: string }> = [
@@ -455,10 +467,29 @@ function ExpandedCardPreview({ form, image, backImage, isVerified }: { form: Com
     { label: "QR Code", value: false },
     { label: "Report", value: false },
   ];
+  const featuredSeed = hashString([form.name, form.line, form.category, form.area].filter(Boolean).join("|") || "featured");
+  const featuredPinAngle = -14 + (featuredSeed % 29);
+  const featuredPinHue = (featuredSeed * 37) % 360;
+  const featuredClass = form.featuredTier !== "none" ? `featured-${form.featuredTier}` : "";
 
   return (
     <section className="details-expanded-preview" aria-label="Expanded card preview">
-      <article className={`details-expanded-card ${image || backImage ? "image-top-layout" : ""}`}>
+      <article className={`details-expanded-card ${featuredClass} ${image || backImage ? "image-top-layout" : ""}`}>
+        <span
+          className="card-tape details-expanded-tape"
+          aria-hidden="true"
+          style={{ left: 0, right: 0, width: "100%", transform: "rotate(-1deg)" } as CSSProperties}
+        >
+          {form.featuredTier !== "none" ? (
+            <span
+              className="featured-pin-on-tape"
+              aria-hidden="true"
+              style={{ transform: `translate(-50%, -50%) rotate(${featuredPinAngle}deg)`, filter: `hue-rotate(${featuredPinHue}deg) saturate(1.08) brightness(1.02)` }}
+            >
+              <img src="/assets/pin.webp" alt="" draggable={false} className="featured-pin-image" />
+            </span>
+          ) : null}
+        </span>
         {image || backImage ? (
           <ImageSwapViewer
             frontSrc={image}
@@ -755,7 +786,7 @@ function CardSidesPreview({
   );
 }
 
-export function Composer({ onClose, onReady, initialLocation, isVerified = false }: ComposerProps) {
+export function Composer({ onClose, onReady, initialLocation, isVerified = false, allowPaymentBypass = false }: ComposerProps) {
   const [form, setForm] = useState<ComposerForm>(() => {
     const baseCountry = initialLocation?.country ?? defaultCountry;
     const baseState = initialLocation ? (initialLocation.state ?? "") : defaultState;
@@ -1107,6 +1138,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
       whatsapp: form.whatsapp.trim() || undefined,
       telegram: form.telegram.trim() || undefined,
       featuredTier: form.featuredTier,
+      bypassPayment: allowPaymentBypass && form.paymentOption !== "bundle" ? form.bypassPayment : false,
       rotation: form.rotation,
       autoRenew: autoRenew && form.paymentOption !== "free" && form.paymentOption !== "bundle",
       bundleCities: form.paymentOption === "bundle" ? bundleCities : undefined,
@@ -1389,7 +1421,7 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
                     role="radio"
                     aria-checked={form.paymentOption === option.value}
                     className={`payment-option ${form.paymentOption === option.value ? "selected" : ""} ${option.featured ? "featured" : ""} ${option.value === "bundle" ? "bundle" : ""}`}
-                    onClick={() => setForm((value) => ({ ...value, paymentOption: option.value }))}
+                    onClick={() => setForm((value) => ({ ...value, paymentOption: option.value, bypassPayment: option.value === "bundle" ? false : value.bypassPayment }))}
                   >
                     {option.featured ? <span className="payment-popular">Most popular</span> : null}
                     {option.badge ? <span className="payment-badge">{option.badge}</span> : null}
@@ -1459,6 +1491,19 @@ export function Composer({ onClose, onReady, initialLocation, isVerified = false
               <label className="composer-auto-renew-row">
                 <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} />
                 <span>Auto-renew when it expires</span>
+              </label>
+            ) : null}
+            {allowPaymentBypass && form.paymentOption !== "bundle" ? (
+              <label className="composer-bypass-row">
+                <input
+                  type="checkbox"
+                  checked={form.bypassPayment ?? false}
+                  onChange={(e) => setForm((value) => ({ ...value, bypassPayment: e.target.checked }))}
+                />
+                <span>
+                  <strong>Bypass payment</strong>
+                  <small>Admin only. Post this card immediately while still testing the normal payment flow when unchecked.</small>
+                </span>
               </label>
             ) : null}
             <fieldset className="featured-tier-fieldset" style={form.paymentOption === "bundle" ? { display: "none" } : undefined}>
