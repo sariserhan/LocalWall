@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { pushDashboardHandler } from "@/lib/dashboard-signal";
@@ -17,7 +17,10 @@ const OwnerDashboard = dynamic(
 export function GlobalOwnerDashboard() {
   const { isAuthenticated } = useConvexAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
+  const returnPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
   useEffect(() => pushDashboardHandler(() => setOpen(true)), []);
 
@@ -49,7 +52,7 @@ export function GlobalOwnerDashboard() {
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount, autoRenew } }),
+      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount, autoRenew }, returnPath }),
     });
     const result = await res.json() as { url?: string; error?: string };
     if (!res.ok || !result.url) throw new Error(result.error || "Could not start renewal checkout.");
@@ -80,7 +83,7 @@ export function GlobalOwnerDashboard() {
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ verificationPayload: { plan } }),
+          body: JSON.stringify({ verificationPayload: { plan }, returnPath }),
         });
         const result = await res.json() as { url?: string; error?: string };
         if (!res.ok || !result.url) throw new Error(result.error || "Could not start verification checkout.");

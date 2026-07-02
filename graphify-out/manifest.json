@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "app/api/stripe/checkout/route.ts": {
-    "mtime": 1782793292.5655315,
-    "ast_hash": "17241c8329e1b726085c2d1cfda85b73",
+    "mtime": 1782952306.0395477,
+    "ast_hash": "da6ae2debd250ceaa64df005803f2615",
     "semantic_hash": ""
   },
   "app/api/stripe/session/route.ts": {
@@ -380,8 +380,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1782841010.4913688,
-    "ast_hash": "5c8914d7d9960ea4dc7bfb4cf9284a02",
+    "mtime": 1782950273.4078403,
+    "ast_hash": "5ecf5ba4d5041f149df7d4b6f27e0a9f",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782945049.802538,
-    "ast_hash": "6001cae07f24133d61ae4a40889f2082",
+    "mtime": 1782950270.1566205,
+    "ast_hash": "88b36d0e08af6079a388b58167443e1e",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "src/components/global-owner-dashboard.tsx": {
-    "mtime": 1782670409.1165876,
-    "ast_hash": "003cbc53ca4f04b3ff0afabb758e3c78",
+    "mtime": 1782952377.5442548,
+    "ast_hash": "0905c18494c2d878359ec78a752f9dd2",
     "semantic_hash": ""
   },
   "src/components/privacy-settings-link.tsx": {
@@ -530,8 +530,8 @@
     "semantic_hash": ""
   },
   "src/features/renew/renew-page.tsx": {
-    "mtime": 1782781219.5854104,
-    "ast_hash": "ab745bdf0267ea6e5b917622df00e51c",
+    "mtime": 1782952389.2840085,
+    "ast_hash": "3e6cfa62ec920dbcdfc794ed02136286",
     "semantic_hash": ""
   },
   "src/features/support/bug-report-page.tsx": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782933520.209219,
-    "ast_hash": "ba2aff6d865644454a10b737d281cf21",
+    "mtime": 1782952346.168771,
+    "ast_hash": "938c8679671f99376e854918c56e350b",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
@@ -1170,8 +1170,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/clerk-business-page.tsx": {
-    "mtime": 1782701342.629039,
-    "ast_hash": "8f5a34e217aeb55fe2e4c56c3ffc07fa",
+    "mtime": 1782952383.6295323,
+    "ast_hash": "abedd6511af2c7f5dfa7c556f1b5b4dc",
     "semantic_hash": ""
   },
   "src/features/wall/clerk-my-data-page.tsx": {

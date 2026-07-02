@@ -77,6 +77,7 @@ export function ConnectedWallApp({
     const sub = searchParams.get("subcategory");
     return sub ? `${pathname}?subcategory=${encodeURIComponent(sub)}` : pathname;
   }, [pathname, searchParams]);
+  const checkoutReturnPath = wallPath ?? pathname;
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
   const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, userId } = useAuth();
   const { isDark } = useTheme();
@@ -478,8 +479,8 @@ export function ConnectedWallApp({
     if (totalPaidAmount > 0) {
       if (!("pendingCardId" in result)) throw new Error("The paid card could not be prepared.");
       const checkoutBody = isBundle
-        ? { bundlePayload: { pendingCardId: result.pendingCardId, bundleCities: draft.bundleCities, cardName: draft.name } }
-        : { pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name, autoRenew: draft.autoRenew };
+        ? { bundlePayload: { pendingCardId: result.pendingCardId, bundleCities: draft.bundleCities, cardName: draft.name }, returnPath: checkoutReturnPath }
+        : { pendingCardId: result.pendingCardId, paidAmount: totalPaidAmount, cardName: draft.name, autoRenew: draft.autoRenew, returnPath: checkoutReturnPath };
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -522,11 +523,11 @@ export function ConnectedWallApp({
       return;
     }
 
-    const response = await fetch("/api/stripe/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount, autoRenew } }),
-    });
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount, autoRenew }, returnPath: checkoutReturnPath }),
+      });
     const result = await response.json() as { url?: string; error?: string };
     if (!response.ok || !result.url) throw new Error(result.error || "Could not start renewal checkout.");
     window.location.assign(result.url);
@@ -634,7 +635,7 @@ export function ConnectedWallApp({
         const response = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ verificationPayload: { plan } }),
+          body: JSON.stringify({ verificationPayload: { plan }, returnPath: checkoutReturnPath }),
         });
         const result = await response.json() as { url?: string; error?: string };
         if (!response.ok || !result.url) throw new Error(result.error || "Could not start verification checkout.");

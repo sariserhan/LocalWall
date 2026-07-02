@@ -144,6 +144,7 @@ export function RenewPage({ cardId, preselectedAmount }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           renewalPayload: { cardId: String(card.id), cardName: card.name, paidAmount: amount },
+          returnPath: `/card/${String(card.id)}`,
         }),
       });
       const result = await res.json() as { url?: string; error?: string };

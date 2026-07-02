@@ -375,13 +375,13 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1782945155.685075,
-    "ast_hash": "5ce354da01b2a8d3708dca3db5a2ddba",
+    "mtime": 1782949103.9905376,
+    "ast_hash": "d481303e16ec034c156e05747194f20a",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1782841010.4913688,
-    "ast_hash": "5c8914d7d9960ea4dc7bfb4cf9284a02",
+    "mtime": 1782950273.4078403,
+    "ast_hash": "5ecf5ba4d5041f149df7d4b6f27e0a9f",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782945049.802538,
-    "ast_hash": "6001cae07f24133d61ae4a40889f2082",
+    "mtime": 1782950270.1566205,
+    "ast_hash": "88b36d0e08af6079a388b58167443e1e",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {

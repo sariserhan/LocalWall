@@ -29,6 +29,13 @@ function json(body: unknown, status = 200) {
   return Response.json(body, { status });
 }
 
+function buildRedirectUrl(origin: string, returnPath: unknown, search: Record<string, string>) {
+  const path = typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//") ? returnPath : "/";
+  const url = new URL(path, origin);
+  for (const [key, value] of Object.entries(search)) url.searchParams.set(key, value);
+  return url.toString();
+}
+
 async function handleCheckout(request: NextRequest): Promise<Response> {
   if (!isSameOriginRequest(request)) return json({ error: "Cross-site checkout requests are not allowed." }, 403);
   const contentLength = Number(request.headers.get("content-length") ?? 0);
@@ -67,8 +74,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
           quantity: 1,
         }],
         metadata: { kind: "verification", plan, paidAmount: String(unitAmount / 100) },
-        success_url: `${origin}/?checkout=success&kind=verification&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "verification", session_id: "{CHECKOUT_SESSION_ID}" }),
+        cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
       });
       const phVerif = getPostHogClient();
       phVerif.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "verification", plan, amount: unitAmount / 100 } });
@@ -114,8 +121,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
               paidAmount: String(paidAmount),
             },
           },
-          success_url: `${origin}/?checkout=success&kind=subscription_renewal&card_id=${encodeURIComponent(renewalPayload.cardId)}&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+          success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "subscription_renewal", card_id: String(renewalPayload.cardId), session_id: "{CHECKOUT_SESSION_ID}" }),
+          cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
         });
         const phSubRenewal = getPostHogClient();
         phSubRenewal.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "subscription_renewal", amount: paidAmount } });
@@ -141,8 +148,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
           cardId: renewalPayload.cardId,
           paidAmount: String(paidAmount),
         },
-        success_url: `${origin}/?checkout=success&kind=renewal&card_id=${encodeURIComponent(renewalPayload.cardId)}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "renewal", card_id: String(renewalPayload.cardId), session_id: "{CHECKOUT_SESSION_ID}" }),
+        cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
       });
 
       const phRenewal = getPostHogClient();
@@ -182,8 +189,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
           bundleCities: JSON.stringify(cities),
           paidAmount: "19.99",
         },
-        success_url: `${origin}/?checkout=success&kind=bundle&pending_card_id=${encodeURIComponent(bundlePayload.pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "bundle", pending_card_id: String(bundlePayload.pendingCardId), session_id: "{CHECKOUT_SESSION_ID}" }),
+        cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
       });
       const phBundle = getPostHogClient();
       phBundle.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "bundle", amount: 19.99, city_count: cities.length } });
@@ -225,8 +232,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         subscription_data: {
           metadata: { pendingCardId, paidAmount: String(paidAmount) },
         },
-        success_url: `${origin}/?checkout=success&kind=subscription_posting&pending_card_id=${encodeURIComponent(pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "subscription_posting", pending_card_id: pendingCardId, session_id: "{CHECKOUT_SESSION_ID}" }),
+        cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
       });
       const phSubPosting = getPostHogClient();
       phSubPosting.capture({ distinctId: userId, event: "checkout_started", properties: { kind: "subscription_posting", amount: paidAmount } });
@@ -252,8 +259,8 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
         pendingCardId,
         paidAmount: String(paidAmount),
       },
-      success_url: `${origin}/?checkout=success&kind=posting&pending_card_id=${encodeURIComponent(pendingCardId)}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?checkout=canceled&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "success", kind: "posting", pending_card_id: pendingCardId, session_id: "{CHECKOUT_SESSION_ID}" }),
+      cancel_url: buildRedirectUrl(origin, body?.returnPath, { checkout: "canceled", session_id: "{CHECKOUT_SESSION_ID}" }),
     });
 
     const phPosting = getPostHogClient();

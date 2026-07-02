@@ -2,6 +2,7 @@
 
 import { Check, ShieldCheck, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type BusinessProfile = {
   displayName: string | null;
@@ -24,6 +25,9 @@ export function ClerkBusinessPage({ profile, isReady, onUpdateBusinessName }: Cl
   const [verificationBusy, setVerificationBusy] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [selectedVerificationPlan, setSelectedVerificationPlan] = useState<"monthly" | "annual">("annual");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
   useEffect(() => {
     if (!isReady) return;
@@ -54,7 +58,7 @@ export function ClerkBusinessPage({ profile, isReady, onUpdateBusinessName }: Cl
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verificationPayload: { plan } }),
+        body: JSON.stringify({ verificationPayload: { plan }, returnPath }),
       });
       const result = await response.json() as { url?: string; error?: string };
       if (!response.ok || !result.url) throw new Error(result.error || "Could not start verification checkout.");

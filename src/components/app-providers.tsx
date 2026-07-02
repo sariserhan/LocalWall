@@ -1,7 +1,6 @@
 "use client";
 
 import { ClerkProvider, useAuth, useUser } from "@clerk/nextjs";
-import { ui } from "@clerk/ui";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
@@ -52,7 +51,6 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
   if (!convex) {
     return (
       <ClerkProvider
-        ui={ui}
         publishableKey={clerkPublishableKey}
         signInUrl="/sign-in"
         signUpUrl="/sign-up"
@@ -79,7 +77,6 @@ export function AppProviders({ children, clerkPublishableKey, convexUrl, withCle
 
   return (
     <ClerkProvider
-      ui={ui}
       publishableKey={clerkPublishableKey}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
