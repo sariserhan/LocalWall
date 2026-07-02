@@ -4,6 +4,7 @@ import { internalMutation, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 const packageDurations: Record<number, number> = {
+  0: 1 * 24 * 60 * 60 * 1000,
   2.99: 30 * 24 * 60 * 60 * 1000,
   7.99: 90 * 24 * 60 * 60 * 1000,
   19.99: 90 * 24 * 60 * 60 * 1000,
@@ -42,7 +43,8 @@ export const completePaidCard = internalMutation({
     if (pending.paidAmount !== args.paidAmount) throw new Error("The verified payment does not match this card.");
     const payload = pending.payload;
     const basePaidAmount = typeof payload.basePaidAmount === "number" ? payload.basePaidAmount : args.paidAmount;
-    if (!packageDurations[basePaidAmount]) throw new Error("The payment amount is invalid.");
+    const duration = basePaidAmount === 0 ? packageDurations[0] : packageDurations[basePaidAmount];
+    if (!duration) throw new Error("The payment amount is invalid.");
     const featuredTier = payload.featuredTier as "boost" | "bronze" | "silver" | "gold" | undefined;
     const createdAt = Date.now();
     const cardId = await ctx.db.insert("cards", {
@@ -94,7 +96,7 @@ export const completePaidCard = internalMutation({
       paidAmount: basePaidAmount,
       featuredTier,
       reviewCount: 0,
-      expiresAt: createdAt + packageDurations[basePaidAmount],
+      expiresAt: createdAt + duration,
       positionLockedAt: createdAt,
       updatedAt: createdAt,
       createdAt,
@@ -116,7 +118,7 @@ export const completePaidCard = internalMutation({
       Promise.all(backImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
       Promise.all(backThumbnailImageIds.map((imageId) => ctx.storage.getUrl(imageId))),
     ]);
-    return { id: cardId, ...payload, rotation: payload.rotation ?? 0, ownerId: pending.ownerId, username: owner.username ?? undefined, ownerName: owner.businessName || owner.username || undefined, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), backImages: backUrls.filter((url): url is string => url !== null), backThumbnailImages: backThumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + packageDurations[basePaidAmount], positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0, verified: owner.verified ?? false };
+    return { id: cardId, ...payload, rotation: payload.rotation ?? 0, ownerId: pending.ownerId, username: owner.username ?? undefined, ownerName: owner.businessName || owner.username || undefined, images: urls.filter((url): url is string => url !== null), thumbnailImages: thumbnailUrls.filter((url): url is string => url !== null), backImages: backUrls.filter((url): url is string => url !== null), backThumbnailImages: backThumbnailUrls.filter((url): url is string => url !== null), zIndex: createdAt, status: "published" as const, paidAmount: basePaidAmount, featuredTier, reviewCount: 0, expiresAt: createdAt + duration, positionLockedAt: createdAt, updatedAt: createdAt, createdAt, clicks: 0, verified: owner.verified ?? false };
   },
 });
 
@@ -425,6 +427,7 @@ export const completeVerificationRequest = internalMutation({
       sessionId: args.sessionId,
       createdAt: Date.now(),
     });
+    await ctx.db.patch(user._id, { verificationRequestedAt: Date.now() });
     return { requestId, status: "pending" as const };
   },
 });

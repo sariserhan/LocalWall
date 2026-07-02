@@ -9,6 +9,7 @@ type BusinessProfile = {
   username: string | null;
   businessName: string | null;
   verified: boolean;
+  verificationStatus?: "pending" | "approved" | "rejected" | null;
 } | null;
 
 type ClerkBusinessPageProps = {
@@ -71,6 +72,9 @@ export function ClerkBusinessPage({ profile, isReady, onUpdateBusinessName }: Cl
   };
 
   const profileLabel = profile?.username ? `@${profile.username}` : profile?.displayName || "Unavailable";
+  const isVerified = profile?.verified ?? false;
+  const isPending = profile?.verificationStatus === "pending";
+  const canPurchaseVerification = !isVerified && !isPending && profile?.verificationStatus !== "approved";
 
   return (
     <div className="clerk-custom-page clerk-custom-page--business">
@@ -82,7 +86,7 @@ export function ClerkBusinessPage({ profile, isReady, onUpdateBusinessName }: Cl
       <div className="clerk-custom-page-inline-card clerk-custom-page-inline-card--compact">
         <span>Username</span>
         <strong>{profileLabel}</strong>
-        {profile?.verified ? <em className="clerk-custom-page-verified"><ShieldCheck size={14} /> Verified</em> : null}
+        {isVerified ? <em className="clerk-custom-page-verified"><ShieldCheck size={14} /> Verified</em> : isPending ? <em className="clerk-custom-page-verified"><ShieldCheck size={14} /> Under review</em> : null}
       </div>
       <div className="clerk-custom-page-field clerk-custom-page-field--row">
         <label htmlFor="business-name-input"><span>Business name</span></label>
@@ -114,37 +118,43 @@ export function ClerkBusinessPage({ profile, isReady, onUpdateBusinessName }: Cl
             <h2>Verification</h2>
             <p>Add verified status to all your cards from here.</p>
           </div>
-          {profile?.verified ? <span className="clerk-custom-page-verified-badge clerk-custom-page-verified-badge--active"><ShieldCheck size={14} /> Verified business</span> : <span className="clerk-custom-page-verified-badge">Not verified yet</span>}
+          {isVerified ? <span className="clerk-custom-page-verified-badge clerk-custom-page-verified-badge--active"><ShieldCheck size={14} /> Verified business</span> : isPending ? <span className="clerk-custom-page-verified-badge clerk-custom-page-verified-badge--active"><ShieldCheck size={14} /> Under review</span> : <span className="clerk-custom-page-verified-badge">Not verified yet</span>}
         </div>
-        <div className="verification-plans clerk-custom-page-verification-plans">
-          <button
-            className={`verification-plan${selectedVerificationPlan === "monthly" ? " verification-plan-selected" : ""}`}
-            onClick={() => setSelectedVerificationPlan("monthly")}
-            disabled={verificationBusy}
-            aria-pressed={selectedVerificationPlan === "monthly"}
-          >
-            {selectedVerificationPlan === "monthly" ? <Check size={11} className="plan-check" /> : null}
-            <div className="flex flex-col items-center gap-1">
-              <strong>$4.99 / mo</strong>
-              <span>Monthly</span>
-            </div>
-          </button>
-          <button
-            className={`verification-plan verification-plan-featured${selectedVerificationPlan === "annual" ? " verification-plan-selected" : ""}`}
-            onClick={() => setSelectedVerificationPlan("annual")}
-            disabled={verificationBusy}
-            aria-pressed={selectedVerificationPlan === "annual"}
-          >
-            {selectedVerificationPlan === "annual" ? <Check size={11} className="plan-check" /> : null}
-            <div className="flex flex-col items-center gap-1">
-              <strong>$19.99 / yr</strong>
-              <span>Annual — save 66%</span>
-            </div>
-          </button>
-          <button className="primary verification-purchase-btn" disabled={verificationBusy || !isReady || (!profile?.username && !profile?.displayName)} onClick={() => { void requestVerification(selectedVerificationPlan); }}>
-            {verificationBusy ? "…" : "Get Verified"}
-          </button>
-        </div>
+        {isVerified ? (
+          <div className="clerk-custom-page-verified-copy">Your verified badge is already active on your cards.</div>
+        ) : isPending ? (
+          <div className="clerk-custom-page-verified-copy">Your request is under review. We’ll apply the badge after approval.</div>
+        ) : canPurchaseVerification ? (
+          <div className="verification-plans clerk-custom-page-verification-plans">
+            <button
+              className={`verification-plan${selectedVerificationPlan === "monthly" ? " verification-plan-selected" : ""}`}
+              onClick={() => setSelectedVerificationPlan("monthly")}
+              disabled={verificationBusy}
+              aria-pressed={selectedVerificationPlan === "monthly"}
+            >
+              {selectedVerificationPlan === "monthly" ? <Check size={11} className="plan-check" /> : null}
+              <div className="flex flex-col items-center gap-1">
+                <strong>$4.99 / mo</strong>
+                <span>Monthly</span>
+              </div>
+            </button>
+            <button
+              className={`verification-plan verification-plan-featured${selectedVerificationPlan === "annual" ? " verification-plan-selected" : ""}`}
+              onClick={() => setSelectedVerificationPlan("annual")}
+              disabled={verificationBusy}
+              aria-pressed={selectedVerificationPlan === "annual"}
+            >
+              {selectedVerificationPlan === "annual" ? <Check size={11} className="plan-check" /> : null}
+              <div className="flex flex-col items-center gap-1">
+                <strong>$19.99 / yr</strong>
+                <span>Annual — save 66%</span>
+              </div>
+            </button>
+            <button className="primary verification-purchase-btn" disabled={verificationBusy || !isReady || (!profile?.username && !profile?.displayName)} onClick={() => { void requestVerification(selectedVerificationPlan); }}>
+              {verificationBusy ? "…" : "Get Verified"}
+            </button>
+          </div>
+        ) : null}
       </section>
       {verificationError ? <p className="clerk-custom-page-error">{verificationError}</p> : null}
       {error ? <p className="clerk-custom-page-error">{error}</p> : null}

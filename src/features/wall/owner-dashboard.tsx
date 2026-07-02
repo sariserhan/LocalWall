@@ -75,6 +75,9 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
   const [embedTarget, setEmbedTarget] = useState<OwnerCard | null>(null);
   const [embedCopied, setEmbedCopied] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<OwnerCard | null>(null);
+  const isVerified = profile?.verified ?? false;
+  const isPending = profile?.verificationStatus === "pending";
+  const canPurchaseVerification = !isVerified && !isPending && profile?.verificationStatus !== "approved";
 
   const handleClose = () => {
     onClose();
@@ -181,28 +184,24 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
         </div>
 
         <div className="dashboard-verification">
-          {!profile?.verified ? (
+          {!isVerified ? (
             <div className="dashboard-verification-header">
               <span className="verified-badge dashboard-verification-badge-preview">✓ Verified Business Badge</span>
             </div>
           ) : null}
-          {profile?.verified ? (
+          {isVerified ? (
             <div className="dashboard-verification-active">
               <span className="verified-badge dashboard-verified-badge-lg">✓ Verified Business</span>
               <p>Your checkmark badge appears on all your cards.</p>
             </div>
-          ) : profile?.verificationStatus === "pending" ? (
+          ) : isPending ? (
             <div className="dashboard-verification-status">
               <span className="verification-status-tag pending">Under Review</span>
               <p>Our team is reviewing your request. Your badge will go live within 24 hours of approval.</p>
             </div>
-          ) : (
+          ) : canPurchaseVerification ? (
             <div className="dashboard-verification-cta">
-              {profile?.verificationStatus === "rejected" ? (
-                <><span className="verification-status-tag rejected">Not Approved</span><p>Your last request was not approved. You can submit a new request below.</p></>
-              ) : (
-                <p>Get a ✓ verified checkmark on all your cards — builds trust and drives more clicks.</p>
-              )}
+              <p>Get a ✓ verified checkmark on all your cards — builds trust and drives more clicks.</p>
               <div className="verification-plans">
                 <button
                   className={`verification-plan${selectedVerificationPlan === "monthly" ? " verification-plan-selected" : ""}`}
@@ -231,7 +230,7 @@ export function OwnerDashboard({ cards, savedCards, savedWalls, loading, onClose
                 </button>
               </div>
             </div>
-          )}
+          ) : null}
           {verificationError ? <p className="dashboard-profile-error">{verificationError}</p> : null}
         </div>
 

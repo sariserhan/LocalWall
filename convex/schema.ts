@@ -15,6 +15,7 @@ export default defineSchema({
     blockedReason: v.optional(v.string()),
     verified: v.optional(v.boolean()),
     verifiedAt: v.optional(v.number()),
+    verificationRequestedAt: v.optional(v.number()),
     stripeCustomerId: v.optional(v.string()),
     createdAt: v.number(),
   })

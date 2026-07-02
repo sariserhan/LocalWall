@@ -33,7 +33,7 @@ function buildRedirectUrl(origin: string, returnPath: unknown, search: Record<st
   const path = typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//") ? returnPath : "/";
   const url = new URL(path, origin);
   for (const [key, value] of Object.entries(search)) url.searchParams.set(key, value);
-  return url.toString();
+  return url.toString().replace(/%7BCHECKOUT_SESSION_ID%7D/g, "{CHECKOUT_SESSION_ID}");
 }
 
 async function handleCheckout(request: NextRequest): Promise<Response> {
@@ -41,20 +41,21 @@ async function handleCheckout(request: NextRequest): Promise<Response> {
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > 8 * 1024) return json({ error: "Checkout request is too large." }, 413);
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) return json({ error: "Checkout requests must use JSON." }, 415);
-  const ipLimit = rateLimit(request, "checkout:ip:hour", 40, 60 * 60 * 1000);
-  if (ipLimit) return ipLimit;
+  const body = await request.json().catch(() => null);
+  const verificationPayload = body?.verificationPayload;
   if (!process.env.STRIPE_SECRET_KEY) {
     return json({ error: "Stripe is not configured. Add STRIPE_SECRET_KEY to .env.local and restart the server." }, 503);
   }
   const { userId, getToken } = await auth();
   if (!userId) return json({ error: "Sign in before starting checkout." }, 401);
-  const durableLimit = await durableUserRateLimit(await getToken({ template: "convex" }), ["checkout_hour", "checkout_day"]);
-  if (durableLimit) return durableLimit;
+  if (!verificationPayload) {
+    const ipLimit = rateLimit(request, "checkout:ip:hour", 40, 60 * 60 * 1000);
+    if (ipLimit) return ipLimit;
+    const durableLimit = await durableUserRateLimit(await getToken({ template: "convex" }), ["checkout_hour", "checkout_day"]);
+    if (durableLimit) return durableLimit;
+  }
 
   try {
-    const body = await request.json().catch(() => null);
-
-    const verificationPayload = body?.verificationPayload;
     if (verificationPayload) {
       const plan = verificationPayload.plan;
       if (plan !== "monthly" && plan !== "annual") return json({ error: "Invalid verification plan." }, 400);

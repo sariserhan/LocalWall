@@ -370,6 +370,7 @@ export const setUserVerified = mutation({
     await ctx.db.patch(user._id, {
       verified: args.verified || undefined,
       verifiedAt: args.verified ? Date.now() : undefined,
+      verificationRequestedAt: undefined,
     });
     return { success: true };
   },
@@ -384,7 +385,7 @@ export const approveVerification = mutation({
     if (request.status !== "pending") throw new Error("This request has already been reviewed.");
     const now = Date.now();
     await ctx.db.patch(request._id, { status: "approved", reviewedAt: now });
-    await ctx.db.patch(request.userId, { verified: true, verifiedAt: now });
+    await ctx.db.patch(request.userId, { verified: true, verifiedAt: now, verificationRequestedAt: undefined });
     return { success: true };
   },
 });
@@ -397,6 +398,7 @@ export const rejectVerification = mutation({
     if (!request) throw new Error("That verification request no longer exists.");
     if (request.status !== "pending") throw new Error("This request has already been reviewed.");
     await ctx.db.patch(request._id, { status: "rejected", reviewedAt: Date.now(), rejectedReason: args.reason });
+    await ctx.db.patch(request.userId, { verified: false, verifiedAt: undefined, verificationRequestedAt: undefined });
     return { success: true };
   },
 });
@@ -1033,6 +1035,7 @@ export const playgroundSetVerified = mutation({
     await ctx.db.patch(user._id, {
       verified: args.verified || undefined,
       verifiedAt: args.verified ? Date.now() : undefined,
+      verificationRequestedAt: undefined,
     });
     return { success: true };
   },

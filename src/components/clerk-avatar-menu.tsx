@@ -11,6 +11,7 @@ type ClerkProfile = {
   username: string | null;
   businessName: string | null;
   verified: boolean;
+  verificationStatus?: "pending" | "approved" | "rejected" | null;
 } | null | undefined;
 
 type ClerkAvatarMenuProps = {

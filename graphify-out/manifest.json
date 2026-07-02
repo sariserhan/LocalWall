@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "app/api/stripe/checkout/route.ts": {
-    "mtime": 1782952306.0395477,
-    "ast_hash": "da6ae2debd250ceaa64df005803f2615",
+    "mtime": 1782955160.633501,
+    "ast_hash": "0bcf4ac43b155a98312a486205c7a0fb",
     "semantic_hash": ""
   },
   "app/api/stripe/session/route.ts": {
@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "convex/admin.ts": {
-    "mtime": 1782927495.9294047,
-    "ast_hash": "2c4c601fd1d19b7e94ebec12a6f6eb88",
+    "mtime": 1782956222.141894,
+    "ast_hash": "2a2b6394cbdad8429cb81e7f45261bf0",
     "semantic_hash": ""
   },
   "convex/auth.config.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "convex/cards.ts": {
-    "mtime": 1782927354.643318,
-    "ast_hash": "64c44ab13695a6accec407349de6163f",
+    "mtime": 1782956215.3469257,
+    "ast_hash": "2e64823594ddfb9ae4debbca33587f67",
     "semantic_hash": ""
   },
   "convex/contactMessages.ts": {
@@ -305,8 +305,8 @@
     "semantic_hash": ""
   },
   "convex/paymentsInternal.ts": {
-    "mtime": 1782793023.7506807,
-    "ast_hash": "78a4819abaea856861ebbab69167adf3",
+    "mtime": 1782954372.1850376,
+    "ast_hash": "5b81520bb8a783ae94a6b007949381c3",
     "semantic_hash": ""
   },
   "convex/rateLimits.ts": {
@@ -335,8 +335,8 @@
     "semantic_hash": ""
   },
   "convex/schema.ts": {
-    "mtime": 1782793004.0231473,
-    "ast_hash": "e584091ce31f6e8a3311036b253529ab",
+    "mtime": 1782954368.249557,
+    "ast_hash": "771a056de2d8ce237ea425659e8b4421",
     "semantic_hash": ""
   },
   "convex/tsconfig.json": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/components/app-providers.tsx": {
-    "mtime": 1782950270.1566205,
-    "ast_hash": "88b36d0e08af6079a388b58167443e1e",
+    "mtime": 1782956769.0825758,
+    "ast_hash": "e9095ff4efb9c652139d89947d74ed55",
     "semantic_hash": ""
   },
   "src/components/bug-report-link.tsx": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "src/features/home/home-nav.tsx": {
-    "mtime": 1782933514.4688525,
-    "ast_hash": "4ff36594210d24d029381e7834653b2a",
+    "mtime": 1782956438.8564777,
+    "ast_hash": "815ace0d80726c22de63f0e22fe17663",
     "semantic_hash": ""
   },
   "src/features/home/home-page.tsx": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/admin-playground.tsx": {
-    "mtime": 1782927069.9579542,
-    "ast_hash": "50fcf15a6453facc793257e28fc57869",
+    "mtime": 1782952825.339841,
+    "ast_hash": "a652152b9494414eff23087280d6e116",
     "semantic_hash": ""
   },
   "src/features/wall/composer.tsx": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/connected-wall-app.tsx": {
-    "mtime": 1782952346.168771,
-    "ast_hash": "938c8679671f99376e854918c56e350b",
+    "mtime": 1782953508.3680713,
+    "ast_hash": "5589dac30a847a846d1451175acddb64",
     "semantic_hash": ""
   },
   "src/features/wall/detail-panel.tsx": {
@@ -590,8 +590,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/owner-dashboard.tsx": {
-    "mtime": 1782670760.628513,
-    "ast_hash": "cbf58d83dbc09ea1ab1c6513175a9e37",
+    "mtime": 1782956228.576626,
+    "ast_hash": "d2818065f720367598b42b6ad4e97399",
     "semantic_hash": ""
   },
   "src/features/wall/placement-mode.tsx": {
@@ -620,8 +620,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/wall-app.tsx": {
-    "mtime": 1782934620.554727,
-    "ast_hash": "89b9695fd8e1e945ffceb40c7674981f",
+    "mtime": 1782953919.1406903,
+    "ast_hash": "f5def821015bbda8afd631d0c1a8fffe",
     "semantic_hash": ""
   },
   "src/features/wall/wall-card.tsx": {
@@ -1170,8 +1170,8 @@
     "semantic_hash": ""
   },
   "src/features/wall/clerk-business-page.tsx": {
-    "mtime": 1782952383.6295323,
-    "ast_hash": "abedd6511af2c7f5dfa7c556f1b5b4dc",
+    "mtime": 1782955653.1054058,
+    "ast_hash": "e6eab736909d747b31c6c811ffdf10be",
     "semantic_hash": ""
   },
   "src/features/wall/clerk-my-data-page.tsx": {
@@ -1195,8 +1195,8 @@
     "semantic_hash": ""
   },
   "src/components/clerk-avatar-menu.tsx": {
-    "mtime": 1782933296.461366,
-    "ast_hash": "ed60352fafc01bebac9c926afe149db1",
+    "mtime": 1782954650.0886068,
+    "ast_hash": "e6086ac9fc755cfcdc5709908a7df97e",
     "semantic_hash": ""
   },
   "app/sign-up/[[...sign-up]]/page.tsx": {
@@ -1387,6 +1387,11 @@
   "public/assets/pin.webp": {
     "mtime": 1782929260.9565108,
     "ast_hash": "2b883454d46802fbbffc8d3c2242b38a",
+    "semantic_hash": ""
+  },
+  "src/components/checkout-success-handler.tsx": {
+    "mtime": 1782957115.8491256,
+    "ast_hash": "57788d2140b7a6ea15fd4633d4dcbbde",
     "semantic_hash": ""
   }
 }

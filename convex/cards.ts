@@ -114,13 +114,12 @@ export const getMyProfile = query({
     if (!identity) return null;
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
     if (!user) return null;
-    const latestRequest = await ctx.db.query("verificationRequests").withIndex("by_user", (q) => q.eq("userId", user._id)).order("desc").first();
     return {
       displayName: user.displayName ?? null,
       username: user.username ?? null,
       businessName: user.businessName ?? null,
       verified: user.verified ?? false,
-      verificationStatus: latestRequest?.status ?? null,
+      verificationStatus: user.verified ? "approved" : (user.verificationRequestedAt ? "pending" : null),
     };
   },
 });
@@ -781,7 +780,7 @@ export const create = mutation({
     if (args.location && args.location.length > 300) throw new Error("Location must be 300 characters or fewer.");
     if ([args.instagram, args.facebook, args.tiktok, args.linkedin].some((profile) => profile && (profile.length > 240 || !socialProfilePattern.test(profile.trim())))) throw new Error("Enter valid social usernames or profile URLs.");
     if (args.price && args.price.length > 50) throw new Error("Price must be 50 characters or fewer.");
-    if (args.x < 0 || args.x > 88 || args.y < 0 || args.y > 1500) throw new Error("That position is outside the wall.");
+    if (args.x < 0 || args.x > 100 || args.y < 0 || args.y > 1500) throw new Error("That position is outside the wall.");
     if (![0, 2.99, 7.99, 19.99, 24.99].includes(args.paidAmount)) throw new Error("Invalid payment option.");
 
     let user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();

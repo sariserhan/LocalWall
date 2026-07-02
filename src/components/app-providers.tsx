@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { Toaster } from "@/lib/toast";
+import { CheckoutSuccessHandler } from "./checkout-success-handler";
 import { GlobalAdminPanel } from "./global-admin-panel";
 import { GlobalOwnerDashboard } from "./global-owner-dashboard";
 import { GlobalBugReportModal } from "./global-bug-report-modal";
@@ -105,6 +106,7 @@ function ConnectedProviders({ children, convex }: { children: React.ReactNode; c
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <ClerkUsernameSync />
+      <CheckoutSuccessHandler />
       {children}
       <GlobalAdminPanel />
       <GlobalBugReportModal />

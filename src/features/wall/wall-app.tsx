@@ -53,6 +53,13 @@ import { toast } from "@/lib/toast";
 import { pushDashboardHandler } from "@/lib/dashboard-signal";
 import { captureAnalytics } from "@/lib/analytics";
 
+function clampPlacement(placement: Placement): Placement {
+  return {
+    x: Math.min(100, Math.max(0, placement.x)),
+    y: Math.min(MAX_CARD_Y, Math.max(0, placement.y)),
+  };
+}
+
 interface WallAppProps {
   mode: "demo" | "connected";
   cards?: WallCardModel[];
@@ -1026,7 +1033,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     const maxTop = Math.max(36, wallHeight - format.minHeight - 36);
     const left = margin + Math.random() * Math.max(0, maxLeft - margin);
     const top = 36 + Math.random() * Math.max(0, maxTop - 36);
-    setPlacement({ x: (left / wallWidth) * 100, y: top });
+    setPlacement(clampPlacement({ x: (left / wallWidth) * 100, y: top }));
   };
 
   const movePlacement = (event: PointerEvent<HTMLDivElement>) => {
@@ -1036,7 +1043,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
     const maxLeft = Math.max(12, rect.width - cardWidth - 12);
     const left = Math.min(maxLeft, Math.max(12, event.clientX - rect.left - cardWidth / 2));
     const top = Math.min(rect.height - 250, Math.max(28, event.clientY - rect.top - 90));
-    setPlacement({ x: (left / rect.width) * 100, y: top });
+    setPlacement(clampPlacement({ x: (left / rect.width) * 100, y: top }));
   };
 
   const post = async () => {
@@ -1049,7 +1056,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
         card = makeDemoCard(pendingCard, placement, cards.length + 1);
         setDemoCards((current) => [...current, card as WallCardModel]);
       } else {
-        card = await onCreateCard?.(pendingCard, placement);
+        card = await onCreateCard?.(pendingCard, clampPlacement(placement));
       }
       if (card && "kind" in card) { toast(card.message, "info"); return; }
       const postedCard = card as WallCardModel | void;
@@ -1805,7 +1812,7 @@ export function WallApp({ mode, cards: remoteCards, pendingCreatedCards = [], on
                   onMove={movePlacement}
                   onDragEnd={() => setDragging(false)}
                   onCancel={() => { setPendingCard(null); setDragging(false); }}
-                  onRandom={() => setPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) })}
+                  onRandom={() => setPlacement(clampPlacement({ x: 8 + Math.random() * (window.innerWidth < 780 ? 35 : 68), y: Math.max(60, window.scrollY + 60 + Math.random() * 450) }))}
                   onConfirm={post}
                   onRotate={(rotation) => setPendingCard((current) => current ? { ...current, rotation } : current)}
                   isSaving={isSaving}

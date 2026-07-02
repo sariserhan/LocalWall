@@ -17,7 +17,7 @@ export function HomeNav({ isSignedIn = false, showAvatarButton = false }: { isSi
   const router = useRouter();
   const isTrending = pathname === "/trending";
   const { isDark } = useTheme();
-  const profile = useQuery(api.cards.getMyProfile, isSignedIn ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean } | null | undefined;
+  const profile = useQuery(api.cards.getMyProfile, isSignedIn ? {} : "skip") as { displayName: string | null; username: string | null; businessName: string | null; verified: boolean; verificationStatus: "pending" | "approved" | "rejected" | null } | null | undefined;
   const updateProfileMutation = useMutation(api.cards.updateProfile);
   const adminAccess = useQuery(api.admin.getAccess, isSignedIn ? {} : "skip") as { isAdmin: boolean } | undefined;
 

@@ -4,6 +4,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { Check, ChevronDown, ChevronUp, Clock, CreditCard, ExternalLink, FileText, FlaskConical, Layers, Mail, RefreshCw, Shield, ShieldOff, Star, Trash2, Upload, X, Zap } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { City, Country, State } from "country-state-city";
+import { usePathname, useSearchParams } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { categories, cardThemes, SUBCATEGORY_OPTIONS, getImageCardFormat, type CardCategory, type CardTheme } from "./types";
@@ -340,6 +341,9 @@ function getSubcategoriesForCategory(category: string) {
 
 function CreateCardSection() {
   const createCard = useMutation(api.admin.playgroundCreateCard) as unknown as (args: PlaygroundCardArgs) => Promise<{ cardId: Id<"cards"> }>;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
   const [name, setName] = useState("Test Business Co.");
   const [ownerName, setOwnerName] = useState("");
@@ -400,7 +404,7 @@ function CreateCardSection() {
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pendingCardId: String(result.cardId), paidAmount, cardName: name }),
+          body: JSON.stringify({ pendingCardId: String(result.cardId), paidAmount, cardName: name, returnPath }),
         });
         const data = await res.json() as { url?: string; error?: string };
         if (!res.ok || !data.url) throw new Error(data.error ?? "Stripe checkout could not be started.");

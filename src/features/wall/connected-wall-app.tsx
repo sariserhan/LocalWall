@@ -16,6 +16,7 @@ import { openDashboard } from "@/lib/dashboard-signal";
 import { HOME_PATH } from "@/lib/home-path";
 import { captureAnalytics, identifyAnalytics, resetAnalytics } from "@/lib/analytics";
 import { ClerkAvatarMenu } from "@/components/clerk-avatar-menu";
+import { toast } from "@/lib/toast";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -307,8 +308,18 @@ export function ConnectedWallApp({
     const sessionId = searchParams.get("session_id");
     const checkoutStatus = searchParams.get("checkout");
     if (!sessionId || !checkoutStatus) return;
+    if (!isClerkLoaded || isConvexAuthLoading) return;
+    if (!isAuthenticated) {
+      setCheckoutMessage("Finishing sign-in with Convex…");
+      return;
+    }
 
     const processCheckout = async () => {
+      const announceSuccess = (message: string) => {
+        setCheckoutMessage(null);
+        toast(message);
+      };
+
       if (checkoutStatus === "canceled") {
         setCheckoutMessage("Payment canceled. No changes were made.");
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -327,19 +338,19 @@ export function ConnectedWallApp({
           const cardId = searchParams.get("card_id");
           if (!cardId) throw new Error("The renewal card is missing.");
           await finalizePaidRenewal({ sessionId, cardId: cardId as Id<"cards"> });
-          setCheckoutMessage("Payment succeeded and your card has been renewed.");
+          announceSuccess("Payment succeeded and your card has been renewed.");
           return;
         }
         if (checkoutKind === "subscription_renewal") {
           const cardId = searchParams.get("card_id");
           if (!cardId) throw new Error("The renewal card is missing.");
           await finalizeSubscriptionRenewal({ sessionId, cardId: cardId as Id<"cards"> });
-          setCheckoutMessage("Payment succeeded. Your card will now auto-renew.");
+          announceSuccess("Payment succeeded. Your card will now auto-renew.");
           return;
         }
         if (checkoutKind === "verification") {
           await finalizeVerification({ sessionId });
-          setCheckoutMessage("Payment succeeded. Your verification request is under review — we'll approve within 24 hours.");
+          announceSuccess("Payment succeeded. Your verification request is under review — we'll approve within 24 hours.");
           return;
         }
 
@@ -347,18 +358,18 @@ export function ConnectedWallApp({
         if (checkoutKind === "bundle") {
           const createdCards = await finalizeBundlePosting({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard[];
           createdCards.forEach((c) => addCardToLocalWall(c));
-          setCheckoutMessage(`Payment succeeded. Your card is now live in ${createdCards.length} cities.`);
+          announceSuccess(`Payment succeeded. Your card is now live in ${createdCards.length} cities.`);
           return;
         }
         if (checkoutKind === "subscription_posting") {
           const createdCard = await finalizeSubscriptionPosting({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard;
           addCardToLocalWall(createdCard);
-          setCheckoutMessage("Payment succeeded. Your card is on the wall and will auto-renew.");
+          announceSuccess("Payment succeeded. Your card is on the wall and will auto-renew.");
           return;
         }
         const createdCard = await finalizePaidCard({ sessionId, pendingCardId: pendingCardId as Id<"pendingCards"> }) as WallCard;
         addCardToLocalWall(createdCard);
-        setCheckoutMessage("Payment succeeded and your card is now on the wall.");
+        announceSuccess("Payment succeeded and your card is now on the wall.");
       } catch (cause) {
         failed = true;
         setCheckoutMessage(cause instanceof Error ? cause.message : "Payment could not be finalized. Refresh the page to try again.");
@@ -369,7 +380,7 @@ export function ConnectedWallApp({
     };
 
     processCheckout();
-  }, [searchParams, finalizePaidCard, finalizePaidRenewal, finalizeBundlePosting, finalizeSubscriptionPosting, finalizeSubscriptionRenewal, finalizeVerification, addCardToLocalWall]);
+  }, [searchParams, isAuthenticated, isClerkLoaded, isConvexAuthLoading, finalizePaidCard, finalizePaidRenewal, finalizeBundlePosting, finalizeSubscriptionPosting, finalizeSubscriptionRenewal, finalizeVerification, addCardToLocalWall]);
 
   const uploadVariant = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateUploadUrl({});
